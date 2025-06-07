@@ -1,0 +1,36 @@
+{
+    "editor.tabSize": 4,
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": true,
+    "namespaceResolver.sortOnSave": true,
+    "editor.rulers": [
+        80,
+        120
+    ],
+    "[html]": {
+        "editor.tabSize": 2
+    },
+    "[blade]": {
+        "editor.tabSize": 2
+    },
+    "[css]": {
+        "editor.tabSize": 2
+    },
+    "[scss]": {
+        "editor.tabSize": 2
+    },
+    "[javascript]": {
+        "editor.tabSize": 2
+    },
+    "[json]": {
+        "editor.tabSize": 2
+    },
+    "[ini]": {
+        "editor.tabSize": 2
+    },
+    "[properties]": {
+        "editor.tabSize": 2
+    },
+    "cSpell.language": "en,pl",
+    "intelephense.diagnostics.undefinedMethods": false
+}
