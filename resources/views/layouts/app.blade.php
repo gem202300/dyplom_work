@@ -16,27 +16,9 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-<script>
-    const sliders = {};
 
-    function nextSlide(id) {
-        const container = document.querySelector('#' + id + ' > div');
-        if (!container) return;
-        const count = container.children.length;
-        sliders[id] = (sliders[id] ?? 0) + 1;
-        if (sliders[id] >= count) sliders[id] = 0;
-        container.style.transform = `translateX(-${sliders[id] * 100}%)`;
-    }
 
-    function prevSlide(id) {
-        const container = document.querySelector('#' + id + ' > div');
-        if (!container) return;
-        const count = container.children.length;
-        sliders[id] = (sliders[id] ?? 0) - 1;
-        if (sliders[id] < 0) sliders[id] = count - 1;
-        container.style.transform = `translateX(-${sliders[id] * 100}%)`;
-    }
-</script>
+
 
     <!-- Styles -->
     @livewireStyles
@@ -69,6 +51,31 @@
     @stack('modals')
 
     @livewireScripts
+    <script>
+    const sliders = {};
+
+    function nextSlide(id) {
+        const slider = document.querySelector(`#${id} > .flex`);
+        if (!slider) return;
+
+        const slides = slider.children.length;
+        sliders[id] = (sliders[id] ?? 0) + 1;
+        if (sliders[id] >= slides) sliders[id] = 0;
+
+        slider.style.transform = `translateX(-${sliders[id] * 96}px)`;
+    }
+
+    function prevSlide(id) {
+        const slider = document.querySelector(`#${id} > .flex`);
+        if (!slider) return;
+
+        const slides = slider.children.length;
+        sliders[id] = (sliders[id] ?? 0) - 1;
+        if (sliders[id] < 0) sliders[id] = slides - 1;
+
+        slider.style.transform = `translateX(-${sliders[id] * 96}px)`;
+    }
+</script>
 </body>
 
 </html>

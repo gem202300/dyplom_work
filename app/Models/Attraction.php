@@ -15,7 +15,19 @@ class Attraction extends Model
     
     public function dataSource(): \Illuminate\Database\Eloquent\Builder
     {
-        return Attraction::query()->with('photos');
+        return Attraction::query()
+            ->with('photos')
+            ->withAvg('ratings', 'rating');
+    }
+
+    public function ratings()
+    {
+        return $this->morphMany(\App\Models\Rating::class, 'rateable');
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return round($this->ratings()->avg('rating'), 2);
     }
 
 }
