@@ -16,8 +16,8 @@ return [
     'actions' => [
         'assign_admin_role' => 'Ustaw rolę administratora',
         'remove_admin_role' => 'Odbierz rolę administratora',
-        'assign_worker_role'=> 'Ustaw rolę pracownika',
-        'remove_worker_role'=> 'Odbierz rolę pracownika',
+        'assign_holder_role'=> 'Ustaw rolę właściciela',
+        'remove_holder_role'=> 'Odbierz rolę właściciela',
         'delete'            => 'Usuń użytkownika',
     ],
     'messages' => [

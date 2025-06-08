@@ -18,11 +18,8 @@ class PermissionSeeder extends Seeder
 
         Permission::create(['name' => PermissionType::USER_ACCESS->value]);
         Permission::create(['name' => PermissionType::USER_MANAGE->value]);
-
-        Permission::create(['name' => PermissionType::EVENT_ACCESS->value]);
-        Permission::create(['name' => PermissionType::EVENT_MANAGE->value]);
         
-        Permission::create(['name' => PermissionType::RESERBATION_ACCESS->value]);
-        Permission::create(['name' => PermissionType::RESERBATION_MANAGE->value]);
+        Permission::create(['name' => PermissionType::ATTRACTION_ACCESS->value]);
+        Permission::create(['name' => PermissionType::ATTRACTION_MANAGE->value]);
     }
 }

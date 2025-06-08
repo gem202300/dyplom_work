@@ -11,4 +11,6 @@ enum PermissionType: string
     case USER_ACCESS = 'user_access';
     case USER_MANAGE = 'user_manage';
     
+    case ATTRACTION_ACCESS = 'attraction_access';
+    case ATTRACTION_MANAGE = 'attraction_manage';
 }

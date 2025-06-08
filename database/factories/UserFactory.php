@@ -79,7 +79,7 @@ class UserFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (User $user) {
-            $user->assignRole(RoleType::USER->value);
+            $user->assignRole(RoleType::TOURIST->value);
         });
     }
 }

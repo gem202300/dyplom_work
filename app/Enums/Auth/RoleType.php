@@ -9,4 +9,8 @@ enum RoleType: string
     use EnumToArray;
 
     case ADMIN = 'admin';
+    
+    case HOLDER = 'holder';
+
+    case TOURIST = 'tourist';
 }

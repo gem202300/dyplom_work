@@ -16,6 +16,27 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+<script>
+    const sliders = {};
+
+    function nextSlide(id) {
+        const container = document.querySelector('#' + id + ' > div');
+        if (!container) return;
+        const count = container.children.length;
+        sliders[id] = (sliders[id] ?? 0) + 1;
+        if (sliders[id] >= count) sliders[id] = 0;
+        container.style.transform = `translateX(-${sliders[id] * 100}%)`;
+    }
+
+    function prevSlide(id) {
+        const container = document.querySelector('#' + id + ' > div');
+        if (!container) return;
+        const count = container.children.length;
+        sliders[id] = (sliders[id] ?? 0) - 1;
+        if (sliders[id] < 0) sliders[id] = count - 1;
+        container.style.transform = `translateX(-${sliders[id] * 100}%)`;
+    }
+</script>
 
     <!-- Styles -->
     @livewireStyles

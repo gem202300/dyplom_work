@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make('12345678'),
             'phone' => '0987654321', 
             'address' => 'Worker Address, 456', 
-        ])->assignRole(RoleType::WORKER->value);
+        ])->assignRole(RoleType::HOLDER->value);
 
         \App\Models\User::factory()->create([
             'name' => 'Administrator Testowy',

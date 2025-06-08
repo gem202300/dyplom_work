@@ -24,23 +24,8 @@
                       </x-nav-link>
                   @endif
 
-                  <!-- Посилання "Видаження" (події) показується всім -->
-                  <x-nav-link href="{{ route('events.index') }}" :active="request()->routeIs('events.index')">
-                      {{ __('translation.navigation.events') }}
-                  </x-nav-link>
+                  
 
-                  <!-- Посилання на резервації:
-                       Якщо користувач адміністратор або працівник – "Резервації",
-                       інакше (USER) – "Мої резервації" -->
-                  @if(Auth::user()->isAdmin() || Auth::user()->isWorker())
-                      <x-nav-link href="{{ route('reservations.index') }}" :active="request()->routeIs('reservations.index')">
-                          {{ __('translation.navigation.reservations') }}
-                      </x-nav-link>
-                  @else
-                      <x-nav-link href="{{ route('reservations.index') }}" :active="request()->routeIs('reservations.index')">
-                          {{ __('translation.navigation.my_reservations') }}
-                      </x-nav-link>
-                  @endif
               </div>
           </div>
 
@@ -173,20 +158,7 @@
                   {{ __('translation.navigation.users') }}
               </x-responsive-nav-link>
           @endif
-          <!-- Responsive: Видаження (події) -->
-          <x-responsive-nav-link href="{{ route('events.index') }}" :active="request()->routeIs('events.index')">
-              {{ __('translation.navigation.events') }}
-          </x-responsive-nav-link>
-          <!-- Responsive: Резервації -->
-          @if(Auth::user()->isAdmin() || Auth::user()->isWorker())
-              <x-responsive-nav-link href="{{ route('reservations.index') }}" :active="request()->routeIs('reservations.index')">
-                  {{ __('translation.navigation.reservations') }}
-              </x-responsive-nav-link>
-          @else
-              <x-responsive-nav-link href="{{ route('reservations.index') }}" :active="request()->routeIs('reservations.index')">
-                  {{ __('translation.navigation.my_reservations') }}
-              </x-responsive-nav-link>
-          @endif
+          
       </div>
 
       <!-- Responsive Settings Options -->

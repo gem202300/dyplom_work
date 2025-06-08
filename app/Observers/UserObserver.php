@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Enums\Auth\RoleType;
 use App\Models\User;
+use App\Enums\Auth\RoleType;
 
 class UserObserver
 {
@@ -12,7 +12,7 @@ class UserObserver
      */
     public function created(User $user): void
     {
-        $user->assignRole(RoleType::USER->value);
+        $user->assignRole(RoleType::TOURIST->value);
     }
 
     /**
