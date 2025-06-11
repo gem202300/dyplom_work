@@ -25,7 +25,8 @@ class AttractionForm extends Component
     public $photos = [];
     public $selectedCategories = [];
     public $allCategories = [];
-
+    public $photosToDelete = [];
+    
     public function mount(Attraction $attraction = null)
     {
     $this->attraction = $attraction ?? new Attraction();
@@ -87,6 +88,14 @@ class AttractionForm extends Component
             '',
             'success'
         );
+        foreach ($this->photosToDelete as $photoId) {
+            $photo = AttractionPhoto::find($photoId);
+            if ($photo) {
+                Storage::disk('public')->delete(str_replace('storage/', '', $photo->path));
+                $photo->delete();
+            }
+        }
+
 
         return redirect()->route('attractions.index');
     }
@@ -96,11 +105,12 @@ class AttractionForm extends Component
         $photo = AttractionPhoto::findOrFail($id);
         $this->authorize('delete', $photo);
 
-        Storage::disk('public')->delete(str_replace('storage/', '', $photo->path));
-        $photo->delete();
+        if (!in_array($id, $this->photosToDelete)) {
+            $this->photosToDelete[] = $id;
+        }
 
-        $this->attraction->refresh();
     }
+
 
     public function render()
     {

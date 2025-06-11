@@ -98,6 +98,10 @@ final class AttractionTable extends PowerGridComponent
     public function actions(Attraction $attraction): array
     {
         return [
+            Button::add('showAttraction')
+                ->route('attractions.show', ['attraction' => $attraction->id])
+                ->slot('<x-wireui-icon name="eye" class="w-5 h-5 text-blue-500" />')
+                ->tooltip('Zobacz szczegóły'),
             Button::add('editAttraction')
                 ->route('attractions.edit', ['attraction' => $attraction->id])
                 ->slot('<x-wireui-icon name="pencil" class="w-5 h-5" />')

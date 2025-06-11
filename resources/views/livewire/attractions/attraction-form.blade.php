@@ -84,7 +84,7 @@
         {{-- Galeria --}}
         @if($attraction->exists && $attraction->photos->isNotEmpty())
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                @foreach($attraction->photos as $photo)
+                @foreach($attraction->photos->whereNotIn('id', $photosToDelete) as $photo)
                     <div class="relative group">
                         <img src="{{ asset($photo->path) }}" class="w-full h-32 object-cover rounded shadow" />
                         <button wire:click.prevent="deletePhoto({{ $photo->id }})"

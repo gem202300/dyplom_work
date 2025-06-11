@@ -33,9 +33,10 @@ class Attraction extends Model
         return $this->belongsToMany(Category::class);
     }
     
+
     public function getAverageRatingAttribute()
     {
-        return round($this->ratings()->avg('rating'), 2);
+        return $this->ratings()->whereNotNull('rating')->avg('rating');
     }
 
 }
