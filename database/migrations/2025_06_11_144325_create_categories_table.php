@@ -11,17 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attractions', function (Blueprint $table) {
+        Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('location');
-            $table->text('description')->nullable();
-            $table->time('opening_time')->nullable();  
-            $table->time('closing_time')->nullable(); 
-            $table->decimal('rating', 3, 2)->default(0);
             $table->timestamps();
         });
-
     }
 
     /**
@@ -29,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attractions');
+        Schema::dropIfExists('categories');
     }
 };

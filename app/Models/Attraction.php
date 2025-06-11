@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Attraction extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['name', 'location', 'description', 'opening_time', 'closing_time'];
+    
     public function photos()
     {
         return $this->hasMany(AttractionPhoto::class);
@@ -24,7 +27,12 @@ class Attraction extends Model
     {
         return $this->morphMany(\App\Models\Rating::class, 'rateable');
     }
-
+    
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
+    }
+    
     public function getAverageRatingAttribute()
     {
         return round($this->ratings()->avg('rating'), 2);

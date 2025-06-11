@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('rateable_id');
             $table->string('rateable_type');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->unsignedTinyInteger('rating')->nullable(); // 1-5
+            $table->unsignedTinyInteger('rating')->nullable(); 
             $table->text('comment')->nullable();
             $table->timestamps();
 

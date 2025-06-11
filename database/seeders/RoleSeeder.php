@@ -31,6 +31,10 @@ class RoleSeeder extends Seeder
         $userRole = Role::findByName(RoleType::ADMIN->value);
         $userRole->givePermissionTo(PermissionType::USER_ACCESS->value);
         $userRole->givePermissionTo(PermissionType::USER_MANAGE->value);
+        
+        $userRole->givePermissionTo(PermissionType::ATTRACTION_ACCESS->value);
+        $userRole->givePermissionTo(PermissionType::ATTRACTION_MANAGE->value);
+        
         // Wlasciciel
         $userRole = Role::findByName(RoleType::HOLDER->value);
         $userRole->givePermissionTo(PermissionType::ATTRACTION_ACCESS->value);

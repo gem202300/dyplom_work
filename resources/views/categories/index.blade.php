@@ -1,14 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between">
-            <h2 class="text-xl font-semibold text-gray-800">Atrakcje</h2>
-            <x-wireui-button href="{{ route('attractions.create') }}" primary label="Dodaj atrakcję" />
+            <h2 class="text-xl font-semibold text-gray-800">Kategorie atrakcji</h2>
+            <x-wireui-button href="{{ route('categories.create') }}" primary label="Dodaj kategorię" />
         </div>
     </x-slot>
 
     <div class="py-6 max-w-7xl mx-auto">
         <div class="bg-white p-4 rounded shadow">
-            <livewire:attractions.attraction-table />
+            <livewire:categories.category-table />
         </div>
     </div>
 </x-app-layout>

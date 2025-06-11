@@ -23,8 +23,17 @@
                           {{ __('translation.navigation.users') }}
                       </x-nav-link>
                   @endif
-
-                  
+                  @if(Auth::user()->isAdmin())
+                      <x-nav-link href="{{ route('attractions.index') }}" :active="request()->routeIs('attractions.*')">
+                          {{ __('Atrakcje') }}
+                      </x-nav-link>
+                  @endif
+                                    
+                  @if(Auth::user()->isAdmin())
+                      <x-nav-link href="{{ route('categories.index') }}" :active="request()->routeIs('categories.*')">
+                          {{ __('Kategorie') }}
+                      </x-nav-link>
+                  @endif
 
               </div>
           </div>
@@ -158,7 +167,17 @@
                   {{ __('translation.navigation.users') }}
               </x-responsive-nav-link>
           @endif
-          
+          @if(Auth::user()->isAdmin())
+              <x-responsive-nav-link href="{{ route('attractions.index') }}" :active="request()->routeIs('attractions.*')">
+                  {{ __('Atrakcje') }}
+              </x-responsive-nav-link>
+          @endif
+          @if(Auth::user()->isAdmin())
+              <x-responsive-nav-link href="{{ route('categories.index') }}" :active="request()->routeIs('categories.*')">
+                  {{ __('Kategorie') }}
+              </x-responsive-nav-link>
+          @endif
+
       </div>
 
       <!-- Responsive Settings Options -->
