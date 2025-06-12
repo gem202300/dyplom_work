@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Rating;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class RatingController extends Controller
@@ -34,9 +35,6 @@ class RatingController extends Controller
         return back()->with('success', 'Dziękujemy za opinię!');
     }
     
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
+    
 
 }

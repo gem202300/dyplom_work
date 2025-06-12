@@ -11,7 +11,6 @@ class AttractionSeeder extends Seeder
 {
     public function run()
     {
-        // Atrakcja 1 – Zamek we Lwowie
         $zamek = Attraction::create([
             'name' => 'Zamek we Lwowie',
             'location' => 'Lwów, Ukraina',
@@ -19,6 +18,8 @@ class AttractionSeeder extends Seeder
             'opening_time' => '10:00',
             'closing_time' => '18:00',
             'rating' => 4.5,
+            'latitude' => 49.8397,
+            'longitude' => 24.0297,
         ]);
 
         AttractionPhoto::insert([
@@ -32,12 +33,11 @@ class AttractionSeeder extends Seeder
             ],
         ]);
 
-        // Przypisanie kategorii "Zamki"
         $zamek->categories()->attach(
             Category::where('name', 'Zamki')->first()->id
         );
 
-        // Atrakcja 2 – Jezioro Synewyr
+        
         $jezioro = Attraction::create([
             'name' => 'Jezioro Synewyr',
             'location' => 'Zakarpacie, Ukraina',
@@ -45,6 +45,8 @@ class AttractionSeeder extends Seeder
             'opening_time' => '09:00',
             'closing_time' => '19:00',
             'rating' => 4.8,
+            'latitude' => 48.6222,
+            'longitude' => 23.6908,
         ]);
 
         AttractionPhoto::insert([
@@ -58,7 +60,6 @@ class AttractionSeeder extends Seeder
             ],
         ]);
 
-        // Przypisanie kategorii "Jeziora" i "Przyroda"
         $jezioro->categories()->attach([
             Category::where('name', 'Jeziora')->first()->id,
             Category::where('name', 'Przyroda')->first()->id,

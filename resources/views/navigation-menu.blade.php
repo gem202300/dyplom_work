@@ -34,7 +34,9 @@
                           {{ __('Kategorie') }}
                       </x-nav-link>
                   @endif
-
+                  <x-nav-link href="{{ route('map.index') }}" :active="request()->routeIs('map.index')">
+                      Mapa
+                  </x-nav-link>
               </div>
           </div>
 

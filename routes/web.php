@@ -1,12 +1,15 @@
 <?php
 use App\Models\Category;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MapController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\AttractionController;
 use App\Http\Controllers\ReservationController;
 
+
+Route::get('/map', [MapController::class, 'index'])->name('map.index');
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,7 +28,9 @@ Route::middleware(['auth'])->group(function () {
     });
     
 Route::get('/attractions/{attraction}', [AttractionController::class, 'show'])->name('attractions.show');
-Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
+Route::post('/ratings', [\App\Http\Controllers\RatingController::class, 'store'])
+    ->middleware('auth')
+    ->name('ratings.store');
 
     Route::middleware(['auth'])->prefix('categories')->name('categories.')->group(function () {
         Route::get('/', fn () => view('categories.index'))->name('index');

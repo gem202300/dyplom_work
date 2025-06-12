@@ -47,11 +47,13 @@ final class AttractionTable extends PowerGridComponent
             ->add('categories_names', function ($model) {
                 return $model->categories->pluck('name')->join(', ');
             })
-            ->add('average_rating', function ($model) {
-                return $model->ratings_avg_rating
-                    ? number_format($model->ratings_avg_rating, 2)
+            ->add('formatted_average_rating', function ($model) {
+                return is_numeric($model->ratings_avg_rating)
+                    ? number_format((float)$model->ratings_avg_rating, 2)
                     : '—';
             })
+
+
 
             ->add('created_at_formatted', fn ($model) => \Carbon\Carbon::parse($model->created_at)->format('Y-m-d H:i'))
             ->add('photo_column', function ($model) {
@@ -87,7 +89,8 @@ final class AttractionTable extends PowerGridComponent
             Column::make(__('attractions.location'), 'location'),
             Column::make(__('attractions.description'), 'description'),
             Column::make(__('attractions.hours'), 'opening_hours_combined'),
-            Column::make(__('attractions.rating'), 'average_rating'),
+            Column::make(__('attractions.rating'), 'formatted_average_rating'),
+
             Column::make('Kategorie', 'categories_names'),
             Column::action(__('attractions.actions')),
 

@@ -11,18 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attractions', function (Blueprint $table) {
+        Schema::create('map_views', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('location');
+            $table->string('title');
             $table->text('description')->nullable();
-            $table->time('opening_time')->nullable();  
-            $table->time('closing_time')->nullable(); 
-            $table->decimal('rating', 3, 2)->default(0);
-            $table->decimal('latitude', 10, 6)->nullable(); 
-            $table->decimal('longitude', 10, 6)->nullable();
             $table->timestamps();
         });
+
     }
 
     /**
@@ -30,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attractions');
+        Schema::dropIfExists('map_views');
     }
 };
