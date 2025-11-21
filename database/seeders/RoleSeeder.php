@@ -43,7 +43,6 @@ class RoleSeeder extends Seeder
         // Turysta
         $userRole = Role::findByName(RoleType::TOURIST->value);
         $userRole->givePermissionTo(PermissionType::ATTRACTION_ACCESS->value);
-        $userRole->givePermissionTo(PermissionType::ATTRACTION_MANAGE->value);
         
     }
 }

@@ -72,11 +72,11 @@
 
         {{-- Upload --}}
         <div class="border-2 border-dashed border-gray-400 rounded-lg p-6 text-center cursor-pointer">
-            <label class="block text-sm font-medium text-gray-700 mb-2">📷 Dodaj zdjęcia</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Dodaj zdjęcia</label>
             <input type="file" multiple wire:model="photos" id="photoUpload" class="hidden" />
             <label for="photoUpload"
                    class="block w-full py-10 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200">
-                📁 Kliknij lub przeciągnij pliki tutaj
+                 Kliknij lub przeciągnij pliki tutaj
             </label>
             @error('photos') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
         </div>

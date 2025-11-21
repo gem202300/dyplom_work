@@ -21,7 +21,7 @@ class RatingSeeder extends Seeder
                 'rateable_type' => Attraction::class,
                 'user_id' => $user->id,
                 'rating' => rand(3, 5),
-                'comment' => 'Гарне місце!',
+                'comment' => 'To miłe miejsce!',
             ]);
 
             Rating::create([
@@ -29,35 +29,35 @@ class RatingSeeder extends Seeder
                 'rateable_type' => Attraction::class,
                 'user_id' => $user->id,
                 'rating' => rand(2, 5),
-                'comment' => 'Ще раз приїду!',
+                'comment' => 'Przyjadę ponownie!',
             ]);
             Rating::create([
                 'rateable_id' => $attraction->id,
                 'rateable_type' => Attraction::class,
                 'user_id' => $user->id,
                 'rating' => rand(2, 5),
-                'comment' => 'Ще раз приїду!',
+                'comment' => 'Przyjadę ponownie!',
             ]);
             Rating::create([
                 'rateable_id' => $attraction->id,
                 'rateable_type' => Attraction::class,
                 'user_id' => $user->id,
                 'rating' => rand(2, 5),
-                'comment' => 'Ще раз приїду!',
+                'comment' => 'Przyjadę ponownie!',
             ]);
             Rating::create([
                 'rateable_id' => $attraction->id,
                 'rateable_type' => Attraction::class,
                 'user_id' => $user->id,
                 'rating' => rand(2, 5),
-                'comment' => 'Ще раз приїду!',
+                'comment' => 'Przyjadę ponownie!',
             ]);
             Rating::create([
                 'rateable_id' => $attraction->id,
                 'rateable_type' => Attraction::class,
                 'user_id' => $user->id,
                 'rating' => rand(2, 5),
-                'comment' => 'Ще раз приїду!',
+                'comment' => 'Przyjadę ponownie!',
             ]);
         }
     }
