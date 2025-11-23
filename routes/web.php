@@ -1,15 +1,15 @@
 <?php
 
 use App\Models\Category;
+use App\Http\Controllers;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\EventController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\AttractionController;
-use App\Http\Controllers\ReservationController;
+use App\Http\Livewire\Admin\OwnerRequestTable;
 
-
+use App\Http\Controllers\OwnerRequestController;
 Route::get('/map', [MapController::class, 'index'])->name('map.index');
 
 Route::get('/', function () {
@@ -84,6 +84,26 @@ Route::middleware(['auth'])->group(function () {
         ])->name('owner.request.submit');
 
     });
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/admin/owner-requests', function () {
+            return view('admin.owner-requests.index');
+        })->name('admin.owner-requests.index');
+    });
+   
+Route::middleware(['auth'])->prefix('admin/owner-requests')->name('admin.owner-requests.')->group(function () {
+    
+    Route::get('/', function () {
+        return view('admin.owner-requests.index');
+    })->name('index');
+
+    Route::get('/{owner_request}', [OwnerRequestController::class, 'show'])
+        ->whereNumber('owner_request')
+        ->name('show');
+});
+
+
+
+
 
     Route::middleware(['auth'])->prefix('categories')->name('categories.')->group(function () {
         Route::get('/', fn() => view('categories.index'))->name('index');

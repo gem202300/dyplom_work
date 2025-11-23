@@ -67,9 +67,9 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
    
-    public function isHolder(): bool
+    public function isOwner(): bool
     {
-        return $this->hasRole(RoleType::HOLDER->value);
+        return $this->hasRole(RoleType::OWNER->value);
     }
 
    

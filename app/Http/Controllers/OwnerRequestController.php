@@ -41,4 +41,8 @@ class OwnerRequestController extends Controller
 
         return redirect()->back()->with('status', 'Wniosek został wysłany do administratora.');
     }
+    public function show(OwnerRequest $owner_request)
+    {
+        return view('admin.owner-requests.show', compact('owner_request'));
+    }
 }

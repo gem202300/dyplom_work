@@ -151,18 +151,18 @@ final class UserTable extends PowerGridComponent
         User::findOrFail($id)->removeRole(RoleType::ADMIN->value);
     }
 
-    #[\Livewire\Attributes\On('assignHolderRoleAction')]
-    public function assignHolderRoleAction($id): void
+    #[\Livewire\Attributes\On('assignOwnerRoleAction')]
+    public function assignOwnerRoleAction($id): void
     {
         $this->authorize('update', Auth::user());
-        User::findOrFail($id)->assignRole(RoleType::HOLDER->value);
+        User::findOrFail($id)->assignRole(RoleType::OWNER->value);
     }
 
-    #[\Livewire\Attributes\On('removeHolderRoleAction')]
-    public function removeHolderRoleAction($id): void
+    #[\Livewire\Attributes\On('removeOwnerRoleAction')]
+    public function removeOwnerRoleAction($id): void
     {
         $this->authorize('update', Auth::user());
-        User::findOrFail($id)->removeRole(RoleType::HOLDER->value);
+        User::findOrFail($id)->removeRole(RoleType::OWNER->value);
     }
 
     
@@ -179,16 +179,16 @@ final class UserTable extends PowerGridComponent
                 ->tooltip(__('users.actions.remove_admin_role'))
                 ->class('text-green-500')
                 ->dispatch('removeAdminRoleAction', ['id' => $user->id]),
-            Button::add('assignHolderRoleAction')
+            Button::add('assignOwnerRoleAction')
                 ->slot('<x-wireui-icon name="cube" class="w-5 h-5" mini />')
                 ->tooltip(__('users.actions.assign_holder_role'))
                 ->class('text-gray-500')
-                ->dispatch('assignHolderRoleAction', ['id' => $user->id]),
-            Button::add('removeHolderRoleAction')
+                ->dispatch('assignOwnerRoleAction', ['id' => $user->id]),
+            Button::add('removeOwnerRoleAction')
                 ->slot('<x-wireui-icon name="cube" class="w-5 h-5" mini />')
                 ->tooltip(__('users.actions.remove_holder_role'))
                 ->class('text-green-500')
-                ->dispatch('removeHolderRoleAction', ['id' => $user->id]),
+                ->dispatch('removeOwnerRoleAction', ['id' => $user->id]),
             Button::add('deleteUserAction')
                 ->slot('<x-wireui-icon name="trash" class="w-5 h-5" mini />')
                 ->tooltip(__('users.actions.delete'))
@@ -234,12 +234,12 @@ final class UserTable extends PowerGridComponent
                 ->when(fn($user) => !$user->isAdmin() || $user->id === auth()->id())
                 ->hide(),
     
-            Rule::button('assignHolderRoleAction')
-                ->when(fn($user) => $user->isHolder() || !auth()->user()->hasRole(\App\Enums\Auth\RoleType::ADMIN->value))
+            Rule::button('assignOwnerRoleAction')
+                ->when(fn($user) => $user->isOwner() || !auth()->user()->hasRole(\App\Enums\Auth\RoleType::ADMIN->value))
                 ->hide(),
     
-            Rule::button('removeHolderRoleAction')
-                ->when(fn($user) => !$user->isHolder() || $user->id === auth()->id())
+            Rule::button('removeOwnerRoleAction')
+                ->when(fn($user) => !$user->isOwner() || !auth()->user()->hasRole(\App\Enums\Auth\RoleType::ADMIN->value))
                 ->hide(),
     
             Rule::button('deleteUserAction')

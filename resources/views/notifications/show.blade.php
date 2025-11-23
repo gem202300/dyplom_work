@@ -40,8 +40,8 @@
                         <div class="mt-6 flex gap-3">
                             @if(!$notification->read_at)
                                 <button type="button"
-                                        onclick="markAsRead('{{ $notification->id }}')"
-                                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                                        onclick="event.preventDefault(); event.stopPropagation(); markAsRead('{{ $notification->id }}')"
+                                        class="ml-4 px-4 py-2 bg-white text-black border border-black rounded hover:bg-gray-50 transition">
                                     Oznacz jako przeczytane
                                 </button>
                             @endif
