@@ -77,6 +77,20 @@
         slider.style.transform = `translateX(-${sliders[id] * 96}px)`;
     }
 </script>
+<script>
+function markNotificationRead(id) {
+    fetch('/notifications/read/' + id, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        }
+    }).then(() => location.reload());
+}
+</script>
+
+<x-notifications />
+
 </body>
 
 </html>
