@@ -22,10 +22,12 @@
                                 </p>
                             </div>
 
-                            <span
-                                class="inline-block px-3 py-1 bg-blue-600 dark:bg-blue-700 text-white text-sm font-medium rounded shadow transition cursor-pointer">
-                                New
-                            </span>
+                            @if(!$notification->read_at)
+                                <span
+                                    class="inline-block px-3 py-1 bg-blue-600 dark:bg-blue-700 text-white text-sm font-medium rounded shadow transition cursor-pointer">
+                                    New
+                                </span>
+                            @endif
                         </div>
 
                         <hr class="my-4 border-gray-200">
@@ -36,11 +38,13 @@
                             </div>
                         </div>
                         <div class="mt-6 flex gap-3">
-                            <button type="button"
-                                    onclick="markAsRead('example-id')"
-                                    class="px-4 py-2 bg-blue-600 text-black rounded hover:bg-blue-500 transition">
-                                Oznacz jako przeczytane
-                            </button>
+                            @if(!$notification->read_at)
+                                <button type="button"
+                                        onclick="markAsRead('{{ $notification->id }}')"
+                                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                                    Oznacz jako przeczytane
+                                </button>
+                            @endif
 
                             <a href="{{ route('notifications.index') }}" class="px-4 py-2 bg-white text-black border rounded hover:bg-gray-100 transition">
                                 Powrót do listy
@@ -48,10 +52,7 @@
                         </div>
                     </div>
 
-                   
                 </div>
-
-              
 
             </div>
         </div>

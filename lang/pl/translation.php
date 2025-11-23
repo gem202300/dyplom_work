@@ -22,7 +22,7 @@ return [
     ],
     'roles' => [
         RoleType::ADMIN->value  => 'Administrator',
-        RoleType::HOLDER->value => 'Właściciel',
+        RoleType::OWNER->value => 'Właściciel',
         RoleType::TOURIST->value   => 'Turysta',
     ],
     'messages' => [

@@ -73,6 +73,17 @@ Route::middleware(['auth'])->group(function () {
         $notification = auth()->user()->notifications()->findOrFail($id);
         return view('notifications.show', compact('notification'));
     })->name('notifications.show');
+    Route::middleware(['auth'])->group(function () {
+
+        Route::get('/owner/request', [
+            \App\Http\Controllers\OwnerRequestController::class, 'form'
+        ])->name('owner.request.form');
+
+        Route::post('/owner/request', [
+            \App\Http\Controllers\OwnerRequestController::class, 'submit'
+        ])->name('owner.request.submit');
+
+    });
 
     Route::middleware(['auth'])->prefix('categories')->name('categories.')->group(function () {
         Route::get('/', fn() => view('categories.index'))->name('index');

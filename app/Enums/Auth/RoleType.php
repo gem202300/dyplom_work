@@ -10,7 +10,7 @@ enum RoleType: string
 
     case ADMIN = 'admin';
     
-    case HOLDER = 'holder';
+    case OWNER = 'owner';
 
     case TOURIST = 'tourist';
 }

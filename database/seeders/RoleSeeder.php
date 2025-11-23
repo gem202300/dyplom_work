@@ -25,7 +25,7 @@ class RoleSeeder extends Seeder
 
         Role::create(['name' => RoleType::ADMIN]);
         Role::create(['name' => RoleType::TOURIST]);
-        Role::create(['name' => RoleType::HOLDER]);
+        Role::create(['name' => RoleType::OWNER]);
 
         // ADMINISTRATOR SYSTEMU
         $userRole = Role::findByName(RoleType::ADMIN->value);
@@ -36,7 +36,7 @@ class RoleSeeder extends Seeder
         $userRole->givePermissionTo(PermissionType::ATTRACTION_MANAGE->value);
         
         // Wlasciciel
-        $userRole = Role::findByName(RoleType::HOLDER->value);
+        $userRole = Role::findByName(RoleType::OWNER->value);
         $userRole->givePermissionTo(PermissionType::ATTRACTION_ACCESS->value);
         $userRole->givePermissionTo(PermissionType::ATTRACTION_MANAGE->value);
         
