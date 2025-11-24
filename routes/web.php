@@ -47,6 +47,13 @@ Route::middleware(['auth'])->group(function () {
         }
         return response()->json(['status' => 'ok']);
     });
+    Route::post('/admin/owner-requests/{ownerRequest}/approve',
+        [\App\Http\Controllers\OwnerRequestController::class, 'approve']
+    )->name('admin.owner-requests.approve');
+
+    Route::post('/admin/owner-requests/{ownerRequest}/reject',
+        [\App\Http\Controllers\OwnerRequestController::class, 'reject']
+    )->name('admin.owner-requests.reject');
 
     Route::post('/notifications/read-all', function () {
         auth()->user()->unreadNotifications->markAsRead();

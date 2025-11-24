@@ -41,6 +41,32 @@ class OwnerRequestController extends Controller
 
         return redirect()->back()->with('status', 'Wniosek został wysłany do administratora.');
     }
+    public function approve(OwnerRequest $ownerRequest)
+    {
+        $ownerRequest->update(['status' => 'approved']);
+        $ownerRequest->user->assignRole('owner');
+
+        $ownerRequest->user->notify(new \App\Notifications\TestNotification(
+            'Twoja prośba została zaakceptowana',
+            'Twoja prośba o rolę właściciela została zatwierdzona przez administratora.'
+        ));
+
+        session()->flash('message', 'Wniosek zatwierdzony.');
+        return back();
+    }
+
+    public function reject(OwnerRequest $ownerRequest)
+    {
+        $ownerRequest->update(['status' => 'rejected']);
+
+        $ownerRequest->user->notify(new \App\Notifications\TestNotification(
+            'Twoja prośba została odrzucona',
+            'Twoja prośba o rolę właściciela została odrzucona przez administratora.'
+        ));
+
+        session()->flash('message', 'Wniosek odrzucony.');
+        return back();
+    }
     public function show(OwnerRequest $owner_request)
     {
         return view('admin.owner-requests.show', compact('owner_request'));

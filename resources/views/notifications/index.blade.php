@@ -101,7 +101,27 @@
                 const button = notif.querySelector('button');
                 if(button) button.remove();
             }
+            Livewire.dispatch('notification-read');
+        });
+    }
+
+    function markAll() {
+        fetch('/notifications/read-all', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        }).then(() => {
+            document.querySelectorAll('[id^="notif-"]').forEach(el => {
+                const badge = el.querySelector('span');
+                const button = el.querySelector('button');
+
+                if (badge) badge.remove();
+                if (button) button.remove();
+            });
+            Livewire.dispatch('notification-read');
         });
     }
 </script>
+
 </x-app-layout>

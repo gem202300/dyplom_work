@@ -72,7 +72,7 @@ final class OwnerRequestTable extends PowerGridComponent
         'Twoja prośba została zaakceptowana',
         'Twoja prośba o rolę właściciela została zatwierdzona przez administratora.'
     ));
-
+    $this->dispatch('notification-added');
     $this->notification()->success('Sukces', 'Wniosek został zatwierdzony.');
     $this->dispatch('pg:eventRefresh-default'); 
 }
@@ -86,7 +86,7 @@ public function reject($id)
         'Twoja prośba została odrzucona',
         'Twoja prośba o rolę właściciela została odrzucona przez administratora.'
     ));
-
+    $this->dispatch('notification-added');
     $this->notification()->success('Info', 'Wniosek został odrzucony.');
     $this->dispatch('pg:eventRefresh-default'); 
 }
