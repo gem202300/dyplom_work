@@ -23,7 +23,7 @@ final class OwnerRequestTable extends PowerGridComponent
         return PowerGrid::fields()
             ->add('id')
             ->add('user_name', fn($model) => $model->user->name)
-            ->add('user_username', fn($model) => $model->user->username)
+            ->add('user_email', fn($model) => $model->user->email)
             ->add('phone')
             ->add('status')
             ->add('created_at_formatted', fn($model) => $model->created_at->format('Y-m-d H:i'));
@@ -34,7 +34,7 @@ final class OwnerRequestTable extends PowerGridComponent
         return [
             Column::make('ID', 'id'),
             Column::make('Użytkownik', 'user_name')->sortable()->searchable(),
-            Column::make('Username', 'user_username')->sortable()->searchable(),
+            Column::make('Email', 'user_email')->sortable()->searchable(),
             Column::make('Telefon', 'phone'),
             Column::make('Status', 'status')->sortable(),
             Column::make('Dodano', 'created_at_formatted')->sortable(),

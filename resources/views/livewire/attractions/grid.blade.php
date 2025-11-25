@@ -1,24 +1,22 @@
 <div class="p-6 space-y-4">
 
-    <!-- Верхня панель: пошук + кнопка фільтрів -->
     <div class="flex justify-end items-center gap-2">
         <input type="text" wire:model.debounce.500ms="search" 
-               placeholder="Пошук по назві або локації"
+               placeholder="Wyszukaj po nazwie lub lokalizacji"
                class="border rounded-lg p-2 w-40 focus:ring-2 focus:ring-blue-400 focus:outline-none"/>
 
         <button wire:click="$toggle('showFilters')" 
                 class="bg-blue-600 text-black px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition">
-            Фільтруй
+            Filtruj
         </button>
     </div>
 
-    <!-- Модалка фільтрів -->
     <x-dialog-modal wire:model.defer="showFilters">
-        <x-slot name="title">Фільтри</x-slot>
+        <x-slot name="title">Filtry</x-slot>
         <x-slot name="content">
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Категорії</label>
+                    <label class="block text-sm font-medium text-gray-700">Kategorie</label>
                     <select wire:model="selectedCategories" multiple class="border rounded p-2 w-full">
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -28,12 +26,12 @@
 
                 <div class="flex gap-2">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Мін. оцінка</label>
+                        <label class="block text-sm font-medium text-gray-700">Min. ocena</label>
                         <input type="number" wire:model="minRating" min="0" max="5" step="0.1"
                                class="border rounded p-2 w-24"/>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Макс. оцінка</label>
+                        <label class="block text-sm font-medium text-gray-700">Maks. ocena</label>
                         <input type="number" wire:model="maxRating" min="0" max="5" step="0.1"
                                class="border rounded p-2 w-24"/>
                     </div>
@@ -41,12 +39,11 @@
             </div>
         </x-slot>
         <x-slot name="footer">
-            <x-button wire:click="$set('showFilters', false)" flat label="Закрити"/>
-            <x-button wire:click="$set('showFilters', false)" primary label="Застосувати"/>
+            <x-button wire:click="$set('showFilters', false)" flat label="Zamknij"/>
+            <x-button wire:click="$set('showFilters', false)" primary label="Zastosuj"/>
         </x-slot>
     </x-dialog-modal>
 
-    <!-- Сітка атракцій -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach($attractions as $a)
             <div class="bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition">
@@ -57,7 +54,7 @@
                                  class="w-full h-full object-cover transition-transform hover:scale-105"/>
                         @else
                             <div class="flex items-center justify-center h-full text-gray-400 italic">
-                                немає фото
+                                brak zdjęcia
                             </div>
                         @endif
                     </div>
@@ -69,10 +66,10 @@
                     </h3>
                     <p class="text-sm text-gray-500">{{ $a->location }}</p>
                     <div class="text-sm text-gray-600">
-                        <strong>Категорії:</strong> {{ $a->categories->pluck('name')->join(', ') }}
+                        <strong>Kategorie:</strong> {{ $a->categories->pluck('name')->join(', ') }}
                     </div>
                     <div class="text-sm text-gray-600">
-                        <strong>Години:</strong>
+                        <strong>Godziny:</strong>
                         @if($a->opening_time && $a->closing_time)
                             {{ $a->opening_time }} - {{ $a->closing_time }}
                         @else — @endif
