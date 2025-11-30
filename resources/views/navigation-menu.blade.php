@@ -34,6 +34,10 @@
                     <x-nav-link href="{{ route('map.index') }}" :active="request()->routeIs('map.index')">
                         Mapa
                     </x-nav-link>
+                    <x-nav-link href="{{ route('noclegi.index') }}" :active="request()->routeIs('noclegi.*')">
+                        Noclegi
+                    </x-nav-link>
+
                     @if (Auth::user() && Auth::user()->isAdmin())
                         <x-nav-link href="{{ route('admin.owner-requests.index') }}" :active="request()->routeIs('admin.owner-requests.index')">
                             Zgłoszenia właścicieli

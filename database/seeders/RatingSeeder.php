@@ -11,7 +11,7 @@ class RatingSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::first(); // припустимо, є хоча б один користувач
+        $user = User::first();
 
         $attractions = Attraction::all();
 

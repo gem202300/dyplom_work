@@ -16,39 +16,22 @@ class AttractionsGrid extends Component
     public $selectedCategories = [];
     public $minRating = null;
     public $maxRating = null;
-    public $showFilters = false; // модалка
-
-    protected $listeners = [
-        'deleteAttractionAction' => 'deleteAttractionAction',
-    ];
+    public $showFilters = false;
 
     public function updatingSearch() { $this->resetPage(); }
     public function updatingSelectedCategories() { $this->resetPage(); }
     public function updatingMinRating() { $this->resetPage(); }
     public function updatingMaxRating() { $this->resetPage(); }
 
-    public function deleteAttractionAction($data)
+    public function deleteAttraction($id): void
     {
-        $id = $data['attraction'];
-        $this->dialog()->confirm([
-            'title' => 'Підтвердьте видалення',
-            'description' => "Ви впевнені, що хочете видалити цю атракцію?",
-            'icon' => 'warning',
-            'accept' => [
-                'label' => 'Так',
-                'method' => 'destroy',
-                'params' => $id,
-            ],
-            'reject' => [
-                'label' => 'Ні',
-            ],
-        ]);
-    }
+        $attraction = Attraction::findOrFail($id);
+        $attraction->delete();
 
-    public function destroy($id)
-    {
-        Attraction::findOrFail($id)->delete();
-        $this->notification()->success('Успіх', 'Атракція видалена.');
+        $this->notification()->success(
+            'Sukces',
+            "Atrakcja \"{$attraction->name}\" została usunięta."
+        );
     }
 
     public function render()
@@ -57,7 +40,6 @@ class AttractionsGrid extends Component
             ->with('photos', 'categories')
             ->withAvg('ratings', 'rating');
 
-        // Фільтр по назві та локації
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('name', 'like', '%'.$this->search.'%')
@@ -65,12 +47,10 @@ class AttractionsGrid extends Component
             });
         }
 
-        // Фільтр по категоріях
         if (!empty($this->selectedCategories)) {
             $query->whereHas('categories', fn($q) => $q->whereIn('id', $this->selectedCategories));
         }
 
-        // Фільтр по рейтингу
         if (!is_null($this->minRating)) {
             $query->where('ratings_avg_rating', '>=', $this->minRating);
         }

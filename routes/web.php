@@ -2,13 +2,16 @@
 
 use App\Models\Category;
 use App\Http\Controllers;
+use App\Livewire\Noclegi\NoclegiGrid;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Noclegi\NoclegiTable;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\NoclegController;
+
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\AttractionController;
 use App\Http\Livewire\Admin\OwnerRequestTable;
-
 use App\Http\Controllers\OwnerRequestController;
 Route::get('/map', [MapController::class, 'index'])->name('map.index');
 
@@ -21,7 +24,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attractions', function () {
         return view('attractions.index');
     })->name('attractions.index');
-
+    
+Route::prefix('noclegi')->name('noclegi.')->group(function () {
+    Route::get('/', function() { return view('noclegi.index'); })->name('index');
+    Route::get('/create', [NoclegController::class, 'create'])->name('create');
+    Route::get('/{nocleg}', [NoclegController::class, 'show'])->name('show');
+    Route::get('/{nocleg}/edit', [NoclegController::class, 'edit'])->name('edit');
+});
     Route::middleware(['auth'])->prefix('attractions')->name('attractions.')->group(function () {
         Route::get('/', [AttractionController::class, 'index'])->name('index');
         Route::get('/create', [AttractionController::class, 'create'])->name('create');

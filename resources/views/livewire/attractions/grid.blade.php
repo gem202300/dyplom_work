@@ -86,11 +86,12 @@
                     <a href="{{ route('attractions.edit', $a->id) }}" class="flex-1 text-center py-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition">
                         <x-wireui-icon name="pencil" class="w-5 h-5 inline"/>
                     </a>
-                    <button wire:click="$dispatch('deleteAttractionAction', { attraction: {{ $a->id }} })"
+                    <button wire:click="deleteAttraction({{ $a->id }})" 
+                            wire:confirm="Czy na pewno chcesz usunąć {{ $a->name }}?"
                             class="flex-1 text-center py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition">
                         <x-wireui-icon name="trash" class="w-5 h-5 inline"/>
                     </button>
-                </div>
+                          </div>
             </div>
         @endforeach
     </div>
