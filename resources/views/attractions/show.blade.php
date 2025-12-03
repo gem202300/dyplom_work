@@ -79,42 +79,8 @@
                 </div>
             </div>
 
-            @auth
-                <div class="bg-gray-50 p-6 rounded shadow space-y-4">
-                    <h3 class="text-lg font-semibold">Dodaj swoją opinię</h3>
-
-                    <form method="POST" action="{{ route('ratings.store') }}" class="space-y-4">
-                        @csrf
-                        <input type="hidden" name="rateable_type" value="App\Models\Attraction">
-                        <input type="hidden" name="rateable_id" value="{{ $attraction->id }}">
-
-                        <div>
-                            <label for="rating" class="block text-sm font-medium">Ocena (1–5, opcjonalnie)</label>
-                            <input id="rating" name="rating" type="number" min="1" max="5"
-                                  class="mt-1 block w-full border border-gray-300 rounded-md shadow px-3 py-2"
-                                  value="{{ old('rating') }}">
-                        </div>
-
-
-                        <div>
-                            <label for="comment" class="block text-sm font-medium">Komentarz</label>
-                            <textarea id="comment" name="comment" rows="4"
-                                      class="mt-1 block w-full border border-gray-300 rounded-md shadow px-3 py-2"
-                                      placeholder="Podziel się swoją opinią..."></textarea>
-                        </div>
-
-                        <button type="submit"
-                                class="px-5 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700 transition">
-                            Wyślij opinię
-                        </button>
-                    </form>
-                </div>
-            @else
-                <p class="text-sm text-gray-600">
-                    Aby dodać opinię, <a href="{{ route('login') }}" class="text-indigo-600 underline">zaloguj się</a>.
-                </p>
-            @endauth
-
+            <x-ratings :rateable="$attraction" :ratings="$ratings" />
+            
             <div class="pt-4">
                 <a href="{{ route('attractions.index') }}"
                    class="inline-block px-5 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700 transition">
