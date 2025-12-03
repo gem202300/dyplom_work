@@ -19,7 +19,7 @@ class AdminNoclegController extends Controller
             ));
         }
 
-        return back()->with('success', 'Nocleg zatwierdzony.');
+        return redirect()->route('admin.noclegi.index')->with('success', 'Nocleg zatwierdzony.');
     }
 
     public function reject(Nocleg $nocleg)
@@ -33,6 +33,7 @@ class AdminNoclegController extends Controller
             ));
         }
 
-        return back()->with('success', 'Nocleg odrzucony.');
+        return redirect()->route('admin.noclegi.index')->with('success', 'Nocleg odrzucony.');
     }
+
 }

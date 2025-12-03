@@ -37,6 +37,8 @@ Route::post('/admin/noclegi/{nocleg}/approve', [AdminNoclegController::class, 'a
     ->name('admin.noclegi.approve');
 Route::post('/admin/noclegi/{nocleg}/reject', [AdminNoclegController::class, 'reject'])
     ->name('admin.noclegi.reject');
+Route::get('/admin/noclegi/{nocleg}/details', [NoclegController::class, 'details'])
+    ->name('admin.noclegi.details');
 
 Route::prefix('noclegi')->name('noclegi.')->group(function () {
     Route::get('/', function() { return view('noclegi.index'); })->name('index');

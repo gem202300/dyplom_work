@@ -43,6 +43,7 @@ class NoclegForm extends Component
         $this->nocleg = $nocleg ?? new Nocleg();
 
         if ($nocleg && $nocleg->exists) {
+
             $this->title = $nocleg->title;
             $this->description = $nocleg->description;
             $this->city = $nocleg->city;
@@ -52,7 +53,7 @@ class NoclegForm extends Component
             $this->contact_phone = $nocleg->contact_phone;
             $this->link = $nocleg->link;
 
-             $this->amenities = [];
+            $this->amenities = [];
 
             if ($nocleg->has_kitchen) $this->amenities[] = 'kuchnia';
             if ($nocleg->has_parking) $this->amenities[] = 'parking';
@@ -63,24 +64,40 @@ class NoclegForm extends Component
             if (!empty($nocleg->amenities_other)) $this->amenities[] = 'inne';
 
             $this->other_amenities = $nocleg->amenities_other ?? '';
+
+        } else {
+            $this->contact_phone = auth()->user()->phone ?? '';
         }
     }
+
 
 
     public function rules()
     {
         return [
-            'title' => 'required|string|max:255',
+            'title' => [
+                'required',
+                'regex:/^[\p{L} ]+$/u',
+                'max:255'
+            ],
             'description' => 'nullable|string',
-            'city' => 'required|string',
-            'street' => 'required|string',
+            'city' => [
+                'required',
+                'regex:/^[\p{L} ]+$/u',
+            ],
+            'street' => 'required|string|max:255',
             'object_type' => 'required|string|max:50',
-            'capacity' => 'nullable|integer|min:1',
-            'contact_phone' => 'nullable|string|max:50',
+            'capacity' => 'required|integer|min:1',
+            'contact_phone' => [
+                'nullable',
+                'regex:/^\+?[0-9]{6,15}$/',
+            ],
             'link' => 'nullable|url|max:255',
+            'photos' => 'required|array|min:1',
             'photos.*' => 'image|max:2048',
         ];
     }
+
 
     public function submit()
     {

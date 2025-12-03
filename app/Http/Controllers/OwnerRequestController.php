@@ -18,29 +18,32 @@ class OwnerRequestController extends Controller
     public function submit(Request $request)
     {
         $request->validate([
-            'phone' => 'required|string|min:6',
+            'phone' => ['required', 'regex:/^\+?[0-9]{6,15}$/'],
             'reason' => 'required|string|min:10',
             'terms' => 'accepted'
         ]);
 
+        $user = auth()->user();
+        $user->phone = $request->phone;
+        $user->save();
+
         OwnerRequest::create([
-            'user_id' => auth()->id(),
+            'user_id' => $user->id,
             'phone' => $request->phone,
             'reason' => $request->reason,
             'accepted_terms' => true,
         ]);
-        $admins = \App\Models\User::role(\App\Enums\Auth\RoleType::ADMIN->value)->get();
-
+        $admins = User::role(RoleType::ADMIN->value)->get();
         foreach ($admins as $admin) {
-            $admin->notify(new \App\Notifications\TestNotification(
+            $admin->notify(new TestNotification(
                 'Nowa prośba o rolę właściciela',
-                'Użytkownik ' . $request->user()->name . ' (' . $request->user()->username . ') wysłał wniosek o rolę właściciela.'
+                'Użytkownik ' . $user->name . ' (' . $user->username . ') wysłał wniosek o rolę właściciela.'
             ));
         }
 
-
         return redirect()->back()->with('status', 'Wniosek został wysłany do administratora.');
     }
+
     public function approve(OwnerRequest $ownerRequest)
     {
         $ownerRequest->update(['status' => 'approved']);

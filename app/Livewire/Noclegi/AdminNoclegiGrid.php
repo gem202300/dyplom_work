@@ -12,8 +12,9 @@ class AdminNoclegiGrid extends Component
 {
     use WithPagination, WireUiActions;
 
-    public $searchInput = ''; 
-    public $search = '';      
+    public $search = '';
+    public $type = '';
+    public $showFilters = false;
 
     protected $paginationTheme = 'tailwind';
 
@@ -22,9 +23,8 @@ class AdminNoclegiGrid extends Component
         $this->resetPage();
     }
 
-    public function applyFilter()
+    public function updatingType()
     {
-        $this->search = $this->searchInput;
         $this->resetPage();
     }
 
@@ -58,7 +58,7 @@ class AdminNoclegiGrid extends Component
         if ($nocleg->user) {
             $nocleg->user->notify(new TestNotification(
                 'Twój nocleg został odrzucony',
-                "Nocleg \"{$nocleg->title}\" został odrzucony przez administratora."
+                "Nocleg \"{$nocleg->title}\" został odrzucony."
             ));
         }
 
@@ -70,7 +70,8 @@ class AdminNoclegiGrid extends Component
 
     public function render()
     {
-        $query = Nocleg::with('photos', 'user')->where('status', 'pending');
+        $query = Nocleg::with('photos', 'user')
+            ->where('status', 'pending');
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -78,6 +79,10 @@ class AdminNoclegiGrid extends Component
                   ->orWhere('city', 'like', "%{$this->search}%")
                   ->orWhere('street', 'like', "%{$this->search}%");
             });
+        }
+
+        if ($this->type) {
+            $query->where('object_type', $this->type);
         }
 
         return view('livewire.noclegi.admin-noclegi-grid', [

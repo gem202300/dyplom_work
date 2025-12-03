@@ -12,6 +12,12 @@ class NoclegController extends Controller
         $ratings = $nocleg->ratings()->latest()->paginate(5);
         return view('noclegi.show', compact('nocleg', 'ratings'));
     }
+    public function details(Nocleg $nocleg)
+    {
+        $nocleg->load('photos', 'user');
+
+        return view('noclegi.details', compact('nocleg'));
+    }
 
 
     public function edit(Nocleg $nocleg)
