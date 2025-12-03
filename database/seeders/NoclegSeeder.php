@@ -13,6 +13,7 @@ class NoclegSeeder extends Seeder
         $domki = Nocleg::create([
             'title' => 'Domki w Zakarpaciu',
             'description' => 'Przytulne domki w górach.',
+            'user_id' => 103,
             'capacity' => 6,
             'object_type' => 'domki',
             'city' => 'Użhorod',
@@ -36,6 +37,7 @@ class NoclegSeeder extends Seeder
         $hotel = Nocleg::create([
             'title' => 'Hotel we Lwowie',
             'description' => 'Nowoczesny hotel.',
+            'status' => 'approved',            
             'capacity' => 20,
             'object_type' => 'hotel',
             'city' => 'Lwów',

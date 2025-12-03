@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
 
         \App\Models\User::factory()->create([
             'name' => 'Właściciel Testowy',
-            'email' => 'Holder.test@localhost',
+            'email' => 'owner.test@localhost',
             'password' => Hash::make('12345678'),
             'phone' => '0987654321', 
             'address' => 'Holder Address, 456', 

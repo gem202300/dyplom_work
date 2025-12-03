@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('noclegs', function (Blueprint $table) {
         $table->id();
-
+        $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+        $table->enum('status', ['pending', 'approved', 'rejected'])
+        ->default('pending');
         $table->string('title'); 
         $table->text('description')->nullable(); 
         $table->integer('capacity')->nullable(); 

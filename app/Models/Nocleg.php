@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Nocleg extends Model
 {
     protected $fillable = [
+        'user_id',
+        'status',
         'title',
         'description',
         'capacity',
@@ -34,6 +36,10 @@ class Nocleg extends Model
     public function ratings()
     {
         return $this->morphMany(Rating::class, 'rateable');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function average_rating()

@@ -7,7 +7,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
 
-class NoclegiGrid extends Component
+class MyNoclegiGrid extends Component
 {
     use WithPagination, WireUiActions;
 
@@ -34,13 +34,13 @@ class NoclegiGrid extends Component
     public function render()
     {
         $query = Nocleg::with('photos')
-            ->where('status', 'approved');
+            ->where('user_id', auth()->id()); 
 
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('title', 'like', "%{$this->search}%")
-                ->orWhere('city', 'like', "%{$this->search}%")
-                ->orWhere('street', 'like', "%{$this->search}%");
+                  ->orWhere('city', 'like', "%{$this->search}%")
+                  ->orWhere('street', 'like', "%{$this->search}%");
             });
         }
 
@@ -48,9 +48,8 @@ class NoclegiGrid extends Component
             $query->where('object_type', $this->type);
         }
 
-        return view('livewire.noclegi.grid', [
+        return view('livewire.noclegi.my-noclegi-grid', [
             'noclegi' => $query->paginate(12),
         ]);
     }
-
 }

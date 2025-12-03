@@ -87,6 +87,7 @@ class NoclegForm extends Component
         $this->validate();
 
         $this->nocleg->fill([
+            'user_id' => auth()->id(),
             'title' => $this->title,
             'description' => $this->description,
             'city' => $this->city,

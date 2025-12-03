@@ -8,10 +8,11 @@ use App\Livewire\Noclegi\NoclegiTable;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NoclegController;
-
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\MyNoclegiController;
 use App\Http\Controllers\AttractionController;
 use App\Http\Livewire\Admin\OwnerRequestTable;
+use App\Http\Controllers\AdminNoclegController;
 use App\Http\Controllers\OwnerRequestController;
 Route::get('/map', [MapController::class, 'index'])->name('map.index');
 
@@ -24,7 +25,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/attractions', function () {
         return view('attractions.index');
     })->name('attractions.index');
-    
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/my-noclegi', [MyNoclegiController::class, 'index'])->name('my-noclegi');
+    });
+
+Route::middleware(['auth'])->prefix('admin/noclegi')->name('admin.noclegi.')->group(function () {
+    Route::get('/', fn() => view('admin.noclegi.index'))->name('index');
+});
+
+Route::post('/admin/noclegi/{nocleg}/approve', [AdminNoclegController::class, 'approve'])
+    ->name('admin.noclegi.approve');
+Route::post('/admin/noclegi/{nocleg}/reject', [AdminNoclegController::class, 'reject'])
+    ->name('admin.noclegi.reject');
+
 Route::prefix('noclegi')->name('noclegi.')->group(function () {
     Route::get('/', function() { return view('noclegi.index'); })->name('index');
     Route::get('/create', [NoclegController::class, 'create'])->name('create');
