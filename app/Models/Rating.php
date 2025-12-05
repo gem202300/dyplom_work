@@ -9,18 +9,17 @@ class Rating extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'rating',
-        'comment',
-        'rateable_type',
-        'rateable_id',
-        'user_id',
+        'rating', 'comment', 'user_id', 'rateable_id', 'rateable_type', 'is_flagged'
     ];
     
     public function rateable()
     {
         return $this->morphTo();
     }
-
+    public function reports()
+    {
+        return $this->hasMany(RatingReport::class);
+    }
     public function user()
     {
         return $this->belongsTo(User::class);

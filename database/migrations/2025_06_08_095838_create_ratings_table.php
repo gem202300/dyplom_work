@@ -16,8 +16,9 @@ return new class extends Migration
             $table->unsignedBigInteger('rateable_id');
             $table->string('rateable_type');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->unsignedTinyInteger('rating')->nullable(); 
+            $table->unsignedTinyInteger('rating')->nullable();
             $table->text('comment')->nullable();
+            $table->boolean('is_flagged')->default(false); // для модерації
             $table->timestamps();
 
             $table->index(['rateable_id', 'rateable_type']);

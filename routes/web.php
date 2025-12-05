@@ -9,6 +9,7 @@ use App\Http\Controllers\MapController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NoclegController;
 use App\Http\Controllers\RatingController;
+
 use App\Http\Controllers\MyNoclegiController;
 use App\Http\Controllers\AttractionController;
 use App\Http\Livewire\Admin\OwnerRequestTable;
@@ -132,6 +133,11 @@ Route::middleware(['auth'])->prefix('admin/owner-requests')->name('admin.owner-r
         ->name('show');
 });
 
+
+Route::middleware('auth')->group(function () {
+    Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
+    Route::post('/ratings/{rating}/report', [RatingController::class, 'report'])->name('ratings.report');
+});
 
 
 

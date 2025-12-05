@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AttractionSeeder::class,
             NoclegSeeder::class,
             RatingSeeder::class,
+            BannedWordsSeeder::class,
         ]);
 
     }

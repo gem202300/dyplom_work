@@ -49,36 +49,7 @@
                     </strong>
                 </p>
             </div>
-
-            <div>
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Opinie</h2>
-
-                @forelse ($ratings as $rating)
-                    <div class="mb-4 p-4 bg-gray-100 rounded shadow">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold">{{ $rating->user->name ?? 'Użytkownik' }}</span>
-                            <span class="text-sm text-gray-600">
-                                {{ $rating->created_at->format('Y-m-d H:i') }}
-                            </span>
-                        </div>
-                        @if($rating->rating)
-                            <p class="mb-2">Ocena: {{ $rating->rating }} / 5</p>
-                        @endif
-
-                        @if($rating->comment)
-                            <p>{{ $rating->comment }}</p>
-                        @endif
-
-                    </div>
-                @empty
-                    <p class="text-gray-500">Brak opinii.</p>
-                @endforelse
-
-                <div class="mt-4">
-                    {{ $ratings->links() }}
-                </div>
-            </div>
-
+            
             <x-ratings :rateable="$attraction" :ratings="$ratings" />
             
             <div class="pt-4">
