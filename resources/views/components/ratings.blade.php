@@ -1,6 +1,6 @@
 @props([
-    'rateable', // модель: Nocleg або Attraction
-    'ratings'   // колекція рейтинґів
+    'rateable', 
+    'ratings'   
 ])
 
 @auth
@@ -25,12 +25,10 @@
                       class="mt-1 block w-full border border-gray-300 rounded-md shadow px-3 py-2"
                       placeholder="Podziel się swoją opinią...">{{ old('comment') }}</textarea>
 
-            {{-- Помилка при заборонених словах --}}
             @if($errors->has('comment'))
                 <p class="text-red-600 text-sm mt-1">{{ $errors->first('comment') }}</p>
             @endif
 
-            {{-- Повідомлення успіху --}}
             @if(session('success'))
                 <p class="text-green-600 text-sm mt-1">{{ session('success') }}</p>
             @endif
@@ -58,11 +56,19 @@
             <span class="text-sm text-gray-600">{{ $rating->created_at->format('Y-m-d H:i') }}</span>
 
             @auth
-            {{-- Меню три крапки --}}
             <div class="relative inline-block text-left">
-                <button type="button" class="text-gray-500 hover:text-red-600" onclick="toggleReportMenu({{ $rating->id }})">
+                <button type="button" class="text-gray-500 hover:text-gray-700" onclick="toggleOptions({{ $rating->id }})">
                     &#x22EE;
                 </button>
+
+                <div class="hidden absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-50" id="options-menu-{{ $rating->id }}">
+                    <button type="button" class="block w-full text-left px-4 py-2 hover:bg-gray-100" 
+                            onclick="toggleReportReasons({{ $rating->id }})">
+                        Zgłoś
+                    </button>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-100">Edytuj</a>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-100">Usuń</a>
+                </div>
 
                 <div class="hidden absolute right-0 mt-2 w-56 bg-white border rounded shadow-lg z-50" id="report-menu-{{ $rating->id }}">
                     @foreach(['Rugactwa', 'Nieobiektywna ocena', 'Obraza'] as $reason)
@@ -97,16 +103,29 @@
 </div>
 
 <script>
-function toggleReportMenu(id) {
-    const menu = document.getElementById('report-menu-' + id);
+function toggleOptions(id) {
+    const menu = document.getElementById('options-menu-' + id);
     menu.classList.toggle('hidden');
+
+    const reportMenu = document.getElementById('report-menu-' + id);
+    if(reportMenu && !reportMenu.classList.contains('hidden')) {
+        reportMenu.classList.add('hidden');
+    }
 }
 
-// Закриваємо меню, якщо клік поза ним
+function toggleReportReasons(id) {
+    const reportMenu = document.getElementById('report-menu-' + id);
+    reportMenu.classList.toggle('hidden');
+}
+
 document.addEventListener('click', function(e) {
-    document.querySelectorAll('[id^="report-menu-"]').forEach(menu => {
-        if (!menu.contains(e.target) && !menu.previousElementSibling.contains(e.target)) {
+    document.querySelectorAll('[id^="options-menu-"]').forEach(menu => {
+        const id = menu.id.replace('options-menu-', '');
+        const reportMenu = document.getElementById('report-menu-' + id);
+
+        if (!menu.contains(e.target) && !reportMenu.contains(e.target) && !menu.previousElementSibling.contains(e.target)) {
             menu.classList.add('hidden');
+            reportMenu.classList.add('hidden');
         }
     });
 });

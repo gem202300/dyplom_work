@@ -9,12 +9,13 @@ use App\Http\Controllers\MapController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\NoclegController;
 use App\Http\Controllers\RatingController;
-
+use App\Http\Livewire\Admin\ReportedRatings;
 use App\Http\Controllers\MyNoclegiController;
 use App\Http\Controllers\AttractionController;
 use App\Http\Livewire\Admin\OwnerRequestTable;
 use App\Http\Controllers\AdminNoclegController;
 use App\Http\Controllers\OwnerRequestController;
+use App\Http\Controllers\RatingReportController;
 Route::get('/map', [MapController::class, 'index'])->name('map.index');
 
 Route::get('/', function () {
@@ -52,6 +53,25 @@ Route::prefix('noclegi')->name('noclegi.')->group(function () {
         Route::get('/create', [AttractionController::class, 'create'])->name('create');
         Route::get('/{attraction}/edit', [AttractionController::class, 'edit'])->name('edit');
     });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/ratings/reports', function() {
+        return view('admin.ratings-reports'); 
+    })->name('admin.ratings.reports');
+});
+Route::get('/admin/reports/{rating}', [App\Http\Controllers\RatingReportController::class, 'details'])
+    ->name('ratings.report.details');
+Route::post('/ratings/{rating}/delete', [RatingReportController::class, 'delete'])
+    ->name('ratings.delete');
+
+Route::post('/ratings/{rating}/clear-reports', [RatingReportController::class, 'clearReports'])
+    ->name('ratings.clear-reports');
+
+Route::post('/admin/banned-words/store', [App\Http\Controllers\BannedWordController::class, 'store'])
+    ->name('banned-words.store');
+Route::post('/ratings/{rating}/delete', [RatingReportController::class, 'delete'])->name('ratings.delete');
+Route::post('/ratings/{rating}/clear-reports', [RatingReportController::class, 'clearReports'])->name('ratings.clear-reports');
+
 
     Route::get('/attractions/{attraction}', [AttractionController::class, 'show'])->name('attractions.show');
     Route::post('/ratings', [\App\Http\Controllers\RatingController::class, 'store'])
