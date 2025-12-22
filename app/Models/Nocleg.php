@@ -41,6 +41,15 @@ class Nocleg extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function availabilities()
+    {
+        return $this->hasMany(NoclegAvailability::class);
+    }
+
+    public function availabilityForDate($date)
+    {
+        return $this->availabilities()->where('date', $date)->first();
+    }
 
     public function average_rating()
     {

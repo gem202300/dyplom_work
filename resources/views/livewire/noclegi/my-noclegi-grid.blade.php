@@ -62,11 +62,11 @@
                 <div class="text-sm font-medium text-gray-700">
                     Status: 
                     @if($n->status === 'pending') 
-                        <span class="px-2 py-1 bg-yellow-200 text-yellow-700 rounded">W trakcie</span>
+                        <span class="px-2 py-1 bg-yellow-200 text-yellow-700 rounded">Oczekuje na zatwierdzenie</span>
                     @elseif($n->status === 'approved') 
-                        <span class="px-2 py-1 bg-green-200 text-green-700 rounded">Zatwierdzono</span>
+                        <span class="px-2 py-1 bg-green-200 text-green-700 rounded">Zatwierdzony</span>
                     @else 
-                        <span class="px-2 py-1 bg-red-200 text-red-700 rounded">Odrzucono</span>
+                        <span class="px-2 py-1 bg-red-200 text-red-700 rounded">Odrzucony</span>
                     @endif
                 </div>
 
@@ -92,6 +92,10 @@
                             class="flex-1 text-center py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition">
                         <x-wireui-icon name="trash" class="w-5 h-5 inline"/>
                     </button>
+                    <a href="{{ route('noclegi.calendar', $n->id) }}"
+                      class="flex-1 text-center py-2 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition">
+                        <x-wireui-icon name="calendar" class="w-5 h-5 inline"/>
+                    </a>
                 </div>
             </div>
         @endforeach

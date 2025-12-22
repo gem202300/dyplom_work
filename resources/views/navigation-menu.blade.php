@@ -25,7 +25,7 @@
 
                     @if (Auth::user()->isAdmin())
                         <x-nav-link href="{{ route('categories.index') }}" :active="request()->routeIs('categories.*')">
-                            {{ __('Kategorie') }}
+                            {{ __('Kategorie atrakcji') }}
                         </x-nav-link>
                     @endif
 

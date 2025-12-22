@@ -8,7 +8,8 @@
 @if (!$user->hasRole('owner'))
     <x-action-section class="mt-10">
         <x-slot name="title">
-            {{ __('Zgłoś się jako właściciel') }}
+            {{ __('Zgłoś się jako właściciel obiektu') }}
+            
         </x-slot>
 
         <x-slot name="description">
@@ -37,4 +38,5 @@
             </div>
         </x-slot>
     </x-action-section>
+    <x-section-border />
 @endif

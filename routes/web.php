@@ -1,5 +1,4 @@
 <?php
-
 use App\Models\Category;
 use App\Http\Controllers;
 use App\Livewire\Noclegi\NoclegiGrid;
@@ -16,6 +15,8 @@ use App\Http\Livewire\Admin\OwnerRequestTable;
 use App\Http\Controllers\AdminNoclegController;
 use App\Http\Controllers\OwnerRequestController;
 use App\Http\Controllers\RatingReportController;
+use App\Http\Controllers\NoclegCalendarController;
+
 Route::get('/map', [MapController::class, 'index'])->name('map.index');
 
 Route::get('/', function () {
@@ -71,6 +72,13 @@ Route::post('/admin/banned-words/store', [App\Http\Controllers\BannedWordControl
     ->name('banned-words.store');
 Route::post('/ratings/{rating}/delete', [RatingReportController::class, 'delete'])->name('ratings.delete');
 Route::post('/ratings/{rating}/clear-reports', [RatingReportController::class, 'clearReports'])->name('ratings.clear-reports');
+Route::middleware(['auth'])->prefix('noclegi')->name('noclegi.')->group(function () {
+    Route::get('/{nocleg}/calendar', [NoclegCalendarController::class, 'index'])
+        ->name('calendar');
+
+    Route::post('/{nocleg}/calendar', [NoclegCalendarController::class, 'update'])
+        ->name('calendar.update');
+});
 
 
     Route::get('/attractions/{attraction}', [AttractionController::class, 'show'])->name('attractions.show');

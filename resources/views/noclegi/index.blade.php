@@ -4,12 +4,6 @@
             <h2 class="text-xl font-semibold text-gray-800">
                 Noclegi
             </h2>
-
-            <x-wireui-button
-                primary
-                label="Dodaj nocleg"
-                href="{{ route('noclegi.create') }}"
-            />
         </div>
     </x-slot>
 
