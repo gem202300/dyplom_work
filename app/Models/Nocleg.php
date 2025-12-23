@@ -12,7 +12,6 @@ class Nocleg extends Model
         'title',
         'description',
         'capacity',
-        'object_type',
         'city',
         'street',
         'location',
@@ -45,7 +44,10 @@ class Nocleg extends Model
     {
         return $this->hasMany(NoclegAvailability::class);
     }
-
+    public function objectType()
+    {
+        return $this->belongsTo(ObjectType::class);
+    }
     public function availabilityForDate($date)
     {
         return $this->availabilities()->where('date', $date)->first();

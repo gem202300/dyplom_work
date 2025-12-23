@@ -80,7 +80,8 @@ Route::middleware(['auth'])->prefix('noclegi')->name('noclegi.')->group(function
         ->name('calendar.update');
 });
 
-
+Route::get('/ratings/filter/{rateableType}/{rateableId}', [RatingController::class, 'filter'])
+    ->name('ratings.filter');
     Route::get('/attractions/{attraction}', [AttractionController::class, 'show'])->name('attractions.show');
     Route::post('/ratings', [\App\Http\Controllers\RatingController::class, 'store'])
         ->middleware('auth')

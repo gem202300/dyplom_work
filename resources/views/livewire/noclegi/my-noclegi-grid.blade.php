@@ -54,7 +54,7 @@
                 <div class="p-4 space-y-2">
                     <h3 class="text-lg font-semibold">{{ $n->title }}</h3>
                     <p class="text-sm text-gray-600">📍 {{ $n->city }}, {{ $n->street }}</p>
-                    <p class="text-sm text-gray-600"><strong>Typ:</strong> {{ $n->object_type }}</p>
+                    <p class="text-sm text-gray-600"><strong>Typ:</strong> {{ $n->objectType?->name }}</p>
                     <p class="text-sm text-gray-600"><strong>Kontakt:</strong> {{ $n->contact_phone ?? '—' }}</p>
                 <div class="text-sm font-medium text-gray-700">
                     ⭐ {{ number_format($n->average_rating ?? 0, 2) }}

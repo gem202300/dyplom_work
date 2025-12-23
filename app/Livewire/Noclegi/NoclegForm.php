@@ -4,6 +4,7 @@ namespace App\Livewire\Noclegi;
 
 use App\Models\Nocleg;
 use Livewire\Component;
+use App\Models\ObjectType;
 use App\Models\NoclegPhoto;
 use Livewire\WithFileUploads;
 use WireUi\Traits\WireUiActions;
@@ -20,7 +21,8 @@ class NoclegForm extends Component
     public $description = '';
     public $city = '';
     public $street = '';
-    public $object_type = '';
+    public $object_type_id = '';
+    public $objectTypes = [];
     public $capacity = '';
     public $contact_phone = '';
     public $link = '';
@@ -41,14 +43,14 @@ class NoclegForm extends Component
     public function mount(Nocleg $nocleg = null)
     {
         $this->nocleg = $nocleg ?? new Nocleg();
-
+        $this->objectTypes = ObjectType::orderBy('name')->get();
         if ($nocleg && $nocleg->exists) {
 
             $this->title = $nocleg->title;
             $this->description = $nocleg->description;
             $this->city = $nocleg->city;
             $this->street = $nocleg->street;
-            $this->object_type = $nocleg->object_type;
+            $this->object_type_id = $nocleg->object_type_id;
             $this->capacity = $nocleg->capacity;
             $this->contact_phone = $nocleg->contact_phone;
             $this->link = $nocleg->link;
@@ -86,7 +88,7 @@ class NoclegForm extends Component
                 'regex:/^[\p{L} ]+$/u',
             ],
             'street' => 'required|string|max:255',
-            'object_type' => 'required|string|max:50',
+            'object_type_id' => 'required|exists:object_types,id',
             'capacity' => 'required|integer|min:1',
             'contact_phone' => [
                 'nullable',
@@ -109,7 +111,7 @@ class NoclegForm extends Component
             'description' => $this->description,
             'city' => $this->city,
             'street' => $this->street,
-            'object_type' => $this->object_type,
+            'object_type_id' => $this->object_type_id,
             'capacity' => $this->capacity,
             'contact_phone' => $this->contact_phone,
             'link' => $this->link,

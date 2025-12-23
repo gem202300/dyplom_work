@@ -16,7 +16,10 @@ return new class extends Migration
         $table->string('title'); 
         $table->text('description')->nullable(); 
         $table->integer('capacity')->nullable(); 
-        $table->string('object_type', 50); 
+        $table->foreignId('object_type_id')
+                ->constrained('object_types')
+                ->cascadeOnDelete();
+
 
         $table->string('city');    
         $table->string('street');    

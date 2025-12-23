@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CategorySeeder::class,
             AttractionSeeder::class,
+            ObjectTypeSeeder::class,
             NoclegSeeder::class,
             RatingSeeder::class,
             BannedWordsSeeder::class,

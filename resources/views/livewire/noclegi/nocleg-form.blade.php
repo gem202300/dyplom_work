@@ -37,15 +37,19 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Typ obiektu</label>
-                <select wire:model.defer="object_type"
+                <select wire:model.defer="object_type_id"
                         class="w-full bg-white text-black border border-gray-400 rounded-md px-4 py-2">
                     <option value="">Wybierz typ</option>
-                    <option value="domki">Domki</option>
-                    <option value="hotel">Hotel</option>
-                    <option value="pokoje prywatne">Pokoje prywatne</option>
-                    <option value="apartament">Apartament</option>
+
+                    @foreach($objectTypes as $type)
+                        <option value="{{ $type->id }}">
+                            {{ $type->name }}
+                        </option>
+                    @endforeach
                 </select>
-                @error('object_type') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                @error('object_type_id') 
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p> 
+                @enderror
             </div>
 
             <div>

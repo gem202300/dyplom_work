@@ -4,6 +4,7 @@ namespace App\Livewire\Noclegi;
 
 use App\Models\Nocleg;
 use Livewire\Component;
+use App\Models\ObjectType;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
 
@@ -12,44 +13,34 @@ class MyNoclegiGrid extends Component
     use WithPagination, WireUiActions;
 
     public $search = '';
-    public $type = '';
-    public $showFilters = false;
+    public $object_type_id = null;
 
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingType() { $this->resetPage(); }
+    protected $paginationTheme = 'tailwind';
 
-    public function deleteNocleg($id)
+    public function updating()
     {
-        $nocleg = Nocleg::find($id);
-        if (!$nocleg) return;
-
-        $nocleg->delete();
-
-        $this->notification()->success(
-            'Usunięto',
-            "Nocleg \"{$nocleg->title}\" został usunięty."
-        );
+        $this->resetPage();
     }
 
     public function render()
     {
-        $query = Nocleg::with('photos')
-            ->where('user_id', auth()->id()); 
+        $query = Nocleg::with(['photos', 'objectType'])
+            ->where('user_id', auth()->id());
 
         if ($this->search) {
-            $query->where(function ($q) {
+            $query->where(fn ($q) =>
                 $q->where('title', 'like', "%{$this->search}%")
                   ->orWhere('city', 'like', "%{$this->search}%")
-                  ->orWhere('street', 'like', "%{$this->search}%");
-            });
+            );
         }
 
-        if ($this->type) {
-            $query->where('object_type', $this->type);
+        if ($this->object_type_id) {
+            $query->where('object_type_id', $this->object_type_id);
         }
 
         return view('livewire.noclegi.my-noclegi-grid', [
             'noclegi' => $query->paginate(12),
+            'types' => ObjectType::orderBy('name')->get(),
         ]);
     }
 }

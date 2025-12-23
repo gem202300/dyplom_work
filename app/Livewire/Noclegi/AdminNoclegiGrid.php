@@ -4,6 +4,7 @@ namespace App\Livewire\Noclegi;
 
 use App\Models\Nocleg;
 use Livewire\Component;
+use App\Models\ObjectType;
 use Livewire\WithPagination;
 use WireUi\Traits\WireUiActions;
 use App\Notifications\TestNotification;
@@ -13,80 +14,57 @@ class AdminNoclegiGrid extends Component
     use WithPagination, WireUiActions;
 
     public $search = '';
-    public $type = '';
-    public $showFilters = false;
+    public $object_type_id = null;
 
     protected $paginationTheme = 'tailwind';
 
-    public function updatingSearch()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingType()
+    public function updating()
     {
         $this->resetPage();
     }
 
     public function approveNocleg($id)
     {
-        $nocleg = Nocleg::find($id);
-        if (!$nocleg) return;
-
+        $nocleg = Nocleg::findOrFail($id);
         $nocleg->update(['status' => 'approved']);
 
-        if ($nocleg->user) {
-            $nocleg->user->notify(new TestNotification(
-                'Twój nocleg został zatwierdzony',
-                "Twój nocleg \"{$nocleg->title}\" został zatwierdzony przez administratora."
-            ));
-        }
+        $nocleg->user?->notify(new TestNotification(
+            'Nocleg zatwierdzony',
+            "Twój nocleg \"{$nocleg->title}\" został zatwierdzony."
+        ));
 
-        $this->notification()->success(
-            'Zatwierdzono',
-            "Nocleg \"{$nocleg->title}\" został zatwierdzony."
-        );
+        $this->notification()->success('Zatwierdzono', $nocleg->title);
     }
 
     public function rejectNocleg($id)
     {
-        $nocleg = Nocleg::find($id);
-        if (!$nocleg) return;
-
+        $nocleg = Nocleg::findOrFail($id);
         $nocleg->update(['status' => 'rejected']);
 
-        if ($nocleg->user) {
-            $nocleg->user->notify(new TestNotification(
-                'Twój nocleg został odrzucony',
-                "Nocleg \"{$nocleg->title}\" został odrzucony."
-            ));
-        }
+        $nocleg->user?->notify(new TestNotification(
+            'Nocleg odrzucony',
+            "Twój nocleg \"{$nocleg->title}\" został odrzucony."
+        ));
 
-        $this->notification()->success(
-            'Odrzucono',
-            "Nocleg \"{$nocleg->title}\" został odrzucony."
-        );
+        $this->notification()->success('Odrzucono', $nocleg->title);
     }
 
     public function render()
     {
-        $query = Nocleg::with('photos', 'user')
+        $query = Nocleg::with(['photos', 'objectType', 'user'])
             ->where('status', 'pending');
 
         if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('title', 'like', "%{$this->search}%")
-                  ->orWhere('city', 'like', "%{$this->search}%")
-                  ->orWhere('street', 'like', "%{$this->search}%");
-            });
+            $query->where('title', 'like', "%{$this->search}%");
         }
 
-        if ($this->type) {
-            $query->where('object_type', $this->type);
+        if ($this->object_type_id) {
+            $query->where('object_type_id', $this->object_type_id);
         }
 
         return view('livewire.noclegi.admin-noclegi-grid', [
             'noclegi' => $query->paginate(12),
+            'types' => ObjectType::orderBy('name')->get(),
         ]);
     }
 }

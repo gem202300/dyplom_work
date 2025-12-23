@@ -3,19 +3,23 @@
 namespace Database\Seeders;
 
 use App\Models\Nocleg;
+use App\Models\ObjectType;
 use App\Models\NoclegPhoto;
 use Illuminate\Database\Seeder;
 
 class NoclegSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
+        $domkiType = ObjectType::where('name', 'Domki')->first();
+        $hotelType = ObjectType::where('name', 'Hotel')->first();
+
         $domki = Nocleg::create([
             'title' => 'Domki w Zakarpaciu',
             'description' => 'Przytulne domki w górach.',
             'user_id' => 103,
             'capacity' => 6,
-            'object_type' => 'domki',
+            'object_type_id' => $domkiType->id,
             'city' => 'Użhorod',
             'street' => 'Hórnia 22',
             'contact_phone' => '+380991112233',
@@ -37,9 +41,9 @@ class NoclegSeeder extends Seeder
         $hotel = Nocleg::create([
             'title' => 'Hotel we Lwowie',
             'description' => 'Nowoczesny hotel.',
-            'status' => 'approved',            
+            'status' => 'approved',
             'capacity' => 20,
-            'object_type' => 'hotel',
+            'object_type_id' => $hotelType->id,
             'city' => 'Lwów',
             'street' => 'Prospekt Svobody 14',
             'contact_phone' => '+380501234567',

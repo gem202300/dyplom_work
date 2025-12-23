@@ -32,7 +32,7 @@
                     <div class="p-4 space-y-2">
                         <h3 class="text-lg font-semibold">{{ $n->title }}</h3>
                         <p class="text-sm text-gray-600">📍 {{ $n->city }}, {{ $n->street }}</p>
-                        <p class="text-sm text-gray-600"><strong>Typ:</strong> {{ $n->object_type }}</p>
+                        <p class="text-sm text-gray-600"><strong>Typ:</strong> {{ $n->objectType?->name }}</p>
                     </div>
 
                     <div class="p-4 border-t flex gap-2">
