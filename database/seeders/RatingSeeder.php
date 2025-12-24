@@ -11,54 +11,27 @@ class RatingSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::first();
 
+        
+        $users = User::all();
         $attractions = Attraction::all();
 
-        foreach ($attractions as $attraction) {
-            Rating::create([
-                'rateable_id' => $attraction->id,
-                'rateable_type' => Attraction::class,
-                'user_id' => $user->id,
-                'rating' => rand(3, 5),
-                'comment' => 'To miłe miejsce!',
-            ]);
-
-            Rating::create([
-                'rateable_id' => $attraction->id,
-                'rateable_type' => Attraction::class,
-                'user_id' => $user->id,
-                'rating' => rand(2, 5),
-                'comment' => 'Przyjadę ponownie!',
-            ]);
-            Rating::create([
-                'rateable_id' => $attraction->id,
-                'rateable_type' => Attraction::class,
-                'user_id' => $user->id,
-                'rating' => rand(2, 5),
-                'comment' => 'Przyjadę ponownie!',
-            ]);
-            Rating::create([
-                'rateable_id' => $attraction->id,
-                'rateable_type' => Attraction::class,
-                'user_id' => $user->id,
-                'rating' => rand(2, 5),
-                'comment' => 'Przyjadę ponownie!',
-            ]);
-            Rating::create([
-                'rateable_id' => $attraction->id,
-                'rateable_type' => Attraction::class,
-                'user_id' => $user->id,
-                'rating' => rand(2, 5),
-                'comment' => 'Przyjadę ponownie!',
-            ]);
-            Rating::create([
-                'rateable_id' => $attraction->id,
-                'rateable_type' => Attraction::class,
-                'user_id' => $user->id,
-                'rating' => rand(2, 5),
-                'comment' => 'Przyjadę ponownie!',
-            ]);
+        foreach ($users as $user) {
+            foreach ($attractions as $attraction) {
+                if (!Rating::where('user_id', $user->id)
+                        ->where('rateable_id', $attraction->id)
+                        ->where('rateable_type', Attraction::class)
+                        ->exists()) {
+                    Rating::create([
+                        'rateable_id' => $attraction->id,
+                        'rateable_type' => Attraction::class,
+                        'user_id' => $user->id,
+                        'rating' => rand(2, 5),
+                        'comment' => 'Przyjadę ponownie!',
+                    ]);
+                }
+            }
         }
+
     }
 }

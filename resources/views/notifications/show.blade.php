@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-         <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight">
             {{ __('Powiadomienia') }}
         </h2>
     </x-slot>
@@ -15,14 +15,14 @@
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <h2 class="text-xl font-bold text-black">
-                                    {{ data_get($notification->data, 'title') ?? data_get($notification->data, 'text') ?? 'Без назви' }}
+                                    {{ data_get($notification->data, 'title') ?? (data_get($notification->data, 'text') ?? 'Без назви') }}
                                 </h2>
                                 <p class="text-sm text-gray-500 mt-1">
                                     Utworzono: {{ $notification->created_at->format('d.m.Y H:i') }}
                                 </p>
                             </div>
 
-                            @if(!$notification->read_at)
+                            @if (!$notification->read_at)
                                 <span
                                     class="inline-block px-3 py-1 bg-blue-600 dark:bg-blue-700 text-white text-sm font-medium rounded shadow transition cursor-pointer">
                                     New
@@ -34,19 +34,30 @@
 
                         <div class="mt-4">
                             <div class="w-full bg-white text-black p-6 rounded-lg border border-gray-200 shadow">
-                                {{ data_get($notification->data, 'message') ?? data_get($notification->data, 'text') ?? '' }}
+                                {{ data_get($notification->data, 'message') ?? (data_get($notification->data, 'text') ?? '') }}
                             </div>
                         </div>
                         <div class="mt-6 flex gap-3">
-                            @if(!$notification->read_at)
+
+                            @if (!empty($notification->data['url']) && $notification->data['can_resubmit'])
+                                <a href="{{ $notification->data['url'] }}"
+                                    class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white font-semibold rounded shadow">
+                                    Edytuj i wyślij ponownie
+                                </a>
+                            @endif
+
+
+
+                            @if (!$notification->read_at)
                                 <button type="button"
-                                        onclick="event.preventDefault(); event.stopPropagation(); markAsRead('{{ $notification->id }}')"
-                                        class="ml-4 px-4 py-2 bg-white text-black border border-black rounded hover:bg-gray-50 transition">
+                                    onclick="event.preventDefault(); event.stopPropagation(); markAsRead('{{ $notification->id }}')"
+                                    class="ml-4 px-4 py-2 bg-white text-black border border-black rounded hover:bg-gray-50 transition">
                                     Oznacz jako przeczytane
                                 </button>
                             @endif
 
-                            <a href="{{ route('notifications.index') }}" class="px-4 py-2 bg-white text-black border rounded hover:bg-gray-100 transition">
+                            <a href="{{ route('notifications.index') }}"
+                                class="px-4 py-2 bg-white text-black border rounded hover:bg-gray-100 transition">
                                 Powrót do listy
                             </a>
                         </div>

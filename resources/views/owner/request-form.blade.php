@@ -1,3 +1,9 @@
+@php
+    $lastRequest = \App\Models\OwnerRequest::where('user_id', auth()->id())
+        ->latest()
+        ->first();
+@endphp
+
 <x-app-layout>
     <div class="max-w-xl mx-auto mt-10 bg-white shadow p-6 rounded-xl">
 
@@ -14,13 +20,20 @@
 
             <div class="mb-4">
                 <label class="block text-sm font-medium">Numer telefonu</label>
-                <input type="text" name="phone" class="w-full mt-1 rounded" required>
+                <input type="text"
+                    name="phone"
+                    value="{{ old('phone', $lastRequest?->phone) }}"
+                    class="w-full mt-1 rounded"
+                    required>
+
                 @error('phone') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
             </div>
 
             <div class="mb-4">
                 <label class="block text-sm font-medium">Dlaczego chcesz zostać właścicielem?</label>
-                <textarea name="reason" class="w-full mt-1 rounded" rows="4" required></textarea>
+                <textarea name="reason" class="w-full mt-1 rounded" rows="4" required>{{ old('reason', $lastRequest?->reason) }}</textarea>
+
+
                 @error('reason') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
             </div>
 

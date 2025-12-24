@@ -11,13 +11,15 @@ class TestNotification extends Notification
 
     private string $title;
     private string $message;
-
-    public function __construct(string $title, string $message)
+    private ?string $url;
+    private bool $canResubmit;
+    public function __construct(string $title, string $message, ?string $url = null, bool $canResubmit = false)
     {
         $this->title = $title;
         $this->message = $message;
+        $this->url = $url;
+        $this->canResubmit = $canResubmit;
     }
-
     public function via($notifiable)
     {
         return ['database'];
@@ -28,6 +30,8 @@ class TestNotification extends Notification
         return [
             'title' => $this->title,
             'message' => $this->message,
+            'url' => $this->url,
+            'can_resubmit' => $this->canResubmit,
         ];
     }
 }

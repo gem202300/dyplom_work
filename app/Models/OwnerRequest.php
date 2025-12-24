@@ -11,8 +11,11 @@ class OwnerRequest extends Model
         'phone',
         'reason',
         'accepted_terms',
-        'status'
+        'status',
+        'rejection_reason',
+        'can_resubmit',
     ];
+
 
     public function user()
     {
