@@ -3,6 +3,7 @@
 namespace App\Livewire\Users;
 
 use App\Models\User;
+use WireUi\Traits\Actions;
 use App\Enums\Auth\RoleType;
 use Illuminate\Support\Carbon;
 use WireUi\Traits\WireUiActions;
@@ -21,12 +22,12 @@ use PowerComponents\LivewirePowerGrid\PowerGridFields;
 use PowerComponents\LivewirePowerGrid\Traits\WithExport;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use PowerComponents\LivewirePowerGrid\PowerGridComponent;
-
 final class UserTable extends PowerGridComponent
 {
     use AuthorizesRequests, WithExport, WireUiActions;
 
-    
+    public $deleteErrorShown = false;
+    public $assignErrorShown = false;
     public function setUp(): array
     {
         $this->showCheckBox();
@@ -40,7 +41,7 @@ final class UserTable extends PowerGridComponent
         ];
     }
 
-    
+
     public function dataSource(): Builder
     {
         return User::query()->with('roles');
@@ -53,7 +54,7 @@ final class UserTable extends PowerGridComponent
         ];
     }
 
-   
+
     public function fields(): PowerGridFields
     {
         return PowerGrid::fields()
@@ -76,7 +77,7 @@ final class UserTable extends PowerGridComponent
             });
     }
 
-  
+
     public function columns(): array
     {
         return [
@@ -104,7 +105,7 @@ final class UserTable extends PowerGridComponent
         ];
     }
 
-    
+
     public function filters(): array
     {
         return [
@@ -136,7 +137,7 @@ final class UserTable extends PowerGridComponent
         ];
     }
 
-    
+
     #[\Livewire\Attributes\On('assignAdminRoleAction')]
     public function assignAdminRoleAction($id): void
     {
@@ -155,7 +156,15 @@ final class UserTable extends PowerGridComponent
     public function assignOwnerRoleAction($id): void
     {
         $this->authorize('update', Auth::user());
-        User::findOrFail($id)->assignRole(RoleType::OWNER->value);
+        $user = User::findOrFail($id);
+        if (!$user->email_verified_at) {
+            if (!$this->assignErrorShown) {
+                $this->assignErrorShown = true;
+                $this->js('alert("' . __('users.errors.verify_email_first') . '")');
+            }
+            return;
+        }
+        $user->assignRole(RoleType::OWNER->value);
     }
 
     #[\Livewire\Attributes\On('removeOwnerRoleAction')]
@@ -165,7 +174,7 @@ final class UserTable extends PowerGridComponent
         User::findOrFail($id)->removeRole(RoleType::OWNER->value);
     }
 
-    
+
     public function actions(User $user): array
     {
         return [
@@ -189,6 +198,11 @@ final class UserTable extends PowerGridComponent
                 ->tooltip(__('users.actions.remove_holder_role'))
                 ->class('text-green-500')
                 ->dispatch('removeOwnerRoleAction', ['id' => $user->id]),
+            Button::add('showUserNoclegiAction')
+                ->slot('<x-wireui-icon name="home" class="w-5 h-5" mini />')
+                ->tooltip(__('users.actions.show_noclegi'))
+                ->class('text-blue-500')
+                ->dispatch('showUserNoclegiAction', ['id' => $user->id]),
             Button::add('deleteUserAction')
                 ->slot('<x-wireui-icon name="trash" class="w-5 h-5" mini />')
                 ->tooltip(__('users.actions.delete'))
@@ -198,54 +212,81 @@ final class UserTable extends PowerGridComponent
         ];
     }
 
-    
+
     #[\Livewire\Attributes\On('deleteUserAction')]
-    public function deleteUserAction($id): void
-    {
-        if (!auth()->user()->isAdmin()) {
-            abort(403, __('users.errors.unauthorized'));
-        }
-
-        $user = User::findOrFail($id);
-
-        if (method_exists($user, 'reservations')) {
-            $user->reservations()->delete();
-        }
-
-        $user->delete();
-
-        $this->notification()->success(
-            __('users.messages.success'),
-            __('users.messages.user_deleted')
-        );
-
-        $this->dispatch('pg:refresh');
+public function deleteUserAction($id): void
+{
+    if (!auth()->user()->isAdmin()) {
+        abort(403, __('users.errors.unauthorized'));
     }
 
-   
+    $user = User::findOrFail($id);
+
+    // Сценарій: користувач має noclegi → не можна видалити
+    if ($user->noclegi()->exists()) {
+        $this->notification()->error(
+            title: __('users.errors.cannot_delete_owner'),
+            description: __('users.errors.remove_owner_role_or_transfer_noclegi')
+        );
+
+        return;
+    }
+
+    // Видаляємо резервації, якщо метод існує
+    if (method_exists($user, 'reservations')) {
+        $user->reservations()->delete();
+    }
+
+    $user->delete();
+
+    // Успішне видалення
+    $this->notification()->success(
+        title: __('users.messages.success'),
+        description: __('users.messages.user_deleted')
+    );
+
+    // Оновлюємо таблицю
+    $this->dispatch('pg:refresh');
+}
+    #[\Livewire\Attributes\On('showUserNoclegiAction')]
+    public function showUserNoclegiAction($id)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        return redirect()->route('admin.users.noclegi', $id);
+    }
+
+
+
     public function actionRules($row): array
     {
         return [
             Rule::button('assignAdminRoleAction')
                 ->when(fn($user) => $user->isAdmin() || !auth()->user()->hasRole(\App\Enums\Auth\RoleType::ADMIN->value))
                 ->hide(),
-    
-             Rule::button('removeAdminRoleAction')
+
+            Rule::button('removeAdminRoleAction')
                 ->when(fn($user) => !$user->isAdmin() || $user->id === auth()->id())
                 ->hide(),
-    
+
             Rule::button('assignOwnerRoleAction')
                 ->when(fn($user) => $user->isOwner() || !auth()->user()->hasRole(\App\Enums\Auth\RoleType::ADMIN->value))
                 ->hide(),
-    
+
             Rule::button('removeOwnerRoleAction')
                 ->when(fn($user) => !$user->isOwner() || !auth()->user()->hasRole(\App\Enums\Auth\RoleType::ADMIN->value))
                 ->hide(),
-    
+            Rule::button('showUserNoclegiAction')
+                ->when(
+                    fn($user) =>
+                    !$user->isOwner() || !auth()->user()->isAdmin()
+                )
+                ->hide(),
             Rule::button('deleteUserAction')
                 ->when(fn($user) => $user->id === auth()->id() || !auth()->user()->isAdmin())
                 ->hide(),
         ];
     }
-    
 }

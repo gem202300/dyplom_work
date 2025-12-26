@@ -11,16 +11,16 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    @wireUiStyles
 
-  
+
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script src="//unpkg.com/alpinejs" defer></script>
+    
 
     @livewireStyles
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    @wireUiScripts
+    
 
 </head>
 
@@ -51,44 +51,45 @@
     @stack('modals')
 
     @livewireScripts
+    @wireUiScripts
     <script>
-    const sliders = {};
+        const sliders = {};
 
-    function nextSlide(id) {
-        const slider = document.querySelector(`#${id} > .flex`);
-        if (!slider) return;
+        function nextSlide(id) {
+            const slider = document.querySelector(`#${id} > .flex`);
+            if (!slider) return;
 
-        const slides = slider.children.length;
-        sliders[id] = (sliders[id] ?? 0) + 1;
-        if (sliders[id] >= slides) sliders[id] = 0;
+            const slides = slider.children.length;
+            sliders[id] = (sliders[id] ?? 0) + 1;
+            if (sliders[id] >= slides) sliders[id] = 0;
 
-        slider.style.transform = `translateX(-${sliders[id] * 96}px)`;
-    }
-
-    function prevSlide(id) {
-        const slider = document.querySelector(`#${id} > .flex`);
-        if (!slider) return;
-
-        const slides = slider.children.length;
-        sliders[id] = (sliders[id] ?? 0) - 1;
-        if (sliders[id] < 0) sliders[id] = slides - 1;
-
-        slider.style.transform = `translateX(-${sliders[id] * 96}px)`;
-    }
-</script>
-<script>
-function markNotificationRead(id) {
-    fetch('/notifications/read/' + id, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Accept': 'application/json'
+            slider.style.transform = `translateX(-${sliders[id] * 96}px)`;
         }
-    }).then(() => location.reload());
-}
-</script>
 
-<x-notifications />
+        function prevSlide(id) {
+            const slider = document.querySelector(`#${id} > .flex`);
+            if (!slider) return;
+
+            const slides = slider.children.length;
+            sliders[id] = (sliders[id] ?? 0) - 1;
+            if (sliders[id] < 0) sliders[id] = slides - 1;
+
+            slider.style.transform = `translateX(-${sliders[id] * 96}px)`;
+        }
+    </script>
+    <script>
+        function markNotificationRead(id) {
+            fetch('/notifications/read/' + id, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            }).then(() => location.reload());
+        }
+    </script>
+
+    <x-notifications />
 
 </body>
 

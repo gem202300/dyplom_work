@@ -21,7 +21,7 @@ class NoclegForm extends Component
     public $description = '';
     public $city = '';
     public $street = '';
-    public $object_type_id = '';
+    public ?int $object_type_id = null;
     public $objectTypes = [];
     public $capacity = '';
     public $contact_phone = '';
@@ -95,7 +95,10 @@ class NoclegForm extends Component
                 'regex:/^\+?[0-9]{6,15}$/',
             ],
             'link' => 'nullable|url|max:255',
-            'photos' => 'required|array|min:1',
+            'photos' => $this->nocleg->exists
+                ? 'nullable|array'
+                : 'required|array|min:1',
+
             'photos.*' => 'image|max:2048',
         ];
     }
@@ -103,10 +106,13 @@ class NoclegForm extends Component
 
     public function submit()
     {
-        $this->validate();
+         $this->validate();
+
+        if (!$this->nocleg->exists) {
+            $this->nocleg->user_id = auth()->id();
+        }
 
         $this->nocleg->fill([
-            'user_id' => auth()->id(),
             'title' => $this->title,
             'description' => $this->description,
             'city' => $this->city,

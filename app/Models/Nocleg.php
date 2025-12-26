@@ -17,6 +17,7 @@ class Nocleg extends Model
         'location',
         'contact_phone',
         'link',
+        'object_type_id',
 
         'has_kitchen',
         'has_parking',

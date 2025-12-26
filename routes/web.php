@@ -67,6 +67,14 @@ Route::post('/ratings/{rating}/delete', [RatingReportController::class, 'delete'
 
 Route::post('/ratings/{rating}/clear-reports', [RatingReportController::class, 'clearReports'])
     ->name('ratings.clear-reports');
+Route::middleware(['auth'])
+    ->prefix('admin/users')
+    ->name('admin.users.')
+    ->group(function () {
+        Route::get('/{user}/noclegi', function (\App\Models\User $user) {
+            return view('admin.users.noclegi', compact('user'));
+        })->name('noclegi');
+    });
 
 Route::post('/admin/banned-words/store', [App\Http\Controllers\BannedWordController::class, 'store'])
     ->name('banned-words.store');

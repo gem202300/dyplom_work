@@ -14,8 +14,14 @@ class MyNoclegiGrid extends Component
 
     public $search = '';
     public $object_type_id = null;
+    public ?int $userId = null;
 
     protected $paginationTheme = 'tailwind';
+
+    public function mount($userId = null)
+    {
+        $this->userId = $userId ?? auth()->id();
+    }
 
     public function updating()
     {
@@ -25,7 +31,7 @@ class MyNoclegiGrid extends Component
     public function render()
     {
         $query = Nocleg::with(['photos', 'objectType'])
-            ->where('user_id', auth()->id());
+            ->where('user_id', $this->userId); 
 
         if ($this->search) {
             $query->where(fn ($q) =>
