@@ -1,10 +1,16 @@
 <?php
+
 namespace App\Livewire\Categories;
 
 use App\Models\Category;
-use App\Models\Attraction;
 use WireUi\Traits\WireUiActions;
-use PowerComponents\LivewirePowerGrid\{Button, Column, PowerGrid, PowerGridComponent, PowerGridFields};
+use PowerComponents\LivewirePowerGrid\{
+    Button,
+    Column,
+    PowerGrid,
+    PowerGridComponent,
+    PowerGridFields
+};
 
 final class CategoryTable extends PowerGridComponent
 {
@@ -42,31 +48,51 @@ final class CategoryTable extends PowerGridComponent
             Button::add('delete')
                 ->slot('<x-wireui-icon name="trash" class="w-5 h-5 text-red-500" />')
                 ->tooltip('Usuń')
-                ->dispatch('deleteCategory', ['category' => $category->id]),
+                ->class('cursor-pointer')
+                ->dispatch('attemptDeleteCategory', ['categoryId' => $category->id]),
         ];
     }
 
-    #[\Livewire\Attributes\On('deleteCategory')]
-    public function deleteCategory($params)
+    #[\Livewire\Attributes\On('attemptDeleteCategory')]
+    public function attemptDeleteCategory(int $categoryId): void
     {
-        $category = Category::findOrFail($params['category']);
+        $category = Category::findOrFail($categoryId);
 
-        $attractionsWithOnlyThisCategory = $category->attractions()
-            ->has('categories', '=', 1)
-            ->get();
-
-        if ($attractionsWithOnlyThisCategory->count()) {
+        if (Category::count() === 1) {
             $this->dialog()->warning(
-                'Nie można usunąć',
-                'Niektóre atrakcje mają tylko tę kategorię. Zmień kategorię przed usunięciem.'
+                title: 'Nie można usunąć',
+                description: 'To jedyna kategoria w systemie. Nie można jej usunąć.'
             );
             return;
         }
 
+        if ($category->attractions()->has('categories', '=', 1)->exists()) {
+            $this->redirect(route('categories.delete-form', $category->id));
+            return;
+        }
+
+        $this->dialog()->confirm([
+            'title'       => 'Czy na pewno chcesz usunąć kategorię?',
+            'description' => "Kategoria \"{$category->name}\" zostanie usunięta.",
+            'acceptLabel' => 'Tak, usuń',
+            'rejectLabel' => 'Anuluj',
+            'method'      => 'deleteCategoryConfirmed',
+            'params'      => $categoryId,
+        ]);
+    }
+
+    public function deleteCategoryConfirmed(int $categoryId): void
+    {
+        $category = Category::findOrFail($categoryId);
+
         $category->attractions()->detach();
         $category->delete();
 
-        $this->notification()->success('Sukces', 'Kategoria została usunięta.');
+        $this->notification()->success(
+            title: 'Sukces',
+            description: 'Kategoria została usunięta.'
+        );
+
         $this->dispatch('pg:refresh');
     }
 }

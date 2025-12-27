@@ -1,7 +1,8 @@
 <div class="p-2">
     <form wire:submit.prevent="submit">
-        <x-input
+        <x-wireui-input
             label="Nazwa kategorii"
+            name="name"
             wire:model.defer="name"
             placeholder="Wprowadź nazwę"
             class="mb-4"

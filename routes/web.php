@@ -15,6 +15,7 @@ use App\Http\Livewire\Admin\OwnerRequestTable;
 use App\Http\Controllers\AdminNoclegController;
 use App\Http\Controllers\OwnerRequestController;
 use App\Http\Controllers\RatingReportController;
+use App\Http\Controllers\CategoryDeleteController;
 use App\Http\Controllers\NoclegCalendarController;
 
 Route::get('/map', [MapController::class, 'index'])->name('map.index');
@@ -23,6 +24,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/categories/{category}/delete', [CategoryDeleteController::class, 'show'])
+    ->name('categories.delete-form');
+
+Route::post('/categories/{category}/delete', [CategoryDeleteController::class, 'destroy'])
+    ->name('categories.delete');
 Route::middleware(['auth'])->group(function () {
 
     Route::get('/attractions', function () {
