@@ -4,21 +4,17 @@ namespace App\Livewire\Noclegi;
 
 use App\Models\Nocleg;
 use WireUi\Traits\WireUiActions;
-use PowerComponents\LivewirePowerGrid\{
-    PowerGridComponent,
-    PowerGrid,
-    PowerGridFields,
-    Column,
-    Button,
-    Header,
-    Footer
-};
+use PowerComponents\LivewirePowerGrid\Button;
+use PowerComponents\LivewirePowerGrid\Column;
+use PowerComponents\LivewirePowerGrid\Footer;
+use PowerComponents\LivewirePowerGrid\Header;
+use PowerComponents\LivewirePowerGrid\PowerGrid;
+use PowerComponents\LivewirePowerGrid\PowerGridFields;
+use PowerComponents\LivewirePowerGrid\PowerGridComponent;
 
 final class NoclegiTable extends PowerGridComponent
 {
-    use WireUiActions;
-
-    protected $listeners = ['deleteNoclegAction'];
+    use WireUiActions; 
 
     public function setUp(): array
     {
@@ -30,8 +26,7 @@ final class NoclegiTable extends PowerGridComponent
 
     public function datasource()
     {
-        return Nocleg::query()
-            ->with(['photos', 'objectType']);
+        return Nocleg::query()->with(['photos', 'objectType', 'user']);
     }
 
     public function fields(): PowerGridFields
@@ -41,6 +36,7 @@ final class NoclegiTable extends PowerGridComponent
             ->add('title')
             ->add('city')
             ->add('street')
+            ->add('user_name', fn ($m) => $m->user?->name ?? '—')
             ->add('object_type', fn ($m) => $m->objectType?->name ?? '—')
             ->add('capacity')
             ->add('contact_phone')
@@ -58,7 +54,6 @@ final class NoclegiTable extends PowerGridComponent
                 if ($m->photos->isEmpty()) {
                     return '<span class="text-gray-400">brak zdjęcia</span>';
                 }
-
                 return '<img src="' . asset($m->photos->first()->path) . '" class="w-36 h-24 object-cover rounded">';
             });
     }
@@ -68,6 +63,7 @@ final class NoclegiTable extends PowerGridComponent
         return [
             Column::make('Zdjęcie', 'photo_column'),
             Column::make('Tytuł', 'title')->searchable()->sortable(),
+            Column::make('Właściciel', 'user_name'),
             Column::make('Miasto', 'city')->sortable(),
             Column::make('Ulica', 'street'),
             Column::make('Typ', 'object_type'),
@@ -81,30 +77,45 @@ final class NoclegiTable extends PowerGridComponent
     public function actions(Nocleg $nocleg): array
     {
         return [
-            Button::add('show')->route('noclegi.show', $nocleg),
-            Button::add('edit')->route('noclegi.edit', $nocleg),
+            Button::add('show')
+                ->slot('<x-wireui-icon name="eye" class="w-5 h-5" />')
+                ->route('noclegi.show', $nocleg),
+
+            Button::add('edit')
+                ->slot('<x-wireui-icon name="pencil" class="w-5 h-5" />')
+                ->route('noclegi.edit', $nocleg),
+
             Button::add('delete')
+                ->slot('<x-wireui-icon name="trash" class="w-5 h-5 text-red-600" />')
                 ->dispatch('deleteNoclegAction', ['id' => $nocleg->id]),
         ];
     }
 
     #[\Livewire\Attributes\On('deleteNoclegAction')]
-    public function deleteNoclegAction(array $payload): void
+    public function deleteNoclegAction($id): void
     {
-        $nocleg = Nocleg::find($payload['id'] ?? null);
-        if (!$nocleg) return;
+        $nocleg = Nocleg::findOrFail($id);
 
         $this->dialog()->confirm([
-            'title' => 'Usuń nocleg',
-            'description' => "Czy na pewno usunąć \"{$nocleg->title}\"?",
-            'accept' => ['method' => 'destroy', 'params' => $nocleg->id],
+            'title'       => __('noclegi.delete.confirm_title'),
+            'description' => __('noclegi.delete.confirm_description', ['title' => $nocleg->title]),
+            'acceptLabel' => __('noclegi.delete.confirm_accept'),
+            'rejectLabel' => __('noclegi.delete.confirm_reject'),
+            'method'      => 'confirmDeleteNoclegAdmin',
+            'params'      => $id,
         ]);
     }
 
-    public function destroy(int $id): void
+    public function confirmDeleteNoclegAdmin($id): void
     {
-        Nocleg::findOrFail($id)->delete();
-        $this->notification()->success('Usunięto', 'Nocleg został usunięty');
+        $nocleg = Nocleg::findOrFail($id);
+        $nocleg->delete();
+
+        $this->notification()->success(
+            title: __('noclegi.messages.success'),
+            description: __('noclegi.messages.deleted', ['title' => $nocleg->title])
+        );
+
         $this->dispatch('pg:refresh');
     }
 }

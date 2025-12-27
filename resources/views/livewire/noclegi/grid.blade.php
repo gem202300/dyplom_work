@@ -31,19 +31,18 @@
     </div>
 
     {{-- Випадаюче вікно фільтрів --}}
-    @if($showFilters)
+    @if($showFilters ?? false)
     <div class="bg-white p-6 rounded-lg shadow-lg border">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             {{-- Фільтр за типом об'єкту з бази даних --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Typ obiektu</label>
                 <div class="border rounded-lg p-2 max-h-44 overflow-y-auto bg-white">
-                    {{-- Цикл по типах з бази даних --}}
-                    @foreach($objectTypes as $type)
+                    @foreach($objectTypes ?? [] as $type)
                         <div class="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors"
                              wire:click="toggleType({{ $type->id }})">
                             <div class="w-6 h-6 mr-3 flex items-center justify-center">
-                                @if(in_array($type->id, $selectedTypeIds))
+                                @if(in_array($type->id, $selectedTypeIds ?? []))
                                     <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                     </svg>
@@ -58,12 +57,12 @@
                         </div>
                     @endforeach
                 </div>
-                @if(count($selectedTypeIds) > 0)
-                    <p class="text-sm text-gray-500 mt-1">Wybrano: {{ count($selectedTypeIds) }}</p>
+                @if(count($selectedTypeIds ?? []) > 0)
+                    <p class="text-sm text-gray-500 mt-1">Wybrano: {{ count($selectedTypeIds ?? []) }}</p>
                 @endif
             </div>
 
-            {{-- Фільтр за зручностями (так само як тип об'єкту) --}}
+            {{-- Фільтр за зручностями --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Wyposażenie</label>
                 <div class="border rounded-lg p-2 max-h-44 overflow-y-auto bg-white">
@@ -81,7 +80,7 @@
                         <div class="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors"
                              wire:click="toggleAmenity('{{ $key }}')">
                             <div class="w-6 h-6 mr-3 flex items-center justify-center">
-                                @if(in_array($key, $selectedAmenities))
+                                @if(in_array($key, $selectedAmenities ?? []))
                                     <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                     </svg>
@@ -96,14 +95,13 @@
                         </div>
                     @endforeach
                 </div>
-                @if(count($selectedAmenities) > 0)
-                    <p class="text-sm text-gray-500 mt-1">Wybrano: {{ count($selectedAmenities) }}</p>
+                @if(count($selectedAmenities ?? []) > 0)
+                    <p class="text-sm text-gray-500 mt-1">Wybrano: {{ count($selectedAmenities ?? []) }}</p>
                 @endif
             </div>
 
-            {{-- Фільтр за місткістю та оцінкою (один над одним) --}}
+            {{-- Фільтр за місткістю та оцінкою --}}
             <div class="space-y-6">
-                {{-- Місткість --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Pojemność (osób)</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -126,7 +124,6 @@
                     </div>
                 </div>
 
-                {{-- Оцінка --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Ocena</label>
                     <div class="grid grid-cols-2 gap-2">
@@ -151,7 +148,6 @@
             </div>
         </div>
 
-        {{-- Кнопки дій фільтрів --}}
         <div class="flex justify-between items-center mt-6 pt-4 border-t">
             <button wire:click="resetFilters"
                     class="text-gray-600 hover:text-gray-800 px-4 py-2 rounded hover:bg-gray-100">
@@ -166,7 +162,7 @@
     @endif
 
     {{-- Активні фільтри --}}
-    @if($search || !empty($selectedTypeIds) || !empty($selectedAmenities) || $minCapacity || $maxCapacity || $minRating || $maxRating)
+    @if($search || !empty($selectedTypeIds ?? []) || !empty($selectedAmenities ?? []) || $minCapacity || $maxCapacity || $minRating || $maxRating)
     <div class="bg-blue-50 p-3 rounded-lg">
         <p class="text-sm text-blue-800 mb-2">Aktywne filtry:</p>
         <div class="flex flex-wrap gap-2">
@@ -177,8 +173,8 @@
                 </span>
             @endif
             
-            @foreach($selectedTypeIds as $typeId)
-                @php $type = $objectTypes->firstWhere('id', $typeId); @endphp
+            @foreach($selectedTypeIds ?? [] as $typeId)
+                @php $type = ($objectTypes ?? collect())->firstWhere('id', $typeId); @endphp
                 @if($type)
                     <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
                         {{ $type->name }}
@@ -187,7 +183,7 @@
                 @endif
             @endforeach
             
-            @foreach($selectedAmenities as $amenity)
+            @foreach($selectedAmenities ?? [] as $amenity)
                 @php
                     $amenityLabels = [
                         'has_kitchen' => '🍳 Kuchnia',
@@ -284,9 +280,9 @@
                         <a href="{{ route('noclegi.edit', $n->id) }}" class="flex-1 text-center py-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition">
                             <x-wireui-icon name="pencil" class="w-5 h-5 inline"/>
                         </a>
-                        <button wire:click="deleteNocleg({{ $n->id }})" 
-                                wire:confirm='Czy na pewno chcesz usunąć "{{ $n->title }}"?'
-                                class="flex-1 text-center py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition">
+                        <button wire:click="deleteNocleg({{ $n->id }})"
+                                class="flex-1 text-center py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition"
+                                title="Usuń obiekt">
                             <x-wireui-icon name="trash" class="w-5 h-5 inline"/>
                         </button>
                     </div>
@@ -296,7 +292,7 @@
     @else
         <div class="text-center py-12">
             <p class="text-gray-500 text-lg">Brak noclegów spełniających kryteria wyszukiwania.</p>
-            @if($search || !empty($selectedTypeIds) || !empty($selectedAmenities) || $minCapacity || $maxCapacity || $minRating || $maxRating)
+            @if($search || !empty($selectedTypeIds ?? []) || !empty($selectedAmenities ?? []) || $minCapacity || $maxCapacity || $minRating || $maxRating)
                 <button wire:click="resetFilters" class="mt-4 text-blue-600 hover:text-blue-800">
                     Wyczyść filtry
                 </button>

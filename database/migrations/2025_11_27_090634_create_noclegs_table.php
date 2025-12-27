@@ -36,7 +36,7 @@ return new class extends Migration
         $table->boolean('has_balcony')->default(false);
 
         $table->string('amenities_other')->nullable(); 
-
+        $table->text('reject_reason')->nullable();
         $table->timestamps();
     });
 
