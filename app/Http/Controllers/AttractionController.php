@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Attraction;
@@ -19,9 +20,14 @@ class AttractionController extends Controller
     {
         return view('attractions.edit', compact('attraction'));
     }
-    
+
     public function show(Attraction $attraction)
     {
+        // Перевірка доступу: неактивні атракції доступні тільки авторизованим користувачам
+        if (!$attraction->is_active && !auth()->check()) {
+            abort(404);
+        }
+
         $attraction->load(['photos', 'categories']);
 
         $ratings = $attraction->ratings()
@@ -31,7 +37,4 @@ class AttractionController extends Controller
 
         return view('attractions.show', compact('attraction', 'ratings'));
     }
-
-
-
 }

@@ -17,17 +17,29 @@ class AttractionsGrid extends Component
     public $minRating = null;
     public $maxRating = null;
     public $showFilters = false;
-    
+
     public function resetFilters()
     {
         $this->reset(['search', 'selectedCategories', 'minRating', 'maxRating']);
         $this->resetPage();
     }
 
-    public function updatingSearch() { $this->resetPage(); }
-    public function updatingSelectedCategories() { $this->resetPage(); }
-    public function updatingMinRating() { $this->resetPage(); }
-    public function updatingMaxRating() { $this->resetPage(); }
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+    public function updatingSelectedCategories()
+    {
+        $this->resetPage();
+    }
+    public function updatingMinRating()
+    {
+        $this->resetPage();
+    }
+    public function updatingMaxRating()
+    {
+        $this->resetPage();
+    }
 
     public function render()
     {
@@ -42,16 +54,21 @@ class AttractionsGrid extends Component
                     ->where('ratings.rateable_type', Attraction::class);
             }, 'average_rating');
 
+        // Фільтр для публічних користувачів - показувати тільки активні атракції
+        if (!auth()->check()) {
+            $query->where('is_active', true);
+        }
+
         if ($this->search) {
             $query->where(function ($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                  ->orWhere('location', 'like', '%'.$this->search.'%')
-                  ->orWhere('description', 'like', '%'.$this->search.'%');
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('location', 'like', '%' . $this->search . '%')
+                    ->orWhere('description', 'like', '%' . $this->search . '%');
             });
         }
 
         if (!empty($this->selectedCategories)) {
-            $query->whereHas('categories', function($q) {
+            $query->whereHas('categories', function ($q) {
                 $q->whereIn('categories.id', $this->selectedCategories);
             });
         }
@@ -60,7 +77,7 @@ class AttractionsGrid extends Component
         if (!is_null($this->minRating)) {
             $query->having('average_rating', '>=', $this->minRating);
         }
-        
+
         if (!is_null($this->maxRating)) {
             $query->having('average_rating', '<=', $this->maxRating);
         }
@@ -77,7 +94,7 @@ class AttractionsGrid extends Component
     {
         if (in_array($categoryId, $this->selectedCategories)) {
             $this->selectedCategories = array_filter(
-                $this->selectedCategories, 
+                $this->selectedCategories,
                 fn($id) => $id != $categoryId
             );
         } else {
@@ -88,7 +105,7 @@ class AttractionsGrid extends Component
     public function removeCategory($categoryId)
     {
         $this->selectedCategories = array_filter(
-            $this->selectedCategories, 
+            $this->selectedCategories,
             fn($id) => $id != $categoryId
         );
     }
@@ -101,6 +118,18 @@ class AttractionsGrid extends Component
         $this->notification()->success(
             'Sukces',
             "Atrakcja \"{$attraction->name}\" została usunięta."
+        );
+    }
+
+    public function toggleActive($id): void
+    {
+        $attraction = Attraction::findOrFail($id);
+        $attraction->update(['is_active' => !$attraction->is_active]);
+
+        $status = $attraction->is_active ? 'aktywna' : 'ukryta';
+        $this->notification()->success(
+            'Sukces',
+            "Atrakcja \"{$attraction->name}\" została {$status}."
         );
     }
 }
