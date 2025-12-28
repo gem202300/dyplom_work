@@ -1,4 +1,44 @@
 <div class="p-6 bg-white rounded-lg shadow-md">
+
+  @if ($nocleg->exists && $nocleg->status === 'rejected')
+                <div class="mb-8 p-6 bg-red-50 border-2 border-red-300 rounded-xl">
+                    <div class="flex items-start gap-4">
+                        <div class="shrink-0">
+                            <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-red-800 mb-3">
+                                Zgłoszenie zostało odrzucone
+                            </h3>
+                            <p class="text-red-700 text-base leading-relaxed mb-4">
+                                <strong>Powód:</strong> {{ $reject_reason }}
+
+                            </p>
+                            <p class="text-red-600 text-sm">
+                                Prosimy o wprowadzenie poprawek i ponowne przesłanie obiektu do moderacji.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Нагадування для pending --}}
+            @if ($nocleg->exists && $nocleg->status === 'pending')
+                <div class="mb-8 p-6 bg-amber-50 border-2 border-amber-300 rounded-xl">
+                    <div class="flex items-center gap-4">
+                        <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-amber-800 font-medium">
+                            Obiekt oczekuje na zatwierdzenie. Po zapisaniu zmian zostanie ponownie przesłany do moderacji.
+                        </p>
+                    </div>
+                </div>
+            @endif
     <form wire:submit.prevent="submit" enctype="multipart/form-data" class="space-y-5">
 
         <h2 class="text-2xl font-bold text-gray-800 mb-4">

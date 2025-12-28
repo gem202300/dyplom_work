@@ -137,46 +137,68 @@
                     </div>
                 @endif
 
-                <div class="ms-3 relative">
-                    <x-dropdown align="right" width="48">
-                        <x-slot name="trigger">
-                            @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
-                                <button
-                                    class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
-                                    <img class="h-8 w-8 rounded-full object-cover"
-                                        src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
-                                </button>
-                            @else
-                                <span class="inline-flex rounded-md">
-                                    <button type="button"
-                                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700 active:bg-gray-50 dark:active:bg-gray-700 transition ease-in-out duration-150">
-                                        {{ Auth::user()->name }}
-                                        <svg class="ms-2 -me-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg"
-                                            fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                        </svg>
-                                    </button>
-                                </span>
-                            @endif
-                        </x-slot>
+                <div x-data="{ open: false }" @click.away="open = false" @keydown.escape.window="open = false" class="ms-3 relative">
+    <!-- Тригер — кнопка з ім'ям або фото -->
+    <button
+        @click="open = !open"
+        class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition duration-150 ease-in-out"
+    >
+        @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
+            <img class="h-8 w-8 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
+        @else
+            {{ Auth::user()->name }}
+            <svg class="ms-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        @endif
+    </button>
 
-                        <x-slot name="content">
-                            <div class="block px-4 py-2 text-xs text-gray-400">{{ __('Manage Account') }}</div>
-                            <x-dropdown-link href="{{ route('profile.show') }}">{{ __('Profile') }}</x-dropdown-link>
-                            @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
-                                <x-dropdown-link
-                                    href="{{ route('api-tokens.index') }}">{{ __('API Tokens') }}</x-dropdown-link>
-                            @endif
-                            <div class="border-t border-gray-200 dark:border-gray-600"></div>
-                            <form method="POST" action="{{ route('logout') }}" x-data>
-                                @csrf
-                                <x-dropdown-link href="{{ route('logout') }}"
-                                    @click.prevent="$root.submit();">{{ __('Log Out') }}</x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
-                </div>
+    <!-- Випадаюче меню -->
+    <div
+        x-show="open"
+        x-transition:enter="transition ease-out duration-200"
+        x-transition:enter-start="transform opacity-0 scale-95"
+        x-transition:enter-end="transform opacity-100 scale-100"
+        x-transition:leave="transition ease-in duration-75"
+        x-transition:leave-start="transform opacity-100 scale-100"
+        x-transition:leave-end="transform opacity-0 scale-95"
+        class="absolute right-0 mt-2 w-48 origin-top-right bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50"
+        style="display: none;"
+    >
+        <div class="py-1">
+            <!-- Заголовок -->
+            <div class="block px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                {{ __('Manage Account') }}
+            </div>
+
+            <!-- Profile -->
+            <a href="{{ route('profile.show') }}"
+               class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                {{ __('Profile') }}
+            </a>
+
+            <!-- API Tokens (якщо є) -->
+            @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
+                <a href="{{ route('api-tokens.index') }}"
+                   class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    {{ __('API Tokens') }}
+                </a>
+            @endif
+
+            <!-- Розділювач -->
+            <div class="border-t border-gray-200 dark:border-gray-700"></div>
+
+            <!-- Log Out -->
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit"
+                        class="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    {{ __('Log Out') }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
             </div>
 
             <div class="-me-2 flex items-center sm:hidden">

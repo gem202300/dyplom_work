@@ -11,7 +11,7 @@
 
                 <div class="space-y-6">
 
-                    <div class="max-w-3xl mx-auto p-6 bg-white shadow rounded-lg">
+                    <div class="w-full p-6 bg-white shadow rounded-lg">
                         <div class="flex items-start justify-between gap-4">
                             <div>
                                 <h2 class="text-xl font-bold text-black">

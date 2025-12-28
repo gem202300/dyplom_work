@@ -2,15 +2,14 @@
     <x-slot name="header"></x-slot>
     
     <div class="min-h-screen bg-white dark:bg-gray-900 p-4 md:p-6">
-
         <div class="max-w-7xl mx-auto">
             
             {{-- КАЛЕНДАР + ПАНЕЛЬ БРОНЮВАННЯ --}}
-            <div class="flex flex-col lg:flex-row gap-6 mb-6 justify-center">
+            <div class="flex flex-col lg:flex-row gap-6 mb-6 min-h-[600px] lg:min-h-0">
                 
                 {{-- КАЛЕНДАР (70%) --}}
-                <div class="flex-shrink-0 flex-grow lg:flex-[2] min-w-[400px] max-w-[900px]">
-                    <div class="space-y-4">
+                <div class="flex-shrink-0 flex-grow lg:flex-[2] min-w-[400px] max-w-[900px] flex flex-col">
+                    <div class="space-y-4 flex-grow flex flex-col">
                         {{-- Заголовок календаря --}}
                         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -43,9 +42,8 @@
                             </div>
                         </div>
 
-                        {{-- Календар --}}
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                            {{-- Дні тижня --}}
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex-grow flex flex-col justify-between">
+                            
                             <div class="grid grid-cols-7 gap-2 mb-6">
                                 @foreach(['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'N'] as $day)
                                     <div class="text-center text-2xl font-semibold text-gray-700 py-3 px-1">
@@ -54,121 +52,89 @@
                                 @endforeach
                             </div>
 
-                            {{-- Дні місяця --}}
                             <div class="grid grid-cols-7 gap-1">
                                 @php
                                     $firstDayOfWeek = $carbonMonth->copy()->startOfMonth()->dayOfWeekIso;
                                     $totalDays = $carbonMonth->daysInMonth;
                                 @endphp
 
-                                {{-- Порожні комірки --}}
                                 @for ($i = 1; $i < $firstDayOfWeek; $i++)
                                     <div class="h-16"></div>
                                 @endfor
 
-                                {{-- Дні місяця --}}
                                 @for ($day = 1; $day <= $totalDays; $day++)
-                                  @php
-                                      $date = $carbonMonth->copy()->day($day)->format('Y-m-d');
-                                      $availability = $availabilities[$date] ?? null;
-                                      $currentCapacity = $availability->available_capacity ?? $nocleg->capacity;
-                                      $isBlocked = $availability?->is_blocked ?? false;
-                                      $isToday = $date === now()->format('Y-m-d');
+                                    @php
+                                        $date = $carbonMonth->copy()->day($day)->format('Y-m-d');
+                                        $availability = $availabilities[$date] ?? null;
+                                        $currentCapacity = $availability->available_capacity ?? $nocleg->capacity;
+                                        $isBlocked = $availability?->is_blocked ?? false;
+                                        $isToday = $date === now()->format('Y-m-d');
 
-                                      $stateClasses = [
-                                          'blocked' => [
-                                              'text' => 'text-red-700',
-                                              'bg' => 'bg-red-50',
-                                              'status' => 'text-red-600',
-                                              'indicator' => 'bg-red-600' 
-                                          ],
-                                          'empty' => [
-                                              'text' => 'text-red-600',
-                                              'bg' => 'bg-red-50',
-                                              'status' => 'text-red-600',
-                                              'indicator' => 'bg-red-500' 
-                                          ],
-                                          'full' => [
-                                              'text' => 'text-gray-800',
-                                              'bg' => 'bg-white',
-                                              'status' => 'text-green-600',
-                                              'indicator' => 'bg-green-500' 
-                                          ],
-                                          'partial' => [
-                                              'text' => 'text-gray-800',
-                                              'bg' => 'bg-white',
-                                              'status' => 'text-yellow-600',
-                                              'indicator' => 'bg-yellow-500' 
-                                          ]
-                                      ];
-                                      
-                                      if ($isBlocked) {
-                                          $state = $stateClasses['blocked'];
-                                      } elseif ($currentCapacity == 0) {
-                                          $state = $stateClasses['empty'];
-                                      } elseif ($currentCapacity == $nocleg->capacity) {
-                                          $state = $stateClasses['full'];
-                                      } else {
-                                          $state = $stateClasses['partial'];
-                                      }
-                                      
-                                      $baseClasses = 'h-16 flex flex-col items-center justify-center cursor-pointer border rounded transition-all duration-150 hover:bg-gray-50';
-                                      $borderClass = $isToday ? 'border-blue-300 bg-blue-50' : 'border-gray-200';
-                                      $ringClass = $isToday ? 'ring-1 ring-blue-300' : '';
-                                      $textClass = $isToday ? 'text-blue-700' : $state['text'];
-                                  @endphp
+                                        $stateClasses = [
+                                            'blocked' => ['text' => 'text-red-700', 'bg' => 'bg-red-50', 'status' => 'text-red-600', 'indicator' => 'bg-red-600'],
+                                            'empty' => ['text' => 'text-red-600', 'bg' => 'bg-red-50', 'status' => 'text-red-600', 'indicator' => 'bg-red-500'],
+                                            'full' => ['text' => 'text-gray-800', 'bg' => 'bg-white', 'status' => 'text-green-600', 'indicator' => 'bg-green-500'],
+                                            'partial' => ['text' => 'text-gray-800', 'bg' => 'bg-white', 'status' => 'text-yellow-600', 'indicator' => 'bg-yellow-500']
+                                        ];
 
-                                  <div class="relative" onclick="selectDate('{{ $date }}')" data-date="{{ $date }}">
-                                      <div class="{{ $baseClasses }} {{ $borderClass }} {{ $state['bg'] }} {{ $ringClass }}">
-                                          
-                                          <div class="text-lg font-bold {{ $textClass }}">{{ $day }}</div>
-                                          
-                                          <div class="mt-1">
-                                              <div class="w-7 h-1.5 {{ $state['indicator'] }} rounded-full shadow-sm"></div>
-                                          </div>
-                                          
-                                          <div class="text-xs font-semibold {{ $state['status'] }} mt-0.5">
-                                              @if($isBlocked)
-                                                  Zablokowane
-                                              @elseif($currentCapacity == 0)
-                                                  Brak
-                                              @elseif($currentCapacity == $nocleg->capacity)
-                                                  Wolne ({{ $currentCapacity }})
-                                              @else
-                                                  Częściowo ({{ $currentCapacity }})
-                                              @endif
-                                          </div>
-                                      </div>
-                                      
-                                      <div class="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full opacity-0"
-                                          id="indicator-{{ $date }}"></div>
-                                  </div>
-                              @endfor
+                                        if ($isBlocked) {
+                                            $state = $stateClasses['blocked'];
+                                        } elseif ($currentCapacity == 0) {
+                                            $state = $stateClasses['empty'];
+                                        } elseif ($currentCapacity == $nocleg->capacity) {
+                                            $state = $stateClasses['full'];
+                                        } else {
+                                            $state = $stateClasses['partial'];
+                                        }
+
+                                        $baseClasses = 'h-16 flex flex-col items-center justify-center cursor-pointer border rounded transition-all duration-150 hover:bg-gray-50';
+                                        $borderClass = $isToday ? 'border-blue-300 bg-blue-50' : 'border-gray-200';
+                                        $ringClass = $isToday ? 'ring-1 ring-blue-300' : '';
+                                        $textClass = $isToday ? 'text-blue-700' : $state['text'];
+                                    @endphp
+
+                                    <div class="relative" onclick="selectDate('{{ $date }}')" data-date="{{ $date }}">
+                                        <div class="{{ $baseClasses }} {{ $borderClass }} {{ $state['bg'] }} {{ $ringClass }}">
+                                            <div class="text-lg font-bold {{ $textClass }}">{{ $day }}</div>
+                                            <div class="mt-1">
+                                                <div class="w-7 h-1.5 {{ $state['indicator'] }} rounded-full shadow-sm"></div>
+                                            </div>
+                                            <div class="text-xs font-semibold {{ $state['status'] }} mt-0.5">
+                                                @if($isBlocked)
+                                                    Zablokowane
+                                                @elseif($currentCapacity == 0)
+                                                    Brak
+                                                @elseif($currentCapacity == $nocleg->capacity)
+                                                    Wolne ({{ $currentCapacity }})
+                                                @else
+                                                    Częściowo ({{ $currentCapacity }})
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="absolute top-0 right-0 w-2 h-2 bg-blue-500 rounded-full opacity-0" id="indicator-{{ $date }}"></div>
+                                    </div>
+                                @endfor
                             </div>
 
                             {{-- Легенда --}}
-                        <div class="mt-4 flex items-center gap-6 text-sm font-medium">
-                            <div class="flex items-center gap-2">
-                                <div class="w-5 h-3 bg-green-500 rounded shadow-sm"></div>
-                                <span class="text-gray-700">Wolne</span>
+                            <div class="mt-4 flex items-center gap-6 text-sm font-medium">
+                                <div class="flex items-center gap-6 text-sm font-medium">
+                                    <div class="w-5 h-3 bg-green-500 rounded shadow-sm"></div>
+                                    <span class="text-gray-700">Wolne</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-3 bg-yellow-500 rounded shadow-sm"></div>
+                                    <span class="text-gray-700">Częściowo</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-3 bg-red-500 rounded shadow-sm"></div>
+                                    <span class="text-gray-700">Brak</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-3 bg-red-600 rounded shadow-sm"></div>
+                                    <span class="text-gray-700">Zablokowane</span>
+                                </div>
                             </div>
-
-                            <div class="flex items-center gap-2">
-                                <div class="w-5 h-3 bg-yellow-500 rounded shadow-sm"></div>
-                                <span class="text-gray-700">Częściowo</span>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <div class="w-5 h-3 bg-red-500 rounded shadow-sm"></div>
-                                <span class="text-gray-700">Brak</span>
-                            </div>
-
-                            <div class="flex items-center gap-2">
-                                <div class="w-5 h-3 bg-red-600 rounded shadow-sm"></div>
-                                <span class="text-gray-700">Zablokowane</span>
-                            </div>
-                        </div>
-
                         </div>
                     </div>
                 </div>
@@ -180,7 +146,6 @@
                             Zarządzaj dostępnością
                         </h3>
 
-                        {{-- Повідомлення --}}
                         @if (session('success'))
                             <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                                 <div class="flex items-center">
@@ -192,11 +157,21 @@
                             </div>
                         @endif
 
-                        {{-- Форма --}}
+                        @if (session('error'))
+                            <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span class="text-red-700 text-xs">{{ session('error') }}</span>
+                                </div>
+                            </div>
+                        @endif
+
                         <form method="POST" action="{{ route('noclegi.calendar.update', $nocleg->id) }}" class="space-y-4">
                             @csrf
 
-                            {{-- Вибраний період --}}
+                            {{-- Період --}}
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Okres</label>
                                 <div class="space-y-2">
@@ -207,13 +182,25 @@
                                 </div>
                             </div>
 
-                            {{-- Кількість осіб --}}
+                            {{-- Кількість осіб з JS-валідацією під полем --}}
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 mb-1">
                                     Ilość osób (max: {{ $nocleg->capacity }})
                                 </label>
-                                <input type="number" name="persons" min="0" max="{{ $nocleg->capacity }}" value="1"
-                                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition">
+                                <input 
+                                    type="number" 
+                                    name="persons" 
+                                    min="1" 
+                                    max="{{ $nocleg->capacity }}" 
+                                    value="1"
+                                    required
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
+                                    id="persons-input"
+                                />
+                                <!-- Кастомне повідомлення під полем -->
+                                <div id="persons-error" class="text-xs text-red-600 mt-1 hidden">
+                                    Nie można wprowadzić więcej niż {{ $nocleg->capacity }} miejsc
+                                </div>
                             </div>
 
                             {{-- Дія --}}
@@ -243,7 +230,7 @@
                                     Zastosuj zmiany
                                 </button>
                             </div>
-                            
+
                             <p class="text-xs text-gray-500 text-center mt-2">
                                 Kliknij w dzień w kalendarzu, aby wybrać
                             </p>
@@ -278,7 +265,6 @@
                     </div>
                 </div>
 
-                {{-- Основні метрики --}}
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     @php
                         $totalDays = $carbonMonth->daysInMonth;
@@ -299,34 +285,10 @@
                         ];
                         
                         $stats = [
-                            [
-                                'count' => $fullDays,
-                                'label' => 'Dni wolne',
-                                'percent' => $percentages['full'],
-                                'color' => 'green',
-                                'icon' => 'M5 13l4 4L19 7'
-                            ],
-                            [
-                                'count' => $partialDays,
-                                'label' => 'Częściowo',
-                                'percent' => $percentages['partial'],
-                                'color' => 'yellow',
-                                'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
-                            ],
-                            [
-                                'count' => $emptyDays,
-                                'label' => 'Brak miejsc',
-                                'percent' => $percentages['empty'],
-                                'color' => 'red',
-                                'icon' => 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636'
-                            ],
-                            [
-                                'count' => $blockedDays,
-                                'label' => 'Zablokowane',
-                                'percent' => $percentages['blocked'],
-                                'color' => 'purple',
-                                'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
-                            ]
+                            ['count' => $fullDays, 'label' => 'Dni wolne', 'percent' => $percentages['full'], 'color' => 'green', 'icon' => 'M5 13l4 4L19 7'],
+                            ['count' => $partialDays, 'label' => 'Częściowo', 'percent' => $percentages['partial'], 'color' => 'yellow', 'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'],
+                            ['count' => $emptyDays, 'label' => 'Brak miejsc', 'percent' => $percentages['empty'], 'color' => 'red', 'icon' => 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636'],
+                            ['count' => $blockedDays, 'label' => 'Zablokowane', 'percent' => $percentages['blocked'], 'color' => 'purple', 'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z']
                         ];
                     @endphp
                     
@@ -357,6 +319,7 @@
     </div>
 
     <script>
+        // Вибір дат
         let selectedStartDate = null;
         let selectedEndDate = null;
         let isSelectingRange = false;
@@ -365,7 +328,6 @@
             const dateStr = date;
             
             if (!selectedStartDate) {
-                // Перший клік - початок діапазону
                 selectedStartDate = dateStr;
                 selectedEndDate = null;
                 isSelectingRange = true;
@@ -375,7 +337,6 @@
                 updateSelectionInfo(dateStr, null);
                 
             } else if (isSelectingRange && !selectedEndDate) {
-                // Другий клік - кінець діапазону
                 selectedEndDate = dateStr;
                 isSelectingRange = false;
                 
@@ -392,7 +353,6 @@
                 updateSelectionInfo(selectedStartDate, selectedEndDate);
                 
             } else {
-                // Третій клік - скидання і новий вибір
                 clearSelection();
                 selectedStartDate = dateStr;
                 selectedEndDate = null;
@@ -478,8 +438,23 @@
             }
         }
 
-        // Ініціалізація
+        // Валідація кількості осіб (повідомлення під полем)
         document.addEventListener('DOMContentLoaded', function() {
+            const personsInput = document.getElementById('persons-input');
+            const errorDiv = document.getElementById('persons-error');
+            const maxCapacity = {{ $nocleg->capacity }};
+
+            personsInput.addEventListener('input', function() {
+                if (this.value > maxCapacity || this.value < 1) {
+                    this.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                    errorDiv.classList.remove('hidden');
+                } else {
+                    this.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                    errorDiv.classList.add('hidden');
+                }
+            });
+
+            // Ініціалізація календаря
             const today = new Date().toISOString().split('T')[0];
             updateDateInputs(today, today);
             updateSelectionInfo(today, today);

@@ -16,7 +16,7 @@ class NoclegForm extends Component
     use AuthorizesRequests, WireUiActions, WithFileUploads;
 
     public ?Nocleg $nocleg = null;
-
+    public ?string $reject_reason = null;
     public $title = '';
     public $description = '';
     public $city = '';
@@ -40,12 +40,12 @@ class NoclegForm extends Component
         'inne' => 'Inne'
     ];
     
-    public function mount(Nocleg $nocleg = null)
+    public function mount(Nocleg $nocleg)
     {
-        $this->nocleg = $nocleg ?? new Nocleg();
+        $this->nocleg = $nocleg;
         $this->objectTypes = ObjectType::orderBy('name')->get();
-        if ($nocleg && $nocleg->exists) {
 
+        if ($nocleg->exists) {
             $this->title = $nocleg->title;
             $this->description = $nocleg->description;
             $this->city = $nocleg->city;
@@ -54,7 +54,7 @@ class NoclegForm extends Component
             $this->capacity = $nocleg->capacity;
             $this->contact_phone = $nocleg->contact_phone;
             $this->link = $nocleg->link;
-
+            $this->reject_reason = $nocleg->reject_reason;
             $this->amenities = [];
 
             if ($nocleg->has_kitchen) $this->amenities[] = 'kuchnia';
@@ -66,11 +66,11 @@ class NoclegForm extends Component
             if (!empty($nocleg->amenities_other)) $this->amenities[] = 'inne';
 
             $this->other_amenities = $nocleg->amenities_other ?? '';
-
         } else {
             $this->contact_phone = auth()->user()->phone ?? '';
         }
     }
+
 
 
 
@@ -110,6 +110,11 @@ class NoclegForm extends Component
 
         if (!$this->nocleg->exists) {
             $this->nocleg->user_id = auth()->id();
+        }
+        if ($this->nocleg->exists && $this->nocleg->status === 'rejected') {
+            $this->nocleg->status = 'pending';
+            $this->nocleg->reject_reason = null;
+            $this->reject_reason = null;
         }
 
         $this->nocleg->fill([

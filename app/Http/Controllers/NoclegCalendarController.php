@@ -7,72 +7,106 @@ use App\Models\Nocleg;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use App\Models\NoclegAvailability;
+use Illuminate\Validation\ValidationException;
 
 class NoclegCalendarController extends Controller
 {
     public function index(Nocleg $nocleg)
     {
         $month = request('month', now()->format('Y-m'));
-        $carbonMonth = Carbon::parse($month);
+        $carbonMonth = Carbon::parse($month . '-01');
 
         $start = $carbonMonth->copy()->startOfMonth();
-        $end   = $carbonMonth->copy()->endOfMonth();
+        $end = $carbonMonth->copy()->endOfMonth();
 
-        // Завантажуємо availabilities для цього місяця
         $availabilities = $nocleg->availabilities()
             ->whereBetween('date', [$start, $end])
             ->get()
             ->keyBy('date');
 
-     return view('noclegi.calendar', compact('nocleg', 'carbonMonth', 'availabilities'));
-}
+        return view('noclegi.calendar', compact('nocleg', 'carbonMonth', 'availabilities'));
+    }
 
     public function update(Request $request, Nocleg $nocleg)
     {
         $request->validate([
             'start_date' => 'required|date',
-            'end_date'   => 'required|date',
-            'persons'    => 'nullable|integer|min:0',
-            'action'     => 'required|string', // decrease, increase, block, reset
+            'end_date'   => 'required|date|after_or_equal:start_date',
+            'persons'    => 'required|integer|min:1|max:' . $nocleg->capacity,
+            'action'     => 'required|in:decrease,increase,block,reset',
         ]);
 
-        $period = CarbonPeriod::create($request->start_date, $request->end_date);
+        $startDate = Carbon::parse($request->start_date);
+        $endDate = Carbon::parse($request->end_date);
+        $persons = (int) $request->persons;
+        $action = $request->action;
 
+        $period = CarbonPeriod::create($startDate, $endDate);
+
+        // === ВАЛІДАЦІЯ ДО ЗМІН ===
         foreach ($period as $date) {
+            $dateStr = $date->format('Y-m-d');
+
+            $availability = $nocleg->availabilities()->where('date', $dateStr)->first();
+
+            $currentCapacity = $availability?->available_capacity ?? $nocleg->capacity;
+            $isBlocked = $availability?->is_blocked ?? false;
+
+            // Помилка: намагаємося зменшити більше, ніж є
+            if ($action === 'decrease' && $currentCapacity < $persons) {
+                return back()->with('error', "W dniu {$dateStr} dostępnych jest tylko {$currentCapacity} miejsc — nie można zarezerwować {$persons}.");
+            }
+
+            // Помилка: збільшуємо понад максимум
+            if ($action === 'increase' && ($currentCapacity + $persons) > $nocleg->capacity) {
+                return back()->with('error', "W dniu {$dateStr} dostępnych jest tylko {$currentCapacity} miejsc — nie można zarezerwować {$persons}.");
+           
+            }
+
+            // Не дозволяємо змінювати кількість в заблокованому дні
+            if ($isBlocked && !in_array($action, ['block', 'reset'])) {
+                throw ValidationException::withMessages([
+                    'action' => "Dzień {$dateStr} jest zablokowany — można tylko zablokować lub przywrócić domyślne."
+                ]);
+            }
+        }
+
+        // === ЗАСТОСОВУЄМО ЗМІНИ ===
+        foreach ($period as $date) {
+            $dateStr = $date->format('Y-m-d');
+
             $availability = NoclegAvailability::firstOrCreate([
                 'nocleg_id' => $nocleg->id,
-                'date'      => $date->format('Y-m-d'),
+                'date'      => $dateStr,
             ]);
 
-            switch ($request->action) {
+            $currentCapacity = $availability->available_capacity ?? $nocleg->capacity;
 
+            switch ($action) {
                 case 'decrease':
-                    $availability->available_capacity =
-                        max(0, ($availability->available_capacity ?? $nocleg->capacity) - $request->persons);
+                    $availability->available_capacity = max(0, $currentCapacity - $persons);
                     $availability->is_blocked = false;
                     break;
 
                 case 'increase':
-                    $availability->available_capacity =
-                        min($nocleg->capacity, ($availability->available_capacity ?? $nocleg->capacity) + $request->persons);
+                    $availability->available_capacity = min($nocleg->capacity, $currentCapacity + $persons);
                     $availability->is_blocked = false;
                     break;
 
                 case 'block':
-                    $availability->is_blocked = true;
                     $availability->available_capacity = 0;
+                    $availability->is_blocked = true;
                     break;
 
                 case 'reset':
-                    $availability->is_blocked = false;
                     $availability->available_capacity = $nocleg->capacity;
+                    $availability->is_blocked = false;
                     break;
             }
 
             $availability->save();
         }
 
-        return back()->with('success', 'Dostępność zaktualizowana!');
+        return back()->with('success', 'Harmonogram został zaktualizowany!');
     }
-
 }
