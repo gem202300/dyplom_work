@@ -14,6 +14,8 @@ return new class extends Migration
         $table->enum('status', ['pending', 'approved', 'rejected'])
         ->default('pending');
         $table->string('title'); 
+        $table->decimal('latitude', 10, 8)->nullable();  
+        $table->decimal('longitude', 11, 8)->nullable();
         $table->text('description')->nullable(); 
         $table->integer('capacity')->nullable(); 
         $table->foreignId('object_type_id')

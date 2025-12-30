@@ -9,7 +9,16 @@ class Attraction extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'location', 'description', 'opening_time', 'closing_time','is_active',];
+    protected $fillable = [
+        'name', 
+        'location', 
+        'description', 
+        'opening_time', 
+        'closing_time',
+        'is_active',
+        'latitude',
+        'longitude',
+    ];
     
     public function photos()
     {

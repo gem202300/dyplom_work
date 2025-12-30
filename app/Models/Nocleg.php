@@ -10,6 +10,8 @@ class Nocleg extends Model
         'user_id',
         'status',
         'title',
+        'latitude',
+        'longitude',
         'description',
         'capacity',
         'city',

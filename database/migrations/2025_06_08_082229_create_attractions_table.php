@@ -20,8 +20,8 @@ return new class extends Migration
             $table->time('closing_time')->nullable(); 
             $table->boolean('is_active')->default(true);
             $table->decimal('rating', 3, 2)->default(0);
-            $table->decimal('latitude', 10, 6)->nullable(); 
-            $table->decimal('longitude', 10, 6)->nullable();
+            $table->decimal('latitude', 10, 8)->nullable();  
+            $table->decimal('longitude', 11, 8)->nullable();
             $table->timestamps();
         });
     }

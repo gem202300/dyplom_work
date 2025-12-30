@@ -21,6 +21,8 @@ class NoclegForm extends Component
     public $description = '';
     public $city = '';
     public $street = '';
+    public $latitude = null; // Додано
+    public $longitude = null; // Додано
     public ?int $object_type_id = null;
     public $objectTypes = [];
     public $capacity = '';
@@ -40,6 +42,13 @@ class NoclegForm extends Component
         'inne' => 'Inne'
     ];
     
+    // Додайте цей метод
+    public function removePhoto($index)
+    {
+        unset($this->photos[$index]);
+        $this->photos = array_values($this->photos);
+    }
+
     public function mount(Nocleg $nocleg)
     {
         $this->nocleg = $nocleg;
@@ -50,6 +59,8 @@ class NoclegForm extends Component
             $this->description = $nocleg->description;
             $this->city = $nocleg->city;
             $this->street = $nocleg->street;
+            $this->latitude = $nocleg->latitude; // Додано
+            $this->longitude = $nocleg->longitude; // Додано
             $this->object_type_id = $nocleg->object_type_id;
             $this->capacity = $nocleg->capacity;
             $this->contact_phone = $nocleg->contact_phone;
@@ -71,9 +82,6 @@ class NoclegForm extends Component
         }
     }
 
-
-
-
     public function rules()
     {
         return [
@@ -88,6 +96,8 @@ class NoclegForm extends Component
                 'regex:/^[\p{L} ]+$/u',
             ],
             'street' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90', // Додано
+            'longitude' => 'nullable|numeric|between:-180,180', // Додано
             'object_type_id' => 'required|exists:object_types,id',
             'capacity' => 'required|integer|min:1',
             'contact_phone' => [
@@ -98,15 +108,13 @@ class NoclegForm extends Component
             'photos' => $this->nocleg->exists
                 ? 'nullable|array'
                 : 'required|array|min:1',
-
             'photos.*' => 'image|max:2048',
         ];
     }
 
-
     public function submit()
     {
-         $this->validate();
+        $this->validate();
 
         if (!$this->nocleg->exists) {
             $this->nocleg->user_id = auth()->id();
@@ -122,6 +130,8 @@ class NoclegForm extends Component
             'description' => $this->description,
             'city' => $this->city,
             'street' => $this->street,
+            'latitude' => $this->latitude, // Додано
+            'longitude' => $this->longitude, // Додано
             'object_type_id' => $this->object_type_id,
             'capacity' => $this->capacity,
             'contact_phone' => $this->contact_phone,
@@ -134,7 +144,6 @@ class NoclegForm extends Component
             'has_balcony' => in_array('balkon', $this->amenities),
             'amenities_other' => $this->other_amenities,
         ])->save();
-
 
         foreach ($this->photos as $photo) {
             $path = $photo->store('images/noclegi', 'public');
