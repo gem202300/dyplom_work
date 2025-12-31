@@ -236,21 +236,26 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($noclegi as $n)
                 <div class="bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition">
-                    <a href="{{ route('noclegi.show', $n->id) }}" class="block">
-                        <div class="aspect-video bg-gray-100 overflow-hidden rounded-t-xl">
-                            @if($n->photos->isNotEmpty())
-                                <img src="{{ asset($n->photos->first()->path) }}"
-                                     class="w-full h-full object-cover transition-transform hover:scale-105"/>
-                            @else
-                                <div class="flex items-center justify-center h-full text-gray-400 italic">
-                                    brak zdjęcia
-                                </div>
-                            @endif
-                        </div>
-                    </a>
+                    
+                    
+                        <x-photo-carousel 
+                            :photos="$n->photos"
+                            :showRating="true"
+                            :rating="$n->average_rating ?? 0"
+                            :alt="$n->title"
+                            aspectRatio="aspect-video"
+                            containerClass="rounded-t-xl"
+                            arrowSize="w-8 h-8"
+                            ratingBadgePosition="top-3 right-3"
+                        />
+                    
 
                     <div class="p-4 space-y-2">
-                        <h3 class="text-lg font-semibold">{{ $n->title }}</h3>
+                        <h3 class="text-lg font-semibold">
+                            <a href="{{ route('noclegi.show', $n->id) }}" class="hover:text-blue-600 transition">
+                                {{ $n->title }}
+                            </a>
+                        </h3>
                         <p class="text-sm text-gray-600">📍 {{ $n->city }}, {{ $n->street }}</p>
                         <p class="text-sm text-gray-600">
                             <strong>Typ:</strong> {{ $n->objectType?->name }}
@@ -259,10 +264,7 @@
                             @endif
                         </p>
                         <p class="text-sm text-gray-600"><strong>Kontakt:</strong> {{ $n->contact_phone ?? '—' }}</p>
-                        <div class="text-sm font-medium text-gray-700">
-                            ⭐ {{ number_format($n->average_rating ?? 0, 2) }}
-                        </div>
-
+                        
                         <div class="text-sm text-gray-700 flex gap-2 flex-wrap">
                             @if($n->has_kitchen) <span class="px-2 py-1 bg-gray-100 rounded">🍳 Kuchnia</span> @endif
                             @if($n->has_parking) <span class="px-2 py-1 bg-gray-100 rounded">🅿️ Parking</span> @endif
@@ -274,13 +276,18 @@
                     </div>
 
                     <div class="p-4 border-t flex items-center justify-between space-x-2">
-                        <a href="{{ route('noclegi.show', $n->id) }}" class="flex-1 text-center py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition">
+                        <a href="{{ route('noclegi.show', $n->id) }}" 
+                           class="flex-1 text-center py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition"
+                           title="Zobacz szczegóły">
                             <x-wireui-icon name="eye" class="w-5 h-5 inline"/>
                         </a>
-                        <a href="{{ route('noclegi.edit', $n->id) }}" class="flex-1 text-center py-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition">
+                        <a href="{{ route('noclegi.edit', $n->id) }}" 
+                           class="flex-1 text-center py-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition"
+                           title="Edytuj obiekt">
                             <x-wireui-icon name="pencil" class="w-5 h-5 inline"/>
                         </a>
                         <button wire:click="deleteNocleg({{ $n->id }})"
+                                onclick="return confirm('Czy na pewno chcesz usunąć ten nocleg?')"
                                 class="flex-1 text-center py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition"
                                 title="Usuń obiekt">
                             <x-wireui-icon name="trash" class="w-5 h-5 inline"/>
@@ -291,10 +298,14 @@
         </div>
     @else
         <div class="text-center py-12">
-            <p class="text-gray-500 text-lg">Brak noclegów spełniających kryteria wyszukiwania.</p>
+            <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-gray-500 text-lg mb-2">Brak noclegów spełniających kryteria wyszukiwania.</p>
             @if($search || !empty($selectedTypeIds ?? []) || !empty($selectedAmenities ?? []) || $minCapacity || $maxCapacity || $minRating || $maxRating)
-                <button wire:click="resetFilters" class="mt-4 text-blue-600 hover:text-blue-800">
-                    Wyczyść filtry
+                <button wire:click="resetFilters" 
+                        class="text-blue-600 hover:text-blue-800 font-medium">
+                    Wyczyść filtry i pokaż wszystkie noclegi
                 </button>
             @endif
         </div>

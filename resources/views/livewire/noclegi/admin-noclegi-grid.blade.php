@@ -222,22 +222,23 @@
     @endif
 
     @if ($noclegi->count() > 0)
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             @foreach ($noclegi as $n)
                 <div class="bg-white shadow-md rounded-lg overflow-hidden border">
-
-                    <a href="{{ route('admin.noclegi.details', $n->id) }}" class="block">
-                        <div class="h-40 bg-gray-100 overflow-hidden">
-                            @if ($n->photos->isNotEmpty())
-                                <img src="{{ asset($n->photos->first()->path) }}"
-                                    class="w-full h-full object-cover" />
-                            @else
-                                <div class="flex items-center justify-center h-full text-gray-400 italic">
-                                    brak zdjęcia
-                                </div>
-                            @endif
-                        </div>
-                    </a>
+                    {{-- Карусель фото --}}
+                    
+                        <x-photo-carousel 
+                            :photos="$n->photos"
+                            :showRating="true"
+                            :rating="$n->average_rating ?? 0"
+                            :alt="$n->title"
+                            aspectRatio="aspect-video"
+                            containerClass="rounded-t-lg"
+                            arrowSize="w-6 h-6"
+                            ratingBadgePosition="top-3 right-3"
+                            showDots="true"
+                        />
+                    
 
                     <div class="p-4 space-y-1 text-sm">
                         <h3 class="text-lg font-semibold">{{ $n->title }}</h3>
@@ -356,5 +357,4 @@
             </div>
         </div>
     @endif
-
 </div>

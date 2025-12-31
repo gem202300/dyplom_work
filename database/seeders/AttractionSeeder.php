@@ -29,7 +29,8 @@ class AttractionSeeder extends Seeder
             ],
             [
                 'attraction_id' => $zamek->id,
-                'path' => 'images/attractions/lviv-castle-2.jpg',
+                
+                'path' => 'images/attractions/synevyr-2.jpg',
             ],
         ]);
 
@@ -67,7 +68,7 @@ class AttractionSeeder extends Seeder
             ],
             [
                 'attraction_id' => $jezioro->id,
-                'path' => 'images/attractions/synevyr-2.jpg',
+                'path' => 'images/attractions/lviv-castle-2.jpg',
             ],
         ]);
 
