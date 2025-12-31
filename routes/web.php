@@ -41,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->prefix('admin/noclegi')->name('admin.noclegi.')->group(function () {
     Route::get('/', fn() => view('admin.noclegi.index'))->name('index');
 });
-
+Route::get('/map-data', [App\Http\Controllers\MapDataController::class, 'index'])->name('map.data');
 Route::post('/admin/noclegi/{nocleg}/approve', [AdminNoclegController::class, 'approve'])
     ->name('admin.noclegi.approve');
 Route::post('/admin/noclegi/{nocleg}/reject', [AdminNoclegController::class, 'reject'])
