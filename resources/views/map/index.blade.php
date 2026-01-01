@@ -305,7 +305,8 @@
     let map;
     let isMapLoaded = false;
     let allFeatures = [];
-    let currentGeoJSON = null; // Зберігаємо поточні дані
+    let currentGeoJSON = null;
+    let loadedIcons = new Set();
 
     const themes = {
         light: {
@@ -380,13 +381,11 @@
         const showNoclegi = document.getElementById('toggle-noclegi').checked;
         const showAtrakcje = document.getElementById('toggle-atrakcje').checked;
         
-        // Якщо обидва фільтри вимкнені - очищаємо карту
         if (!showNoclegi && !showAtrakcje) {
             clearMap();
             return;
         }
         
-        // Фільтруємо дані для відображення
         const filteredFeatures = allFeatures.filter(feature => {
             const type = feature.properties.type;
             return (type === 'nocleg' && showNoclegi) || (type === 'attraction' && showAtrakcje);
@@ -397,11 +396,9 @@
             features: filteredFeatures
         };
         
-        // Оновлюємо джерело даних
         if (map.getSource('places')) {
             map.getSource('places').setData(currentGeoJSON);
         } else {
-            // Якщо джерело не існує, створюємо його
             createMapSource(currentGeoJSON);
             setupMapLayers();
         }
@@ -418,12 +415,10 @@
     }
 
     function createMapSource(geoJSON) {
-        // Видаляємо старе джерело якщо існує
         if (map.getSource('places')) {
             map.removeSource('places');
         }
         
-        // Створюємо нове джерело
         map.addSource('places', {
             type: 'geojson',
             data: geoJSON,
@@ -434,6 +429,206 @@
                 'noclegCount': ['+', ['case', ['==', ['get', 'type'], 'nocleg'], 1, 0]],
                 'attractionCount': ['+', ['case', ['==', ['get', 'type'], 'attraction'], 1, 0]]
             }
+        });
+    }
+
+    async function loadIconImage(iconUrl, iconName) {
+        if (!iconUrl || loadedIcons.has(iconName)) {
+            return Promise.resolve();
+        }
+        
+        return new Promise((resolve, reject) => {
+            const img = new Image(32, 32);
+            img.crossOrigin = 'anonymous';
+            img.src = iconUrl;
+            
+            img.onload = () => {
+                if (!map.hasImage(iconName)) {
+                    map.addImage(iconName, img);
+                    loadedIcons.add(iconName);
+                }
+                resolve();
+            };
+            
+            img.onerror = (err) => {
+                console.warn('Nie udało się załadować ikony:', iconUrl, err);
+                resolve();
+            };
+        });
+    }
+
+    function setupMapLayers() {
+        if (!map.getSource('places')) {
+            console.warn('Źródło "places" nie istnieje');
+            return;
+        }
+        
+        const layersToRemove = ['clusters', 'cluster-count', 'nocleg-icons', 'attraction-icons'];
+        layersToRemove.forEach(layerId => {
+            if (map.getLayer(layerId)) {
+                map.removeLayer(layerId);
+            }
+        });
+        
+        // Основний шар для кластерів
+        map.addLayer({
+            id: 'clusters',
+            type: 'circle',
+            source: 'places',
+            filter: ['has', 'point_count'],
+            paint: {
+                'circle-color': [
+                    'case',
+                    ['all', ['>', ['get', 'noclegCount'], 0], ['>', ['get', 'attractionCount'], 0]],
+                    '#9333ea',
+                    ['>', ['get', 'noclegCount'], 0],
+                    '#10b981',
+                    '#f59e0b'
+                ],
+                'circle-radius': [
+                    'step',
+                    ['get', 'point_count'],
+                    20,
+                    10, 30,
+                    30, 40
+                ],
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#ffffff'
+            }
+        });
+
+        // Число в кластері
+        map.addLayer({
+            id: 'cluster-count',
+            type: 'symbol',
+            source: 'places',
+            filter: ['has', 'point_count'],
+            layout: {
+                'text-field': '{point_count_abbreviated}',
+                'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                'text-size': 14
+            },
+            paint: {
+                'text-color': '#ffffff'
+            }
+        });
+
+        // Ночлеги (іконки)
+        map.addLayer({
+            id: 'nocleg-icons',
+            type: 'symbol',
+            source: 'places',
+            filter: ['all',
+                ['!', ['has', 'point_count']],
+                ['==', ['get', 'type'], 'nocleg']
+            ],
+            layout: {
+                'icon-image': ['case',
+                    ['!=', ['get', 'icon_url'], null],
+                    ['get', 'icon_url'],
+                    'default-nocleg-icon'
+                ],
+                'icon-size': 0.6,
+                'icon-allow-overlap': false
+            }
+        });
+
+        // Атракції (іконки)
+        map.addLayer({
+            id: 'attraction-icons',
+            type: 'symbol',
+            source: 'places',
+            filter: ['all',
+                ['!', ['has', 'point_count']],
+                ['==', ['get', 'type'], 'attraction']
+            ],
+            layout: {
+                'icon-image': ['case',
+                    ['!=', ['get', 'icon_url'], null],
+                    ['get', 'icon_url'],
+                    'default-attraction-icon'
+                ],
+                'icon-size': 0.6,
+                'icon-allow-overlap': false
+            }
+        });
+
+        setupMapEvents();
+    }
+
+    function setupMapEvents() {
+        map.off('click', 'clusters');
+        map.off('click', 'nocleg-icons');
+        map.off('click', 'attraction-icons');
+        map.off('dblclick', 'clusters');
+        map.off('mouseenter');
+        map.off('mouseleave');
+
+        // Клік по кластеру
+        map.on('click', 'clusters', (e) => {
+            e.preventDefault();
+            const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+            if (features.length === 0) return;
+            
+            const popupContent = createClusterPopupContent(features[0]);
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            
+            new maplibregl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(popupContent)
+                .addTo(map);
+        });
+
+        // Клік по ночлегу
+        map.on('click', 'nocleg-icons', (e) => {
+            e.preventDefault();
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            
+            new maplibregl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(createPopupContent(e.features[0]))
+                .addTo(map);
+        });
+
+        // Клік по атракції
+        map.on('click', 'attraction-icons', (e) => {
+            e.preventDefault();
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            
+            new maplibregl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(createPopupContent(e.features[0]))
+                .addTo(map);
+        });
+
+        // Розгортання кластера при подвійному кліку
+        map.on('dblclick', 'clusters', (e) => {
+            const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+            if (features.length === 0) return;
+            
+            const clusterId = features[0].properties.cluster_id;
+            const source = map.getSource('places');
+            
+            source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+                if (err) {
+                    console.error('Błąd rozwijania klastra:', err);
+                    return;
+                }
+                
+                map.easeTo({
+                    center: features[0].geometry.coordinates,
+                    zoom: zoom
+                });
+            });
+        });
+
+        // Зміна курсору
+        map.on('mouseenter', ['clusters', 'nocleg-icons', 'attraction-icons'], () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        
+        map.on('mouseleave', ['clusters', 'nocleg-icons', 'attraction-icons'], () => {
+            map.getCanvas().style.cursor = '';
         });
     }
 
@@ -449,6 +644,15 @@
             details = props.capacity ? `<div class="popup-details">👥 Pojemność: ${props.capacity} osób</div>` : '';
         } else {
             details = props.rating ? `<div class="popup-details">⭐ Ocena: ${props.rating}/5</div>` : '';
+        }
+        
+        // Відображаємо іконку
+        if (props.icon_url) {
+            const iconName = props.icon_url;
+            details += `<div class="popup-details" style="margin-top: 8px; display: flex; align-items: center; gap: 5px;">
+                <span style="font-weight: 500;">Ikona:</span>
+                <span style="font-size: 12px; color: #6b7280;">${iconName.replace(/_/g, ' ')}</span>
+            </div>`;
         }
         
         return `
@@ -470,7 +674,6 @@
         const noclegCount = feature.properties.noclegCount || 0;
         const attractionCount = feature.properties.attractionCount || 0;
         
-        // Визначаємо тип кластера для іконки
         let clusterTypeClass = 'mixed';
         let clusterTypeText = 'Klaster mieszany';
         
@@ -510,152 +713,6 @@
         `;
     }
 
-    function setupMapLayers() {
-        // Перевіряємо чи існує джерело
-        if (!map.getSource('places')) {
-            console.warn('Source "places" does not exist');
-            return;
-        }
-        
-        // Видаляємо старі шари якщо вони існують
-        const layersToRemove = ['clusters', 'cluster-count', 'unclustered-point'];
-        layersToRemove.forEach(layerId => {
-            if (map.getLayer(layerId)) {
-                map.removeLayer(layerId);
-            }
-        });
-        
-        // Основний шар для кластерів
-        map.addLayer({
-            id: 'clusters',
-            type: 'circle',
-            source: 'places',
-            filter: ['has', 'point_count'],
-            paint: {
-                'circle-color': [
-                    'case',
-                    ['all', ['>', ['get', 'noclegCount'], 0], ['>', ['get', 'attractionCount'], 0]],
-                    '#9333ea', // фіолетовий для мішаних кластерів
-                    ['>', ['get', 'noclegCount'], 0],
-                    '#10b981', // зелений для ночлегів
-                    '#f59e0b'  // жовтий для атракцій
-                ],
-                'circle-radius': [
-                    'step',
-                    ['get', 'point_count'],
-                    20,
-                    10, 30,
-                    30, 40
-                ],
-                'circle-stroke-width': 2,
-                'circle-stroke-color': '#ffffff'
-            }
-        });
-
-        // Число в кластері
-        map.addLayer({
-            id: 'cluster-count',
-            type: 'symbol',
-            source: 'places',
-            filter: ['has', 'point_count'],
-            layout: {
-                'text-field': '{point_count_abbreviated}',
-                'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-                'text-size': 14
-            },
-            paint: {
-                'text-color': '#ffffff'
-            }
-        });
-
-        // Окремі маркери з кольорами
-        map.addLayer({
-            id: 'unclustered-point',
-            type: 'circle',
-            source: 'places',
-            filter: ['!', ['has', 'point_count']],
-            paint: {
-                'circle-color': [
-                    'match',
-                    ['get', 'type'],
-                    'nocleg', '#10b981',
-                    'attraction', '#f59e0b',
-                    '#cccccc'
-                ],
-                'circle-radius': 8,
-                'circle-stroke-width': 2,
-                'circle-stroke-color': '#ffffff'
-            }
-        });
-
-        setupMapEvents();
-    }
-
-    function setupMapEvents() {
-        // Очищаємо старі обробники
-        map.off('click', 'clusters');
-        map.off('click', 'unclustered-point');
-        map.off('dblclick', 'clusters');
-        map.off('mouseenter');
-        map.off('mouseleave');
-
-        // Клік по кластеру
-        map.on('click', 'clusters', (e) => {
-            e.preventDefault();
-            const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
-            if (features.length === 0) return;
-            
-            const popupContent = createClusterPopupContent(features[0]);
-            const coordinates = e.features[0].geometry.coordinates.slice();
-            
-            new maplibregl.Popup()
-                .setLngLat(coordinates)
-                .setHTML(popupContent)
-                .addTo(map);
-        });
-
-        // Клік по окремому об'єкту
-        map.on('click', 'unclustered-point', (e) => {
-            e.preventDefault();
-            const coordinates = e.features[0].geometry.coordinates.slice();
-            
-            new maplibregl.Popup()
-                .setLngLat(coordinates)
-                .setHTML(createPopupContent(e.features[0]))
-                .addTo(map);
-        });
-
-        // Розгортання кластера при подвійному кліку
-        map.on('dblclick', 'clusters', (e) => {
-            const features = map.queryRenderedFeatures(e.point, { layers: ['clusters'] });
-            if (features.length === 0) return;
-            
-            const clusterId = features[0].properties.cluster_id;
-            const source = map.getSource('places');
-            
-            source.getClusterExpansionZoom(clusterId, (err, zoom) => {
-                if (err) {
-                    console.error('Error expanding cluster:', err);
-                    return;
-                }
-                
-                map.easeTo({
-                    center: features[0].geometry.coordinates,
-                    zoom: zoom
-                });
-            });
-        });
-
-        // Зміна курсору
-        map.on('mouseenter', ['clusters', 'unclustered-point'], () => {
-            map.getCanvas().style.cursor = 'pointer';
-        });
-        
-        map.on('mouseleave', ['clusters', 'unclustered-point'], () => {
-            map.getCanvas().style.cursor = '';
-        });
-    }
-
     async function loadMapData() {
         try {
             console.log('Pobieranie danych mapy...');
@@ -673,13 +730,39 @@
                 return;
             }
 
-            // Зберігаємо всі об'єкти
             allFeatures = data.features;
             
-            // Оновлюємо лічильники
+            // Спочатку завантажуємо всі унікальні іконки
+            const iconPromises = [];
+            const uniqueIcons = new Set();
+            
+            allFeatures.forEach(feature => {
+                if (feature.properties.icon_url) {
+                    const iconUrl = feature.properties.icon_url;
+                    if (!uniqueIcons.has(iconUrl)) {
+                        uniqueIcons.add(iconUrl);
+                        // Створюємо унікальне ім'я для іконки
+                        const iconName = 'icon_' + iconUrl.replace(/[^a-zA-Z0-9]/g, '_');
+                        iconPromises.push(loadIconImage(iconUrl, iconName));
+                        // Оновлюємо властивість для використання в layer
+                        feature.properties.icon_url = iconName;
+                    } else {
+                        // Знаходимо вже завантажене ім'я
+                        const iconName = 'icon_' + iconUrl.replace(/[^a-zA-Z0-9]/g, '_');
+                        feature.properties.icon_url = iconName;
+                    }
+                }
+            });
+
+            // Завантажуємо дефолтні іконки
+            await loadIconImage('/images/map-icons/icons8-hotel-50.png', 'default-nocleg-icon');
+            await loadIconImage('/images/map-icons/icons8-museum-50.png', 'default-attraction-icon');
+            
+            // Чекаємо завантаження всіх іконок
+            await Promise.all(iconPromises);
+            
             updateCounts();
             
-            // Фільтруємо за початковими налаштуваннями фільтрів
             const showNoclegi = document.getElementById('toggle-noclegi').checked;
             const showAtrakcje = document.getElementById('toggle-atrakcje').checked;
             
@@ -693,10 +776,7 @@
                 features: filteredFeatures
             };
             
-            // Створюємо джерело даних
             createMapSource(currentGeoJSON);
-            
-            // Налаштовуємо шари
             setupMapLayers();
             
         } catch (error) {
@@ -704,17 +784,13 @@
         }
     }
 
-    // Функція для відновлення шарів після зміни стилю
     function restoreMapLayers() {
         if (!map || !isMapLoaded || !currentGeoJSON) return;
         
-        // Перевіряємо чи існує джерело
         if (!map.getSource('places')) {
-            // Якщо джерело не існує, створюємо його
             createMapSource(currentGeoJSON);
         }
         
-        // Налаштовуємо шари
         setupMapLayers();
     }
 
@@ -737,22 +813,19 @@
         applyTheme(savedTheme);
         setupFilters();
 
-        map.on('load', () => {
+        map.on('load', async () => {
             console.log('Mapa załadowana');
             isMapLoaded = true;
-            loadMapData();
+            await loadMapData();
         });
 
-        // Перестворюємо шари при зміні стилю
         map.on('style.load', () => {
             console.log('Styl mapy załadowany, przywracam warstwy...');
-            // Невелика затримка, щоб дати часу карті завантажитися
             setTimeout(() => {
                 restoreMapLayers();
             }, 100);
         });
 
-        // Також відновлюємо шари при зміні теми
         map.on('styledata', () => {
             if (isMapLoaded) {
                 console.log('Dane stylu załadowane, przywracam warstwy...');

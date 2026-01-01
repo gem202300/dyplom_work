@@ -3,6 +3,7 @@
 namespace App\Livewire\Noclegi;
 
 use App\Models\Nocleg;
+use App\Models\MapIcon;
 use Livewire\Component;
 use App\Models\ObjectType;
 use App\Models\NoclegPhoto;
@@ -21,8 +22,8 @@ class NoclegForm extends Component
     public $description = '';
     public $city = '';
     public $street = '';
-    public $latitude = null; // Додано
-    public $longitude = null; // Додано
+    public $latitude = null;
+    public $longitude = null;
     public ?int $object_type_id = null;
     public $objectTypes = [];
     public $capacity = '';
@@ -32,6 +33,11 @@ class NoclegForm extends Component
     public $other_amenities = '';
     public $photos = [];
     public $photosToDelete = [];
+    
+    // Для іконок
+    public $mapIcon = '';
+    public $mapIcons = [];
+    
     public $allAmenities = [
         'kuchnia' => 'Kuchnia 🍳',
         'parking' => 'Parking 🅿️',
@@ -42,30 +48,34 @@ class NoclegForm extends Component
         'inne' => 'Inne'
     ];
     
-    // Додайте цей метод
-    public function removePhoto($index)
-    {
-        unset($this->photos[$index]);
-        $this->photos = array_values($this->photos);
-    }
-
     public function mount(Nocleg $nocleg)
     {
         $this->nocleg = $nocleg;
         $this->objectTypes = ObjectType::orderBy('name')->get();
+        
+        // Завантажуємо всі іконки, що підходять для ночлегів
+        // Простіше: беремо всі іконки, а потім фільтруємо
+        $this->mapIcons = MapIcon::where(function($query) {
+            $query->whereNull('category_id') // Іконки без категорій
+                  ->orWhere('category_id', 0); // Або з категорією 0
+        })
+        ->orderBy('name')
+        ->get();
 
         if ($nocleg->exists) {
             $this->title = $nocleg->title;
             $this->description = $nocleg->description;
             $this->city = $nocleg->city;
             $this->street = $nocleg->street;
-            $this->latitude = $nocleg->latitude; // Додано
-            $this->longitude = $nocleg->longitude; // Додано
+            $this->latitude = $nocleg->latitude;
+            $this->longitude = $nocleg->longitude;
             $this->object_type_id = $nocleg->object_type_id;
             $this->capacity = $nocleg->capacity;
             $this->contact_phone = $nocleg->contact_phone;
             $this->link = $nocleg->link;
             $this->reject_reason = $nocleg->reject_reason;
+            $this->mapIcon = $nocleg->map_icon;
+            
             $this->amenities = [];
 
             if ($nocleg->has_kitchen) $this->amenities[] = 'kuchnia';
@@ -84,7 +94,7 @@ class NoclegForm extends Component
 
     public function rules()
     {
-        return [
+        $rules = [
             'title' => [
                 'required',
                 'regex:/^[\p{L} ]+$/u',
@@ -96,8 +106,8 @@ class NoclegForm extends Component
                 'regex:/^[\p{L} ]+$/u',
             ],
             'street' => 'required|string|max:255',
-            'latitude' => 'nullable|numeric|between:-90,90', // Додано
-            'longitude' => 'nullable|numeric|between:-180,180', // Додано
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'object_type_id' => 'required|exists:object_types,id',
             'capacity' => 'required|integer|min:1',
             'contact_phone' => [
@@ -110,6 +120,13 @@ class NoclegForm extends Component
                 : 'required|array|min:1',
             'photos.*' => 'image|max:2048',
         ];
+        
+        // Додаємо валідацію іконки тільки якщо іконки завантажені
+        if (!empty($this->mapIcons)) {
+            $rules['mapIcon'] = 'required|string';
+        }
+        
+        return $rules;
     }
 
     public function submit()
@@ -130,12 +147,13 @@ class NoclegForm extends Component
             'description' => $this->description,
             'city' => $this->city,
             'street' => $this->street,
-            'latitude' => $this->latitude, // Додано
-            'longitude' => $this->longitude, // Додано
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
             'object_type_id' => $this->object_type_id,
             'capacity' => $this->capacity,
             'contact_phone' => $this->contact_phone,
             'link' => $this->link,
+            'map_icon' => $this->mapIcon,
             'has_kitchen' => in_array('kuchnia', $this->amenities),
             'has_parking' => in_array('parking', $this->amenities),
             'has_bathroom' => in_array('lazienka', $this->amenities),
@@ -171,10 +189,56 @@ class NoclegForm extends Component
         return redirect()->route('noclegi.index');
     }
 
+    public function removePhoto($index)
+    {
+        unset($this->photos[$index]);
+        $this->photos = array_values($this->photos);
+    }
+
     public function deletePhoto($id)
     {
         if (!in_array($id, $this->photosToDelete)) {
             $this->photosToDelete[] = $id;
+        }
+    }
+    
+    // Метод для вибору іконки за типом об'єкту
+    public function suggestIconByType()
+    {
+        $type = ObjectType::find($this->object_type_id);
+        
+        if (!$type || empty($this->mapIcons)) {
+            return;
+        }
+        
+        $typeName = strtolower($type->name);
+        
+        // Автоматичний вибір іконки на основі типу
+        foreach ($this->mapIcons as $icon) {
+            $iconName = strtolower($icon->name);
+            
+            if (str_contains($typeName, 'hotel') && str_contains($iconName, 'hotel')) {
+                $this->mapIcon = $icon->icon_url;
+                break;
+            }
+            if (str_contains($typeName, 'apart') && str_contains($iconName, 'apart')) {
+                $this->mapIcon = $icon->icon_url;
+                break;
+            }
+            if (str_contains($typeName, 'dom') && str_contains($iconName, 'dom')) {
+                $this->mapIcon = $icon->icon_url;
+                break;
+            }
+            if (str_contains($typeName, 'hostel') && str_contains($iconName, 'hostel')) {
+                $this->mapIcon = $icon->icon_url;
+                break;
+            }
+        }
+        
+        if ($this->mapIcon) {
+            $this->notification()->info(
+                'Ikona została wybrana automatycznie na podstawie typu obiektu.'
+            );
         }
     }
 

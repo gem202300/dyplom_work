@@ -18,6 +18,7 @@ class Attraction extends Model
         'is_active',
         'latitude',
         'longitude',
+        'map_icon',
     ];
     
     public function photos()

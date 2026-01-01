@@ -17,7 +17,7 @@ class MapDataController extends Controller
                 ->whereNotNull('longitude')
                 ->where('latitude', '!=', 0)
                 ->where('longitude', '!=', 0)
-                ->select('id', 'title', 'city', 'street', 'latitude', 'longitude', 'capacity', 'description')
+                ->select('id', 'title', 'city', 'street', 'latitude', 'longitude', 'capacity', 'description', 'map_icon')
                 ->get();
 
             // Активні атракції
@@ -26,13 +26,12 @@ class MapDataController extends Controller
                 ->whereNotNull('longitude')
                 ->where('latitude', '!=', 0)
                 ->where('longitude', '!=', 0)
-                ->select('id', 'name as title', 'location as city', 'description', 'latitude', 'longitude', 'rating')
+                ->select('id', 'name as title', 'location as city', 'description', 'latitude', 'longitude', 'rating', 'map_icon')
                 ->get();
 
             $features = [];
 
             foreach ($noclegs as $n) {
-                // Перевірка координат
                 if (!$this->isValidCoordinates($n->latitude, $n->longitude)) {
                     continue;
                 }
@@ -50,13 +49,12 @@ class MapDataController extends Controller
                         'description' => $n->description ?? '',
                         'type' => 'nocleg',
                         'capacity' => $n->capacity ?? 0,
-                        'icon' => 'lodging-15'
+                        'icon_url' => $n->map_icon ?: '/images/map-icons/icons8-hotel-50.png',
                     ]
                 ];
             }
 
             foreach ($attractions as $a) {
-                // Перевірка координат
                 if (!$this->isValidCoordinates($a->latitude, $a->longitude)) {
                     continue;
                 }
@@ -74,7 +72,7 @@ class MapDataController extends Controller
                         'description' => $a->description ?? '',
                         'rating' => $a->rating ? number_format($a->rating, 1) : '0.0',
                         'type' => 'attraction',
-                        'icon' => 'attraction-15'
+                        'icon_url' => $a->map_icon ?: '/images/map-icons/icons8-museum-50.png',
                     ]
                 ];
             }
@@ -85,7 +83,6 @@ class MapDataController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            // Простий варіант без імпорту
             error_log('MapDataController error: ' . $e->getMessage());
             
             return response()->json([

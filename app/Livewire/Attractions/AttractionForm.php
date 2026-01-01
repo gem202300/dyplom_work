@@ -3,6 +3,7 @@
 namespace App\Livewire\Attractions;
 
 use Carbon\Carbon;
+use App\Models\MapIcon;
 use Livewire\Component;
 use App\Models\Category;
 use App\Models\Attraction;
@@ -18,22 +19,26 @@ class AttractionForm extends Component
 
     public ?Attraction $attraction = null;
 
-    // Основні поля
+    // Podstawowe pola
     public $name = '';
     public $location = '';
     public $description = '';
     public $opening_time = '';
     public $closing_time = '';
+    public $mapIcon = '';
 
-    // 📍 Координати
+    // 📍 Współrzędne
     public $latitude = null;
     public $longitude = null;
 
-    // Категорії
+    // Kategorie i ikony
     public $selectedCategories = [];
     public $allCategories = [];
+    public $mapIcons = [];
+    public $suggestedIcon = null;
+    public $showIconDropdown = false;
 
-    // Фото
+    // Zdjęcia
     public $photos = [];
     public $photosToDelete = [];
 
@@ -41,11 +46,15 @@ class AttractionForm extends Component
     {
         $this->attraction = $attraction ?? new Attraction();
         $this->allCategories = Category::all();
+        
+        // ЗМІНА: Тільки іконки для атракцій (з категоріями)
+        $this->mapIcons = MapIcon::whereNotNull('category_id')->get();
 
         if ($this->attraction->exists) {
             $this->name = $this->attraction->name;
             $this->location = $this->attraction->location;
             $this->description = $this->attraction->description;
+            $this->mapIcon = $this->attraction->map_icon;
 
             $this->opening_time = $this->attraction->opening_time
                 ? Carbon::parse($this->attraction->opening_time)->format('H:i')
@@ -71,11 +80,12 @@ class AttractionForm extends Component
             'name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'mapIcon' => 'required|string',
 
             'opening_time' => 'nullable|date_format:H:i',
             'closing_time' => 'nullable|date_format:H:i',
 
-            // 📍 Координати
+            // 📍 Współrzędne
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
 
@@ -85,6 +95,42 @@ class AttractionForm extends Component
             'photos' => 'array',
             'photos.*' => 'image|max:2048',
         ];
+    }
+
+    // Automatyczne sugerowanie ikony na podstawie pierwszej kategorii
+    public function updatedSelectedCategories()
+    {
+        if (count($this->selectedCategories) > 0) {
+            $this->suggestIconByCategory();
+        }
+    }
+
+    public function suggestIconByCategory()
+    {
+        if (empty($this->selectedCategories)) {
+            $this->suggestedIcon = null;
+            return;
+        }
+
+        // Шукаємо іконку для кожної категорії по черзі
+        foreach ($this->selectedCategories as $categoryId) {
+            $suggested = MapIcon::where('category_id', $categoryId)->first();
+            
+            if ($suggested) {
+                $this->suggestedIcon = $suggested;
+                return;
+            }
+        }
+        
+        // Якщо немає іконки для конкретної категорії, беремо першу іконку для атракцій
+        $this->suggestedIcon = MapIcon::whereNotNull('category_id')->first();
+    }
+
+    public function useSuggestedIcon()
+    {
+        if ($this->suggestedIcon) {
+            $this->mapIcon = $this->suggestedIcon->icon_url;
+        }
     }
 
     public function submit()
@@ -102,16 +148,17 @@ class AttractionForm extends Component
             'description' => $this->description,
             'opening_time' => $this->opening_time,
             'closing_time' => $this->closing_time,
+            'map_icon' => $this->mapIcon,
 
-            // 📍 Збереження координат
+            // 📍 Zapis współrzędnych
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
         ])->save();
 
-        // Категорії
+        // Kategorie
         $this->attraction->categories()->sync($this->selectedCategories);
 
-        // Нові фото
+        // Nowe zdjęcia
         foreach ($this->photos as $photo) {
             $path = $photo->store('images/attractions', 'public');
 
@@ -123,7 +170,7 @@ class AttractionForm extends Component
 
         $this->photos = [];
 
-        // Видалення фото
+        // Usuwanie zdjęć
         foreach ($this->photosToDelete as $photoId) {
             $photo = AttractionPhoto::find($photoId);
 
@@ -155,12 +202,13 @@ class AttractionForm extends Component
             $this->photosToDelete[] = $id;
         }
     }
-// Додайте цей метод до класу AttractionForm
-public function removePhoto($index)
-{
-    unset($this->photos[$index]);
-    $this->photos = array_values($this->photos); // Переіндексувати масив
-}
+
+    public function removePhoto($index)
+    {
+        unset($this->photos[$index]);
+        $this->photos = array_values($this->photos);
+    }
+    
     public function render()
     {
         return view('livewire.attractions.attraction-form');
