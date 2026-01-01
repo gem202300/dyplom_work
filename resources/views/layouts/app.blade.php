@@ -11,22 +11,23 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    @wireUiStyles
 
-    @wireUiScripts
+
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
 
-    <!-- Styles -->
     @livewireStyles
+    
+
 </head>
 
 <body class="font-sans antialiased">
     <x-banner />
     <x-wireui-notifications />
-    <x-wireui-dialog />
-    <livewire:flash-notifications.flash-notifications />
-
+<x-wireui-dialog />
     <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
         @livewire('navigation-menu')
 
@@ -48,6 +49,44 @@
     @stack('modals')
 
     @livewireScripts
+    @wireUiScripts
+    <script>
+        const sliders = {};
+
+        function nextSlide(id) {
+            const slider = document.querySelector(`#${id} > .flex`);
+            if (!slider) return;
+
+            const slides = slider.children.length;
+            sliders[id] = (sliders[id] ?? 0) + 1;
+            if (sliders[id] >= slides) sliders[id] = 0;
+
+            slider.style.transform = `translateX(-${sliders[id] * 96}px)`;
+        }
+
+        function prevSlide(id) {
+            const slider = document.querySelector(`#${id} > .flex`);
+            if (!slider) return;
+
+            const slides = slider.children.length;
+            sliders[id] = (sliders[id] ?? 0) - 1;
+            if (sliders[id] < 0) sliders[id] = slides - 1;
+
+            slider.style.transform = `translateX(-${sliders[id] * 96}px)`;
+        }
+    </script>
+    <script>
+        function markNotificationRead(id) {
+            fetch('/notifications/read/' + id, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            }).then(() => location.reload());
+        }
+    </script>
+
 </body>
 
 </html>

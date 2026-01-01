@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Enums\Auth\PermissionType;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
+use Spatie\Permission\Contracts\Permission;
 
 class RoleSeeder extends Seeder
 {
@@ -23,28 +24,25 @@ class RoleSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         Role::create(['name' => RoleType::ADMIN]);
-        Role::create(['name' => RoleType::WORKER]);
-        Role::create(['name' => RoleType::USER]);
+        Role::create(['name' => RoleType::TOURIST]);
+        Role::create(['name' => RoleType::OWNER]);
 
         // ADMINISTRATOR SYSTEMU
         $userRole = Role::findByName(RoleType::ADMIN->value);
         $userRole->givePermissionTo(PermissionType::USER_ACCESS->value);
         $userRole->givePermissionTo(PermissionType::USER_MANAGE->value);
-        $userRole->givePermissionTo(PermissionType::EVENT_ACCESS->value);
-        $userRole->givePermissionTo(PermissionType::EVENT_MANAGE->value);
-        $userRole->givePermissionTo(PermissionType::RESERBATION_ACCESS->value);
-        $userRole->givePermissionTo(PermissionType::RESERBATION_MANAGE->value);
-        // PRACOWNIK
-        $userRole = Role::findByName(RoleType::WORKER->value);
-        $userRole->givePermissionTo(PermissionType::EVENT_ACCESS->value);
-        $userRole->givePermissionTo(PermissionType::EVENT_MANAGE->value);
-        $userRole->givePermissionTo(PermissionType::RESERBATION_ACCESS->value);
-        $userRole->givePermissionTo(PermissionType::RESERBATION_MANAGE->value);
-
-        // UŻYTKOWNIK
-        $userRole = Role::findByName(RoleType::USER->value);
-        //$userRole->givePermissionTo(PermissionType::USER_ACCESS->value);
-        $userRole->givePermissionTo(PermissionType::EVENT_ACCESS->value);
-        $userRole->givePermissionTo(PermissionType::RESERBATION_ACCESS->value);
+        
+        $userRole->givePermissionTo(PermissionType::ATTRACTION_ACCESS->value);
+        $userRole->givePermissionTo(PermissionType::ATTRACTION_MANAGE->value);
+        
+        // Wlasciciel
+        $userRole = Role::findByName(RoleType::OWNER->value);
+        $userRole->givePermissionTo(PermissionType::ATTRACTION_ACCESS->value);
+        $userRole->givePermissionTo(PermissionType::ATTRACTION_MANAGE->value);
+        
+        // Turysta
+        $userRole = Role::findByName(RoleType::TOURIST->value);
+        $userRole->givePermissionTo(PermissionType::ATTRACTION_ACCESS->value);
+        
     }
 }

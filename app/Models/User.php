@@ -65,11 +65,15 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasRole(RoleType::ADMIN->value);
     }
+    public function noclegi()
+    {
+        return $this->hasMany(Nocleg::class);
+    }
 
    
-    public function isWorker(): bool
+    public function isOwner(): bool
     {
-        return $this->hasRole(RoleType::WORKER->value);
+        return $this->hasRole(RoleType::OWNER->value);
     }
 
    

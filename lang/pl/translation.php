@@ -22,8 +22,8 @@ return [
     ],
     'roles' => [
         RoleType::ADMIN->value  => 'Administrator',
-        RoleType::WORKER->value => 'Pracownik',
-        RoleType::USER->value   => 'Użytkownik',
+        RoleType::OWNER->value => 'Właściciel',
+        RoleType::TOURIST->value   => 'Turysta',
     ],
     'messages' => [
         'successes' => [

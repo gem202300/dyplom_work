@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bbbac9b9207d12018184e4c29d229cb4",
+    "content-hash": "6b900baa50837ec432fb89fccd8f7eb6",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -6903,21 +6903,21 @@
         },
         {
             "name": "wireui/wireui",
-            "version": "v2.0.5",
+            "version": "v2.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wireui/wireui.git",
-                "reference": "8a02a9bc704d3ef62e0f46cca10b5b6a97e5fe63"
+                "reference": "ae6a1cec8a0eb8027dec3c6868d1f5d7ef3495ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wireui/wireui/zipball/8a02a9bc704d3ef62e0f46cca10b5b6a97e5fe63",
-                "reference": "8a02a9bc704d3ef62e0f46cca10b5b6a97e5fe63",
+                "url": "https://api.github.com/repos/wireui/wireui/zipball/ae6a1cec8a0eb8027dec3c6868d1f5d7ef3495ad",
+                "reference": "ae6a1cec8a0eb8027dec3c6868d1f5d7ef3495ad",
                 "shasum": ""
             },
             "require": {
                 "laravel/framework": "^10.0|^11.0",
-                "php": "^8.2|^8.3",
+                "php": "^8.2|^8.3|^8.4",
                 "wireui/heroicons": "^2.6"
             },
             "require-dev": {
@@ -6935,10 +6935,10 @@
             "type": "library",
             "extra": {
                 "laravel": {
+                    "aliases": [],
                     "providers": [
                         "WireUi\\ServiceProvider"
-                    ],
-                    "aliases": []
+                    ]
                 }
             },
             "autoload": {
@@ -6966,9 +6966,9 @@
             ],
             "support": {
                 "issues": "https://github.com/wireui/wireui/issues",
-                "source": "https://github.com/wireui/wireui/tree/v2.0.5"
+                "source": "https://github.com/wireui/wireui/tree/v2.2.2"
             },
-            "time": "2024-07-03T05:29:41+00:00"
+            "time": "2025-01-05T02:50:06+00:00"
         }
     ],
     "packages-dev": [
@@ -9114,12 +9114,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": [],
+    "platform-dev": {},
     "plugin-api-version": "2.6.0"
 }
