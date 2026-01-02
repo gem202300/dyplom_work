@@ -8,6 +8,11 @@ use App\Notifications\TestNotification;
 
 class AdminNoclegController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('can:admin-access');
+    }
+
     public function approve(Nocleg $nocleg)
     {
         $nocleg->update(['status' => 'approved']);
@@ -35,5 +40,4 @@ class AdminNoclegController extends Controller
 
         return redirect()->route('admin.noclegi.index')->with('success', 'Nocleg odrzucony.');
     }
-
 }

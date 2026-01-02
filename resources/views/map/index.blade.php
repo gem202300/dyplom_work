@@ -438,7 +438,7 @@
         }
         
         return new Promise((resolve, reject) => {
-            const img = new Image(32, 32);
+            const img = new Image(25, 25);
             img.crossOrigin = 'anonymous';
             img.src = iconUrl;
             

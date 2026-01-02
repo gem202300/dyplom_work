@@ -14,6 +14,7 @@ class RatingController extends Controller
      */
     public function filter(Request $request, $rateableType, $rateableId)
     {
+        // Публічний, без authorize (фільтрація рейтингів)
         $query = Rating::where('rateable_type', $rateableType)
             ->where('rateable_id', $rateableId)
             ->with('user')
@@ -55,6 +56,8 @@ class RatingController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Rating::class);  // Для tourist/owner (create rating)
+
         $validated = $request->validate([
             'rateable_type' => 'required|string',
             'rateable_id' => 'required|integer',
@@ -62,7 +65,6 @@ class RatingController extends Controller
             'comment' => 'nullable|string|max:1000',
         ]);
 
-        // Перевірка, чи користувач вже додав рейтинг для цього об'єкта
         $existingRating = Rating::where('user_id', auth()->id())
             ->where('rateable_id', $validated['rateable_id'])
             ->where('rateable_type', $validated['rateable_type'])
@@ -74,7 +76,6 @@ class RatingController extends Controller
             ])->withInput();
         }
 
-        // Чистимо коментар від заборонених слів
         $comment = $this->cleanComment($validated['comment']);
 
         if ($comment === null) {
@@ -83,7 +84,6 @@ class RatingController extends Controller
             ])->withInput();
         }
 
-        // Створюємо рейтинг
         Rating::create([
             'rating' => $validated['rating'],
             'comment' => $comment,
@@ -102,11 +102,12 @@ class RatingController extends Controller
      */
     public function report(Request $request, Rating $rating)
     {
+        $this->authorize('view', $rating);
+
         $request->validate([
             'reason' => 'required|string|max:255'
         ]);
 
-        // Перевірка, чи користувач вже скаржився на цей коментар
         $existingReport = $rating->reports()
             ->where('user_id', $request->user()->id)
             ->first();

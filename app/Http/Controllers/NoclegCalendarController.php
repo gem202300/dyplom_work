@@ -13,6 +13,7 @@ class NoclegCalendarController extends Controller
 {
     public function index(Nocleg $nocleg)
     {
+        $this->authorize('view', $nocleg);  
         $month = request('month', now()->format('Y-m'));
         $carbonMonth = Carbon::parse($month . '-01');
 
@@ -29,6 +30,8 @@ class NoclegCalendarController extends Controller
 
     public function update(Request $request, Nocleg $nocleg)
     {
+        $this->authorize('update', $nocleg);  // Оновлення (owner/admin)
+
         $request->validate([
             'start_date' => 'required|date',
             'end_date'   => 'required|date|after_or_equal:start_date',
@@ -43,7 +46,6 @@ class NoclegCalendarController extends Controller
 
         $period = CarbonPeriod::create($startDate, $endDate);
 
-        // === ВАЛІДАЦІЯ ДО ЗМІН ===
         foreach ($period as $date) {
             $dateStr = $date->format('Y-m-d');
 
@@ -52,18 +54,15 @@ class NoclegCalendarController extends Controller
             $currentCapacity = $availability?->available_capacity ?? $nocleg->capacity;
             $isBlocked = $availability?->is_blocked ?? false;
 
-            // Помилка: намагаємося зменшити більше, ніж є
             if ($action === 'decrease' && $currentCapacity < $persons) {
                 return back()->with('error', "W dniu {$dateStr} dostępnych jest tylko {$currentCapacity} miejsc — nie można zarezerwować {$persons}.");
             }
 
-            // Помилка: збільшуємо понад максимум
             if ($action === 'increase' && ($currentCapacity + $persons) > $nocleg->capacity) {
                 return back()->with('error', "W dniu {$dateStr} dostępnych jest tylko {$currentCapacity} miejsc — nie można zarezerwować {$persons}.");
            
             }
 
-            // Не дозволяємо змінювати кількість в заблокованому дні
             if ($isBlocked && !in_array($action, ['block', 'reset'])) {
                 throw ValidationException::withMessages([
                     'action' => "Dzień {$dateStr} jest zablokowany — można tylko zablokować lub przywrócić domyślne."
@@ -71,7 +70,6 @@ class NoclegCalendarController extends Controller
             }
         }
 
-        // === ЗАСТОСОВУЄМО ЗМІНИ ===
         foreach ($period as $date) {
             $dateStr = $date->format('Y-m-d');
 

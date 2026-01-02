@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Nocleg;
 
 class MyNoclegiController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
-        $noclegi = $user->noclegi()->latest()->paginate(9);
+        if (!auth()->user()->hasRole(['owner'])) {
+            abort(403);
+        }
+
+        $noclegi = auth()->user()->noclegi()->latest()->paginate(9);
 
         return view('noclegi.my-noclegi', compact('noclegi'));
     }

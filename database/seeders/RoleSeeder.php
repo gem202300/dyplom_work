@@ -7,42 +7,51 @@ use Illuminate\Database\Seeder;
 use App\Enums\Auth\PermissionType;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
-use Spatie\Permission\Contracts\Permission;
 
 class RoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Uruchomienie konkretnego seedera:
-        // sail artisan db:seed --class=RoleSeeder
-
-        // Reset cache'a ról i uprawnień:
-        // sail artisan permission:cache-reset
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        Role::create(['name' => RoleType::ADMIN]);
-        Role::create(['name' => RoleType::TOURIST]);
-        Role::create(['name' => RoleType::OWNER]);
+        Role::create(['name' => RoleType::ADMIN->value]);
+        Role::create(['name' => RoleType::TOURIST->value]);
+        Role::create(['name' => RoleType::OWNER->value]);
 
-        // ADMINISTRATOR SYSTEMU
-        $userRole = Role::findByName(RoleType::ADMIN->value);
-        $userRole->givePermissionTo(PermissionType::USER_ACCESS->value);
-        $userRole->givePermissionTo(PermissionType::USER_MANAGE->value);
-        
-        $userRole->givePermissionTo(PermissionType::ATTRACTION_ACCESS->value);
-        $userRole->givePermissionTo(PermissionType::ATTRACTION_MANAGE->value);
-        
-        // Wlasciciel
-        $userRole = Role::findByName(RoleType::OWNER->value);
-        $userRole->givePermissionTo(PermissionType::ATTRACTION_ACCESS->value);
-        $userRole->givePermissionTo(PermissionType::ATTRACTION_MANAGE->value);
-        
-        // Turysta
-        $userRole = Role::findByName(RoleType::TOURIST->value);
-        $userRole->givePermissionTo(PermissionType::ATTRACTION_ACCESS->value);
-        
+        $admin = Role::findByName(RoleType::ADMIN->value);
+        $admin->givePermissionTo([
+            PermissionType::USER_ACCESS,
+            PermissionType::USER_MANAGE,
+            PermissionType::ATTRACTION_ACCESS,
+            PermissionType::ATTRACTION_MANAGE,
+            PermissionType::CATEGORY_ACCESS,
+            PermissionType::CATEGORY_MANAGE,
+            PermissionType::NOCLEG_VIEW,
+            PermissionType::NOCLEG_MANAGE,
+            PermissionType::RATING_VIEW,
+            PermissionType::RATING_CREATE,
+            PermissionType::RATING_MANAGE,
+            PermissionType::BANNED_WORDS_MANAGE,
+        ]);
+
+        $owner = Role::findByName(RoleType::OWNER->value);
+        $owner->givePermissionTo([
+            PermissionType::ATTRACTION_ACCESS,
+            PermissionType::CATEGORY_ACCESS,
+            PermissionType::NOCLEG_VIEW,
+            PermissionType::NOCLEG_OWNER_MANAGE,
+            PermissionType::RATING_VIEW,
+            PermissionType::RATING_CREATE,
+            PermissionType::MY_NOCLEGI_ACCESS,
+        ]);
+
+        $tourist = Role::findByName(RoleType::TOURIST->value);
+        $tourist->givePermissionTo([
+            PermissionType::ATTRACTION_ACCESS,
+            PermissionType::CATEGORY_ACCESS,
+            PermissionType::NOCLEG_VIEW,
+            PermissionType::RATING_VIEW,
+            PermissionType::RATING_CREATE,
+        ]);
     }
 }

@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 
 class CategoryDeleteController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorize('admin-access');
+    }
+
     public function show(Category $category)
     {
         if (Category::count() === 1) {
