@@ -6,6 +6,7 @@
     <div class="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white p-6 rounded-lg shadow space-y-6 text-black">
 
+            <!-- Informacje o noclegu -->
             <p class="text-sm text-gray-600 flex items-center gap-2">
                 📍 <strong>{{ $nocleg->city }}, {{ $nocleg->street }}</strong>
             </p>
@@ -25,7 +26,7 @@
                 </div>
             @endif
 
-            {{-- КАРУСЕЛЬ ФОТО --}}
+            <!-- Karuzela zdjęć -->
             @if($nocleg->photos->isNotEmpty())
                 <div class="space-y-4"
                      x-data="{
@@ -42,7 +43,7 @@
                          }
                      }">
                     
-                    {{-- ГОЛОВНЕ ФОТО --}}
+                    <!-- Główne zdjęcie -->
                     <div class="relative bg-gray-100 rounded-lg overflow-hidden border border-gray-200 max-w-3xl mx-auto">
                         <div class="aspect-w-16 aspect-h-10">
                             @foreach($nocleg->photos as $index => $photo)
@@ -55,10 +56,9 @@
                             @endforeach
                         </div>
 
-                        {{-- СТРІЛКИ НАВІГАЦІЇ НА ФОТО --}}
+                        <!-- Strzałki nawigacji -->
                         @if($nocleg->photos->count() > 1)
                             <div class="absolute inset-0 flex items-center justify-between p-3 z-20">
-                                {{-- Ліва стрілка --}}
                                 <button x-show="currentIndex > 0"
                                         @click="prevPhoto()"
                                         class="w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110">
@@ -67,7 +67,6 @@
                                     </svg>
                                 </button>
 
-                                {{-- Права стрілка --}}
                                 <button x-show="currentIndex < photosCount - 1"
                                         @click="nextPhoto()"
                                         class="w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 ml-auto">
@@ -78,7 +77,7 @@
                             </div>
                         @endif
 
-                        {{-- КРАПОЧКИ-ІНДИКАТОРИ --}}
+                        <!-- Kropki-indykatory -->
                         @if($nocleg->photos->count() > 1)
                             <div class="absolute bottom-3 left-1/2 transform -translate-x-1/2 z-20">
                                 <div class="flex space-x-2">
@@ -94,13 +93,13 @@
                             </div>
                         @endif
 
-                        {{-- НОМЕР ФОТО --}}
+                        <!-- Numer zdjęcia -->
                         <div class="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded z-20">
                             <span x-text="currentIndex + 1"></span>/<span x-text="photosCount"></span>
                         </div>
                     </div>
 
-                    {{-- ГАЛЕРЕЯ МІНІАТЮР --}}
+                    <!-- Galeria miniatur -->
                     @if($nocleg->photos->count() > 1)
                         <div class="max-w-3xl mx-auto">
                             <div class="flex gap-2 overflow-x-auto py-2 px-1 scrollbar-hide justify-center">
@@ -114,14 +113,12 @@
                                              alt="Miniatura {{ $index + 1 }}"
                                              class="w-full h-full object-cover">
                                         
-                                        {{-- ІНДИКАТОР НА МІНІАТЮРІ --}}
                                         <div class="absolute inset-0 transition-opacity duration-300"
                                              :class="currentIndex === {{ $index }} 
                                                     ? 'bg-blue-500/20' 
                                                     : 'group-hover:bg-blue-500/10'">
                                         </div>
                                         
-                                        {{-- НОМЕР НА МІНІАТЮРІ --}}
                                         <div class="absolute top-1 right-1 w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] flex items-center justify-center font-bold"
                                              :class="currentIndex === {{ $index }} ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'">
                                             {{ $index + 1 }}
@@ -138,6 +135,7 @@
                 </div>
             @endif
 
+            <!-- Szczegóły noclegu -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                 <div class="p-4 bg-gray-50 rounded-lg">
                     <p><strong>Typ obiektu:</strong> {{ $nocleg->object_type }}</p>
@@ -179,21 +177,25 @@
                 @endif
             </div>
 
+            <!-- Przyciski akcji administratora -->
             <div class="pt-4 flex flex-wrap gap-2 items-center">
-                <form method="POST" action="{{ route('admin.noclegi.approve', $nocleg->id) }}">
+                <!-- Formularz zatwierdzenia -->
+                <form method="POST" action="{{ route('admin.noclegi.approve', $nocleg->id) }}" class="inline">
                     @csrf
-                    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600 transition">
+                    <button type="submit" 
+                            onclick="return confirm('Czy na pewno chcesz zatwierdzić ten nocleg?')"
+                            class="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600 transition">
                         Zatwierdź
                     </button>
                 </form>
 
-                <form method="POST" action="{{ route('admin.noclegi.reject', $nocleg->id) }}">
-                    @csrf
-                    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600 transition">
-                        Odrzuć
-                    </button>
-                </form>
+                <!-- Przycisk otwierający modal odrzucenia -->
+                <button type="button" onclick="showRejectModal()"
+                        class="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600 transition">
+                    Odrzuć
+                </button>
 
+                <!-- Powrót do listy -->
                 <a href="{{ route('admin.noclegi.index') }}"
                    class="inline-flex items-center px-5 py-3 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 font-medium">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -205,11 +207,83 @@
         </div>
     </div>
 
+    <!-- Modal odrzucenia -->
+    <div id="rejectModal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">
+                Odrzucenie obiektu
+            </h3>
+
+            <form method="POST" action="{{ route('admin.noclegi.reject', $nocleg->id) }}" id="rejectForm">
+                @csrf
+                <div class="mb-6">
+                    <label for="reason" class="block text-sm font-medium text-gray-700 mb-2">
+                        Uzasadnienie odrzucenia <span class="text-red-600">*</span>
+                    </label>
+                    <textarea id="reason" name="reason" rows="3" required
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg
+                              focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                        placeholder="Np. Brak zdjęć, niepełny opis..."></textarea>
+                    <p id="rejectError" class="mt-2 text-sm text-red-600 hidden"></p>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="hideRejectModal()"
+                        class="px-5 py-2.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition font-medium">
+                        Anuluj
+                    </button>
+
+                    <button type="submit"
+                        class="px-5 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium">
+                        Odrzuć obiekt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showRejectModal() {
+            document.getElementById('rejectModal').classList.remove('hidden');
+        }
+
+        function hideRejectModal() {
+            document.getElementById('rejectModal').classList.add('hidden');
+            document.getElementById('reason').value = '';
+            document.getElementById('rejectError').classList.add('hidden');
+        }
+
+        // Walidacja formularza przed wysłaniem
+        document.getElementById('rejectForm').addEventListener('submit', function(e) {
+            const reason = document.getElementById('reason').value.trim();
+            const errorEl = document.getElementById('rejectError');
+            
+            if (!reason) {
+                e.preventDefault();
+                errorEl.textContent = 'Podaj uzasadnienie odrzucenia.';
+                errorEl.classList.remove('hidden');
+            }
+        });
+
+        // Zamykanie modala po kliknięciu w tło
+        document.getElementById('rejectModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideRejectModal();
+            }
+        });
+
+        // Zamykanie modala klawiszem ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideRejectModal();
+            }
+        });
+    </script>
+
     <style>
-        /* Фіксовані пропорції для фото (16:10) */
         .aspect-w-16 {
             position: relative;
-            padding-bottom: 62.5%; /* 10/16 = 0.625 */
+            padding-bottom: 62.5%;
         }
         
         .aspect-w-16 > * {
@@ -222,19 +296,10 @@
             left: 0;
         }
         
-        /* Обмеження ширини для каруселі */
         .max-w-3xl {
-            max-width: 48rem; /* 768px */
+            max-width: 48rem;
         }
         
-        /* Плавні переходи */
-        .transition-all {
-            transition-property: all;
-            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 200ms;
-        }
-        
-        /* Приховування стандартного скролбару для мініатюр */
         .scrollbar-hide {
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -244,7 +309,6 @@
             display: none;
         }
         
-        /* Медіа-запити для адаптивності */
         @media (max-width: 768px) {
             .max-w-3xl {
                 max-width: 100%;
@@ -254,21 +318,6 @@
                 width: 14px;
                 height: 12px;
             }
-            
-            .absolute.top-1.right-1.w-4.h-4 {
-                width: 3px;
-                height: 3px;
-                font-size: 8px;
-            }
-        }
-        
-        /* Стилі для стрілочок */
-        .bg-white\/80 {
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-        
-        .hover\:scale-110:hover {
-            transform: scale(1.1);
         }
     </style>
 </x-app-layout>

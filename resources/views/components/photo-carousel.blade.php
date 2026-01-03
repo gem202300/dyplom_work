@@ -54,26 +54,26 @@
         <div class="absolute inset-0 flex items-center justify-between p-2 z-20">
             <button x-show="currentPhoto > 0"
                     @click="prevPhoto()"
-                    class="{{ $arrowSize }} bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110">
-                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="{{ $arrowSize }} bg-white hover:bg-gray-100 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 border border-gray-200">
+                <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
             </button>
 
             <button x-show="currentPhoto < photosCount - 1"
                     @click="nextPhoto()"
-                    class="{{ $arrowSize }} bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110 ml-auto">
-                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="{{ $arrowSize }} bg-white hover:bg-gray-100 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 border border-gray-200 ml-auto">
+                <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </button>
         </div>
     @endif
 
-    {{-- Бейдж рейтингу --}}
+    {{-- Бейдж рейтингу з 100% білим фоном --}}
     @if($showRating && $rating)
-        <div class="absolute {{ $ratingBadgePosition }} bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md z-30">
-            <div class="flex items-center gap-1">
+        <div class="absolute {{ $ratingBadgePosition }} z-30">
+            <div class="bg-white px-3 py-1.5 rounded-full shadow-md flex items-center gap-1 border border-gray-200">
                 <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                 </svg>
@@ -105,4 +105,5 @@
             <span x-text="currentPhoto + 1"></span>/<span x-text="photosCount"></span>
         </div>
     @endif
+    {{ $slot }}
 </div>

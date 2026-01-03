@@ -43,25 +43,37 @@ final class OwnerRequestTable extends PowerGridComponent
         ];
     }
 
-    public function actions(OwnerRequest $request): array
-    {
-        $buttons = [];
+public function actions(OwnerRequest $request): array
+{
+    $buttons = [];
 
-        $buttons[] = Button::add('view')
-            ->route('admin.owner-requests.show', ['owner_request' => $request->id])
-            ->slot('<x-wireui-icon name="eye" class="w-5 h-5 text-blue-500" />')
-            ->tooltip('Zobacz szczegóły');
+    // Кнопка перегляду (нейтральна, світла)
+    $buttons[] = Button::add('view')
+        ->route('admin.owner-requests.show', ['owner_request' => $request->id])
+        ->slot('<button class="px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 inline-flex items-center justify-center transition">
+                    <x-wireui-icon name="eye" class="w-5 h-5"/>
+                </button>')
+        ->tooltip('Zobacz szczegóły');
 
-        if ($request->status === 'pending') {
-            $buttons[] = Button::add('approve')
-                ->slot('<button wire:click="approve(' . $request->id . ')" class="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700">✓</button>');
+    if ($request->status === 'pending') {
+        // Кнопка затвердження (зелена, виділена)
+        $buttons[] = Button::add('approve')
+            ->slot('<button wire:click="approve(' . $request->id . ')" class="px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 inline-flex items-center justify-center transition">
+                        <x-wireui-icon name="check-circle" class="w-5 h-5"/>
+                    </button>')
+            ->tooltip('Zatwierdź wniosek');
 
-            $buttons[] = Button::add('reject')
-                ->slot('<a href="' . route('admin.owner-requests.show', $request->id) . '" class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 inline-block">✗</a>');
-        }
-
-        return $buttons;
+        // Кнопка відкидання (червона, виділена)
+        $buttons[] = Button::add('reject')
+            ->slot('<a href="' . route('admin.owner-requests.show', $request->id) . '" class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 inline-flex items-center justify-center transition">
+                        <x-wireui-icon name="x-circle" class="w-5 h-5"/>
+                    </a>')
+            ->tooltip('Odrzuć wniosek');
     }
+
+    return $buttons;
+}
+
 
 
     public function approve($id)

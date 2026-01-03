@@ -8,10 +8,7 @@ use App\Notifications\TestNotification;
 
 class AdminNoclegController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('can:admin-access');
-    }
+    
 
     public function approve(Nocleg $nocleg)
     {
@@ -27,14 +24,21 @@ class AdminNoclegController extends Controller
         return redirect()->route('admin.noclegi.index')->with('success', 'Nocleg zatwierdzony.');
     }
 
-    public function reject(Nocleg $nocleg)
+    public function reject(Request $request, Nocleg $nocleg)
     {
-        $nocleg->update(['status' => 'rejected']);
+        $validated = $request->validate([
+            'reason' => 'required|string|min:1'
+        ]);
+
+        $nocleg->update([
+            'status' => 'rejected',
+            'reject_reason' => $validated['reason']
+        ]);
 
         if ($nocleg->user) {
             $nocleg->user->notify(new TestNotification(
                 'Twój nocleg został odrzucony',
-                "Twój nocleg \"{$nocleg->title}\" został odrzucony przez administratora."
+                "Twój nocleg \"{$nocleg->title}\" został odrzucony przez administratora.\n\nPowód: " . $validated['reason']
             ));
         }
 

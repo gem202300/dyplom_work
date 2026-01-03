@@ -132,36 +132,54 @@ class RatingController extends Controller
     /**
      * Clean comment from banned words.
      */
-    private function cleanComment(?string $comment): ?string
-    {
-        if (!$comment) return null;
-
-        $bannedWords = BannedWord::all();
-
-        foreach ($bannedWords as $word) {
-            $bad = mb_strtolower($word->word);
-
-            if (!$word->partial) {
-                if (preg_match('/\b' . preg_quote($bad, '/') . '\b/iu', $comment)) {
-                    return null;
-                }
-            } else {
-                $comment = preg_replace_callback(
-                    '/' . preg_quote($bad, '/') . '/iu',
-                    function ($matches) {
-                        $w = $matches[0];
-                        if (mb_strlen($w) <= 2) {
-                            return str_repeat('*', mb_strlen($w));
-                        }
-                        return mb_substr($w, 0, 1)
-                            . str_repeat('*', mb_strlen($w) - 2)
-                            . mb_substr($w, -1);
-                    },
-                    $comment
-                );
-            }
-        }
-
+    /**
+ * Clean comment from banned words.
+ */
+   
+private function cleanComment(?string $comment): ?string
+{
+    if (!$comment || trim($comment) === '') {
         return $comment;
     }
+
+    // Отримуємо унікальні заборонені слова в нижньому регістрі + їх partial
+    $bannedWords = BannedWord::all()
+        ->mapWithKeys(function ($word) {
+            return [mb_strtolower($word->word) => $word->partial];
+        })
+        ->unique()
+        ->all();
+
+    foreach ($bannedWords as $badWordLower => $isPartial) {
+        // Повний бан
+        if (!$isPartial) {
+            if (preg_match('/\b' . preg_quote($badWordLower, '/') . '\b/iu', $comment)) {
+                return null;
+            }
+            continue;
+        }
+
+        // Часткове маскування — замінюємо ВСІ входження правильно
+        $comment = preg_replace_callback(
+            '/\b' . preg_quote($badWordLower, '/') . '\b/iu',
+            function ($matches) {
+                $word = $matches[0];
+                $length = mb_strlen($word);
+
+                if ($length < 3) {
+                    return str_repeat('*', $length);
+                }
+
+                $first = mb_substr($word, 0, 1);
+                $last = mb_substr($word, -1);
+                $middle = str_repeat('*', $length - 2);
+
+                return $first . $middle . $last;
+            },
+            $comment
+        );
+    }
+
+    return $comment;
+}
 }

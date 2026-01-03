@@ -6,130 +6,169 @@ use Livewire\Component;
 use App\Models\Category;
 use App\Models\Attraction;
 use Livewire\WithPagination;
-use WireUi\Traits\WireUiActions;
 
 class AttractionsGrid extends Component
 {
-    use WithPagination, WireUiActions;
-
+    use WithPagination;
+    
     public $search = '';
     public $selectedCategories = [];
-    public $minRating = null;
-    public $maxRating = null;
+    public $minRating = 0; // ЗМІНА: за замовчуванням 0
+    public $maxRating = 5; // ЗМІНА: за замовчуванням null (не 5)
     public $showFilters = false;
-
-    public function resetFilters()
+    public $hasRatingError = false;
+    
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'selectedCategories' => ['except' => []],
+        'minRating' => ['except' => 0], // ЗМІНА: 0 за замовчуванням
+        'maxRating' => ['except' => null], // ЗМІНА: null за замовчуванням
+    ];
+    
+    // Правила валідації
+    protected $rules = [
+        'minRating' => ['nullable', 'numeric', 'min:0', 'max:5'],
+        'maxRating' => ['nullable', 'numeric', 'min:0', 'max:5'],
+    ];
+    
+    // Валідація рейтингу
+    protected function validateRating()
     {
-        $this->reset(['search', 'selectedCategories', 'minRating', 'maxRating']);
-        $this->resetPage();
+        $this->hasRatingError = false;
+        
+        if ($this->minRating !== null && $this->maxRating !== null) {
+            if ((float)$this->minRating > (float)$this->maxRating) {
+                $this->hasRatingError = true;
+                return false;
+            }
+        }
+        
+        return true;
     }
-
-    public function updatingSearch()
+    
+    // Слухачі для валідації в реальному часі
+    public function updatedMinRating($value)
     {
-        $this->resetPage();
+        $this->validateOnly('minRating');
+        $this->validateRating();
     }
-    public function updatingSelectedCategories()
+    
+    public function updatedMaxRating($value)
     {
-        $this->resetPage();
+        $this->validateOnly('maxRating');
+        $this->validateRating();
     }
-    public function updatingMinRating()
-    {
-        $this->resetPage();
-    }
-    public function updatingMaxRating()
-    {
-        $this->resetPage();
-    }
-
+    
     public function render()
     {
-        // Створюємо підзапит для середньої оцінки
-        $query = Attraction::query()
-            ->with('photos', 'categories')
-            ->select('attractions.*')
-            ->selectSub(function ($query) {
-                $query->selectRaw('COALESCE(AVG(rating), 0)')
-                    ->from('ratings')
-                    ->whereColumn('ratings.rateable_id', 'attractions.id')
-                    ->where('ratings.rateable_type', Attraction::class);
-            }, 'average_rating');
-
-        // Фільтр для публічних користувачів - показувати тільки активні атракції
+        $query = Attraction::with(['photos', 'categories']);
+        
+        // Для неавторизованих користувачів показуємо тільки активні
         if (!auth()->check()) {
             $query->where('is_active', true);
         }
-
+        
+        // Пошук
         if ($this->search) {
-            $query->where(function ($q) {
+            $query->where(function($q) {
                 $q->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('location', 'like', '%' . $this->search . '%')
-                    ->orWhere('description', 'like', '%' . $this->search . '%');
+                  ->orWhere('description', 'like', '%' . $this->search . '%')
+                  ->orWhere('location', 'like', '%' . $this->search . '%');
             });
         }
-
+        
+        // Фільтр по категоріям
         if (!empty($this->selectedCategories)) {
-            $query->whereHas('categories', function ($q) {
+            $query->whereHas('categories', function($q) {
                 $q->whereIn('categories.id', $this->selectedCategories);
             });
         }
-
-        // Фільтрація за середньою оцінкою
-        if (!is_null($this->minRating)) {
-            $query->having('average_rating', '>=', $this->minRating);
+        
+        // Фільтр по рейтингу
+        if ($this->minRating !== null && $this->minRating > 0) {
+            $query->where('rating', '>=', $this->minRating);
         }
-
-        if (!is_null($this->maxRating)) {
-            $query->having('average_rating', '<=', $this->maxRating);
+        
+        if ($this->maxRating !== null) {
+            $query->where('rating', '<=', $this->maxRating);
         }
-
-        $attractions = $query->paginate(12);
-
+        
+        $attractions = $query->orderBy('name')->paginate(12);
+        $categories = Category::orderBy('name')->get();
+        
         return view('livewire.attractions.grid', [
             'attractions' => $attractions,
-            'categories' => Category::orderBy('name')->get(),
+            'categories' => $categories,
         ]);
     }
-
+    
     public function toggleCategory($categoryId)
     {
         if (in_array($categoryId, $this->selectedCategories)) {
-            $this->selectedCategories = array_filter(
-                $this->selectedCategories,
-                fn($id) => $id != $categoryId
-            );
+            $this->selectedCategories = array_diff($this->selectedCategories, [$categoryId]);
         } else {
             $this->selectedCategories[] = $categoryId;
         }
+        $this->resetPage();
     }
-
+    
     public function removeCategory($categoryId)
     {
-        $this->selectedCategories = array_filter(
-            $this->selectedCategories,
-            fn($id) => $id != $categoryId
-        );
+        $this->selectedCategories = array_diff($this->selectedCategories, [$categoryId]);
+        $this->resetPage();
     }
-
-    public function deleteAttraction($id): void
+    
+    public function resetFilters()
     {
-        $attraction = Attraction::findOrFail($id);
+        $this->search = '';
+        $this->selectedCategories = [];
+        $this->minRating = 0; // ЗМІНА: скидаємо на 0
+        $this->maxRating = null; // ЗМІНА: скидаємо на null
+        $this->hasRatingError = false;
+        $this->resetPage();
+    }
+    
+    public function applyFilters()
+    {
+        // Валідація перед застосуванням
+        if (!$this->validateRating()) {
+            session()->flash('error', 'Min ocena nie może być większa niż max ocena.');
+            return;
+        }
+        
+        $this->showFilters = false;
+    }
+    
+    public function toggleActive($attractionId)
+    {
+        // Перевірка авторизації
+        if (!auth()->check()) {
+            return;
+        }
+        
+        $attraction = Attraction::findOrFail($attractionId);
+        $attraction->is_active = !$attraction->is_active;
+        $attraction->save();
+        
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Status atrakcji został zmieniony.'
+        ]);
+    }
+    
+    public function deleteAttraction($attractionId)
+    {
+        // Перевірка авторизації
+        if (!auth()->check()) {
+            return;
+        }
+        
+        $attraction = Attraction::findOrFail($attractionId);
         $attraction->delete();
-
-        $this->notification()->success(
-            'Sukces',
-            "Atrakcja \"{$attraction->name}\" została usunięta."
-        );
-    }
-
-    public function toggleActive($id): void
-    {
-        $attraction = Attraction::findOrFail($id);
-        $attraction->update(['is_active' => !$attraction->is_active]);
-
-        $status = $attraction->is_active ? 'aktywna' : 'ukryta';
-        $this->notification()->success(
-            'Sukces',
-            "Atrakcja \"{$attraction->name}\" została {$status}."
-        );
+        
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Atrakcja została usunięta.'
+        ]);
     }
 }
