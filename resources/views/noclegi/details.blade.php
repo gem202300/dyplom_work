@@ -135,10 +135,37 @@
                 </div>
             @endif
 
+            <!-- 📍 MAPA z punktem noclegu -->
+            @if($nocleg->latitude && $nocleg->longitude)
+                <div class="mt-8">
+                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                        </svg>
+                        Lokalizacja na mapie
+                    </h3>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div id="location-map"
+                             style="width:100%; height:350px;"
+                             class="border border-gray-300 rounded-lg">
+                        </div>
+                        
+                        <div class="flex gap-6 mt-3 text-sm text-gray-600">
+                            <span>Lat: <strong class="font-mono">{{ number_format($nocleg->latitude, 6) }}</strong></span>
+                            <span>Lng: <strong class="font-mono">{{ number_format($nocleg->longitude, 6) }}</strong></span>
+                        </div>
+                       
+                    </div>
+                </div>
+            @endif
+
             <!-- Szczegóły noclegu -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                 <div class="p-4 bg-gray-50 rounded-lg">
-                    <p><strong>Typ obiektu:</strong> {{ $nocleg->object_type }}</p>
+                    <p><strong>Typ obiektu:</strong> {{ $nocleg->objectType->name ?? '—' }}</p>
+
                 </div>
 
                 <div class="p-4 bg-gray-50 rounded-lg">
@@ -241,6 +268,132 @@
             </form>
         </div>
     </div>
+
+    <!-- MapLibre для відображення мапи -->
+    @if($nocleg->latitude && $nocleg->longitude)
+        <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.0/dist/maplibre-gl.css">
+        <script src="https://unpkg.com/maplibre-gl@4.7.0/dist/maplibre-gl.js"></script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => {
+                    const lat = @json($nocleg->latitude ?? 52.2297);
+                    const lng = @json($nocleg->longitude ?? 21.0122);
+
+                    // Створення мапи
+                    const map = new maplibregl.Map({
+                        container: 'location-map',
+                        style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=uJDiq16jXWiNZLGeCJ0m',
+                        center: [lng, lat],
+                        zoom: 15,
+                        pitch: 45, // 3D нахил
+                        bearing: 0
+                    });
+
+                    // Додаємо навігацію
+                    map.addControl(new maplibregl.NavigationControl());
+
+                    // Додаємо маркер ночлегу
+                    new maplibregl.Marker({ 
+                        color: '#059669', // Зелений колір (як кнопка)
+                        scale: 1.2
+                    })
+                    .setLngLat([lng, lat])
+                    .setPopup(
+                        new maplibregl.Popup({ offset: 25 })
+                            .setHTML(`
+                                <div class="popup-header">
+                                    <div class="popup-type nocleg">NOCLEG</div>
+                                    <div class="popup-title">${@json($nocleg->title)}</div>
+                                </div>
+                                <div class="popup-content">
+                                    <p>📍 ${@json($nocleg->city)}, ${@json($nocleg->street)}</p>
+                                    ${@json($nocleg->description) ? `<p>${@json($nocleg->description).substring(0, 100)}...</p>` : ''}
+                                    ${@json($nocleg->capacity) ? `<div class="popup-details">👥 Pojemność: ${@json($nocleg->capacity)} osób</div>` : ''}
+                                </div>
+                                <a href="${@json(route('noclegi.show', $nocleg->id))}" class="popup-link" target="_blank">Zobacz szczegóły</a>
+                            `)
+                    )
+                    .addTo(map);
+
+                    // Автоматично відкриваємо поп-ап при завантаженні
+                    setTimeout(() => {
+                        map.getSource('places')?.features?.forEach(feature => {
+                            if (feature.properties.id == @json($nocleg->id)) {
+                                const markerElement = document.querySelector('.maplibregl-marker');
+                                if (markerElement) {
+                                    markerElement.click();
+                                }
+                            }
+                        });
+                    }, 1000);
+
+                    // Автоматичний ресайз мапи
+                    setTimeout(() => map.resize(), 200);
+
+                }, 300);
+            });
+        </script>
+
+        <style>
+            /* Стилі для поп-апу на детальній сторінці */
+            .maplibregl-popup-content {
+                border-radius: 12px;
+                padding: 16px;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                max-width: 280px;
+            }
+            .popup-header {
+                margin-bottom: 10px;
+            }
+            .popup-type {
+                display: inline-block;
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 8px;
+            }
+            .popup-type.nocleg {
+                background-color: #dcfce7;
+                color: #15803d;
+            }
+            .popup-title {
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: #1f2937;
+            }
+            .popup-content {
+                font-size: 14px;
+                color: #6b7280;
+                line-height: 1.4;
+                margin-bottom: 12px;
+            }
+            .popup-details {
+                font-size: 13px;
+                color: #4b5563;
+                margin-bottom: 10px;
+            }
+            .popup-link {
+                display: block;
+                text-align: center;
+                background-color: #3b82f6;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 8px;
+                text-decoration: none;
+                font-weight: 500;
+                font-size: 14px;
+                transition: background-color 0.2s;
+            }
+            .popup-link:hover {
+                background-color: #2563eb;
+            }
+        </style>
+    @endif
 
     <script>
         function showRejectModal() {

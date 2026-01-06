@@ -18,6 +18,13 @@ Route::get('/', fn() => view('welcome'));
 
 Route::get('/map', [MapController::class, 'index'])->name('map.index');
 Route::get('/map-data', [App\Http\Controllers\MapDataController::class, 'index'])->name('map.data');
+Route::get('/api/object-types', function () {
+    return \App\Models\ObjectType::select('id', 'name')->get();
+})->name('api.object-types');
+
+Route::get('/api/categories', function () {
+    return \App\Models\Category::select('id', 'name')->get();
+})->name('api.categories');
 
 Route::middleware(['auth'])->group(function () {
 

@@ -1,16 +1,19 @@
 <?php
 
 namespace App\Livewire\Attractions;
-
 use Livewire\Component;
 use App\Models\Category;
 use App\Models\Attraction;
+use Livewire\Attributes\Url;
 use Livewire\WithPagination;
 
+use WireUi\Traits\WireUiActions;
 class AttractionsGrid extends Component
 {
     use WithPagination;
-    
+    use WireUiActions;
+    #[Url]
+    public $focusAttractionId = null;
     public $search = '';
     public $selectedCategories = [];
     public $minRating = 0; // ЗМІНА: за замовчуванням 0
@@ -111,7 +114,34 @@ class AttractionsGrid extends Component
         }
         $this->resetPage();
     }
-    
+    public function mount()
+    {
+        // Якщо є ID для фокусу, перевіряємо чи існує атракція
+        if ($this->focusAttractionId) {
+            $attraction = Attraction::find($this->focusAttractionId);
+            if (!$attraction) {
+                $this->focusAttractionId = null;
+            }
+        }
+    }
+    public function showOnMap($attractionId)
+    {
+        $attraction = Attraction::find($attractionId);
+        
+        if (!$attraction || !$attraction->latitude || !$attraction->longitude) {
+            $this->notification()->warning(
+                title: 'Uwaga',
+                description: 'Ta atrakcja nie ma współrzędnych na mapie.'
+            );
+            return;
+        }
+        
+        // Переходимо на сторінку карти з параметром фокусу
+        return redirect()->route('map.index', [
+            'focus' => $attractionId,
+            'type' => 'attraction'
+        ]);
+    }
     public function removeCategory($categoryId)
     {
         $this->selectedCategories = array_diff($this->selectedCategories, [$categoryId]);
@@ -155,20 +185,39 @@ class AttractionsGrid extends Component
             'message' => 'Status atrakcji został zmieniony.'
         ]);
     }
-    
-    public function deleteAttraction($attractionId)
+    public function attemptDelete($attractionId)
     {
-        // Перевірка авторизації
-        if (!auth()->check()) {
+        if (!auth()->check() || !auth()->user()->isAdmin()) {
             return;
         }
-        
+
         $attraction = Attraction::findOrFail($attractionId);
-        $attraction->delete();
-        
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => 'Atrakcja została usunięta.'
+
+        $this->dialog()->confirm([
+            'title'       => 'Czy na pewno chcesz usunąć atrakcję?',
+            'description' => "Atrakcja \"{$attraction->name}\" zostanie trwale usunięta.",
+            'acceptLabel' => 'Tak, usuń',
+            'rejectLabel' => 'Anuluj',
+            'method'      => 'deleteConfirmed',
+            'params'      => $attractionId,
         ]);
+    }
+    public function deleteConfirmed($attractionId)
+    {
+        if (!auth()->check() || !auth()->user()->isAdmin()) {
+            return;
+        }
+
+        $attraction = Attraction::findOrFail($attractionId);
+
+        $attraction->categories()->detach();
+        $attraction->delete();
+
+        $this->notification()->success(
+            title: 'Sukces',
+            description: 'Atrakcja została usunięta.'
+        );
+
+        $this->resetPage();
     }
 }

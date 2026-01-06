@@ -1,20 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold text-gray-800">{{ $nocleg->title }}</h2>
+        {{-- Пустий хедер, назва перенесена в основний контент --}}
     </x-slot>
 
     <div class="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white p-6 rounded-lg shadow space-y-6 text-black">
 
-            <p class="text-sm text-gray-600 flex items-center gap-2">
-                📍 <strong>{{ $nocleg->city }}, {{ $nocleg->street }}</strong>
-            </p>
+            {{-- НАЗВА --}}
+            <div>
+                <h1 style="font-size: 25px; font-weight: 800; margin-bottom: 1rem; color: #1f2937;">
+                    {{ $nocleg->title }}
+                </h1>
 
-            @if($nocleg->description)
-                <div>
-                    <p class="text-gray-800 leading-relaxed">{{ $nocleg->description }}</p>
-                </div>
-            @endif
+            </div>
 
             {{-- КАРУСЕЛЬ ФОТО --}}
             @if($nocleg->photos->isNotEmpty())
@@ -33,35 +31,49 @@
                          }
                      }">
                     
-                    {{-- ГОЛОВНЕ ФОТО --}}
-                    <div class="relative bg-gray-100 rounded-lg overflow-hidden border border-gray-200 max-w-3xl mx-auto">
-                        <div class="aspect-w-16 aspect-h-10">
+                    {{-- ОСНОВНЕ ФОТО З СІРИМ ФОНОМ --}}
+                    <div class="relative bg-gray-200 rounded-xl overflow-hidden border border-gray-300 shadow-lg">
+                        <div class="aspect-w-16 aspect-h-9">
                             @foreach($nocleg->photos as $index => $photo)
-                                <div class="absolute inset-0 transition-opacity duration-300"
-                                     :class="currentIndex === {{ $index }} ? 'opacity-100 z-10' : 'opacity-0 z-0'">
-                                    <img src="{{ asset($photo->path) }}"
-                                         alt="Zdjęcie noclegu {{ $index + 1 }}"
-                                         class="w-full h-full object-cover">
+                                {{-- Фонова фотографія (завжди перша) --}}
+                                @if($index === 0)
+                                    <div class="absolute inset-0 z-0 opacity-20">
+                                        <img src="{{ asset($photo->path) }}"
+                                             alt="Zdjęcie tła"
+                                             class="w-full h-full object-cover blur-sm"
+                                             loading="lazy">
+                                    </div>
+                                @endif
+                                
+                                {{-- Активна фотографія --}}
+                                <div class="absolute inset-0 transition-all duration-300 ease-in-out z-10"
+                                     :class="currentIndex === {{ $index }} 
+                                            ? 'opacity-100' 
+                                            : 'opacity-0'">
+                                    <div class="w-full h-full flex items-center justify-center p-4">
+                                        <img src="{{ asset($photo->path) }}"
+                                             alt="Zdjęcie noclegu {{ $index + 1 }}"
+                                             class="h-full w-auto max-w-full object-contain rounded-lg shadow-xl"
+                                             loading="lazy">
+                                    </div>
                                 </div>
                             @endforeach
                         </div>
 
-                        {{-- СТРІЛКИ НАВІГАЦІЇ НА ФОТО --}}
+                        {{-- НАВІГАЦІЙНІ СТРІЛКИ (БІЛІ) --}}
                         @if($nocleg->photos->count() > 1)
-                            <div class="absolute inset-0 flex items-center justify-between p-3 z-20">
-                                {{-- Ліва стрілка --}}
-                                <button x-show="currentIndex > 0"
-                                        @click="prevPhoto()"
-                                        class="w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110">
+                            <div class="absolute inset-0 flex items-center justify-between p-4 z-20">
+                                <button @click="prevPhoto()"
+                                        class="w-10 h-10 bg-white hover:bg-gray-50 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 border border-gray-200"
+                                        aria-label="Poprzednie zdjęcie">
                                     <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                     </svg>
                                 </button>
 
-                                {{-- Права стрілка --}}
-                                <button x-show="currentIndex < photosCount - 1"
-                                        @click="nextPhoto()"
-                                        class="w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 ml-auto">
+                                <button @click="nextPhoto()"
+                                        class="w-10 h-10 bg-white hover:bg-gray-50 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 border border-gray-200"
+                                        aria-label="Następne zdjęcie">
                                     <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                     </svg>
@@ -69,16 +81,17 @@
                             </div>
                         @endif
 
-                        {{-- КРАПОЧКИ-ІНДИКАТОРИ --}}
+                        {{-- ІНДИКАТОРИ --}}
                         @if($nocleg->photos->count() > 1)
-                            <div class="absolute bottom-3 left-1/2 transform -translate-x-1/2 z-20">
+                            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20">
                                 <div class="flex space-x-2">
                                     @foreach($nocleg->photos as $index => $photo)
                                         <button @click="changePhoto({{ $index }})"
                                                 class="w-2.5 h-2.5 rounded-full transition-all duration-300"
                                                 :class="currentIndex === {{ $index }} 
                                                        ? 'bg-white scale-125' 
-                                                       : 'bg-white/60 hover:bg-white/80'">
+                                                       : 'bg-white/60 hover:bg-white/80'"
+                                                aria-label="Przejdź do zdjęcia {{ $index + 1 }}">
                                         </button>
                                     @endforeach
                                 </div>
@@ -86,36 +99,29 @@
                         @endif
 
                         {{-- НОМЕР ФОТО --}}
-                        <div class="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded z-20">
+                        <div class="absolute top-4 right-4 bg-black/70 text-white text-sm px-2 py-1 rounded z-20">
                             <span x-text="currentIndex + 1"></span>/<span x-text="photosCount"></span>
                         </div>
                     </div>
 
-                    {{-- ГАЛЕРЕЯ МІНІАТЮР --}}
+                    {{-- МІНІАТЮРИ --}}
                     @if($nocleg->photos->count() > 1)
                         <div class="max-w-3xl mx-auto">
-                            <div class="flex gap-2 overflow-x-auto py-2 px-1 scrollbar-hide justify-center">
+                            <div class="flex gap-2 overflow-x-auto py-2 px-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 justify-center">
                                 @foreach($nocleg->photos as $index => $photo)
                                     <button @click="changePhoto({{ $index }})"
-                                            class="flex-shrink-0 w-16 h-14 rounded overflow-hidden border-2 transition-all relative group"
                                             :class="currentIndex === {{ $index }} 
-                                                   ? 'border-blue-500 shadow' 
-                                                   : 'border-gray-300 hover:border-blue-300'">
+                                                   ? 'ring-2 ring-blue-500 ring-offset-1' 
+                                                   : 'opacity-80 hover:opacity-100'"
+                                            class="flex-shrink-0 w-16 h-12 rounded overflow-hidden border border-gray-300 transition-all duration-300 hover:scale-105 relative bg-white">
                                         <img src="{{ asset($photo->path) }}"
                                              alt="Miniatura {{ $index + 1 }}"
-                                             class="w-full h-full object-cover">
+                                             class="w-full h-full object-cover"
+                                             loading="lazy">
                                         
-                                        {{-- ІНДИКАТОР НА МІНІАТЮРІ --}}
-                                        <div class="absolute inset-0 transition-opacity duration-300"
-                                             :class="currentIndex === {{ $index }} 
-                                                    ? 'bg-blue-500/20' 
-                                                    : 'group-hover:bg-blue-500/10'">
-                                        </div>
-                                        
-                                        {{-- НОМЕР НА МІНІАТЮРІ --}}
-                                        <div class="absolute top-1 right-1 w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] flex items-center justify-center font-bold"
-                                             :class="currentIndex === {{ $index }} ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'">
-                                            {{ $index + 1 }}
+                                        {{-- ІНДИКАТОР АКТИВНОСТІ --}}
+                                        <div class="absolute inset-0 transition-colors"
+                                             :class="currentIndex === {{ $index }} ? 'bg-blue-500/10' : ''">
                                         </div>
                                     </button>
                                 @endforeach
@@ -124,99 +130,182 @@
                     @endif
                 </div>
             @else
-                <div class="h-48 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200 max-w-3xl mx-auto">
-                    <p class="text-gray-500">Brak zdjęć dla tego noclegu</p>
+                <div class="h-60 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-300">
+                    <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    <p class="text-gray-500 font-medium">Brak zdjęć dla tego noclegu</p>
                 </div>
             @endif
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+            {{-- ЛОКАЦІЯ --}}
+            <div class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <p class="text-gray-700">
+                    <strong>{{ $nocleg->city }}, {{ $nocleg->street }}</strong>
+                </p>
+            </div>
 
-                <div class="p-4 bg-gray-50 rounded-lg">
-                    <p><strong>Typ obiektu:</strong> {{ $nocleg->object_type }}</p>
+            {{-- ІНФОРМАЦІЯ ТА ОЦІНКИ В ОДНІЙ ЛІНІЇ --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {{-- ІНФОРМАЦІЯ --}}
+                <div class="bg-gray-50 rounded-xl overflow-hidden shadow-sm">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-5 text-gray-800 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Informacje
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Typ obiektu</p>
+                                <p class="text-lg font-medium text-gray-800">{{ $nocleg->object_type }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Liczba miejsc</p>
+                                <p class="text-lg font-medium text-gray-800">{{ $nocleg->capacity }}</p>
+                            </div>
+                            @if($nocleg->contact_phone)
+                                <div>
+                                    <p class="text-sm text-gray-600 mb-1">Telefon kontaktowy</p>
+                                    <p class="text-lg font-medium text-gray-800">{{ $nocleg->contact_phone }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
-                <div class="p-4 bg-gray-50 rounded-lg">
-                    <p><strong>Liczba miejsc:</strong> {{ $nocleg->capacity }}</p>
+                {{-- ОЦІНКИ --}}
+                <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl overflow-hidden border border-yellow-100 shadow-sm">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold mb-5 text-gray-800 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            Ocena
+                        </h3>
+
+                        <div class="space-y-6">
+                            @if($nocleg->average_rating)
+                                <div class="grid grid-cols-2 gap-6">
+                                    <!-- Середня оцінка -->
+                                    <div class="bg-white rounded-xl shadow-inner p-6 text-center">
+                                        <p class="text-base text-gray-600 mb-3 font-medium">Średnia ocena</p>
+                                        <div class="text-5xl font-extrabold text-yellow-600 tracking-tight">
+                                            {{ number_format($nocleg->average_rating, 1) }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Кількість оцінок -->
+                                    <div class="bg-white rounded-xl shadow-inner p-6 text-center">
+                                        <p class="text-base text-gray-600 mb-3 font-medium">Liczba ocen</p>
+                                        <div class="text-5xl font-extrabold text-gray-800 tracking-tight">
+                                            {{ $ratings->count() }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="text-center py-12">
+                                    <div class="text-5xl font-bold text-gray-300 mb-4">—</div>
+                                    <p class="text-xl text-gray-700 font-medium mb-2">
+                                        Brak ocen
+                                    </p>
+                                    <p class="text-base text-gray-500">Bądź pierwszym, który oceni ten nocleg!</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ОПИС --}}
+            @if($nocleg->description)
+                <div class="prose max-w-none">
+                    <h3 class="text-lg font-semibold mb-2 text-gray-800">Opis</h3>
+                    <p class="text-gray-700 leading-relaxed">{{ $nocleg->description }}</p>
+                </div>
+            @endif
+
+            {{-- ПОСИЛАННЯ --}}
+            @if($nocleg->link)
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                    <p class="font-medium text-gray-800 mb-2">Strona obiektu</p>
+                    <a href="{{ $nocleg->link }}" 
+                       class="text-blue-600 hover:text-blue-800 hover:underline font-medium break-all"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        {{ $nocleg->link }}
+                    </a>
+                </div>
+            @endif
+
+            {{-- ВИПОСАДЖЕННЯ --}}
+            <div class="bg-gray-50 p-6 rounded-xl">
+                <h3 class="text-lg font-semibold mb-5 text-gray-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Wyposażenie
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    @if($nocleg->has_kitchen)
+                        <div class="flex items-center gap-3 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                            <span class="text-2xl">🍳</span>
+                            <span class="text-gray-700 font-medium">Kuchnia</span>
+                        </div>
+                    @endif
+                    @if($nocleg->has_parking)
+                        <div class="flex items-center gap-3 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                            <span class="text-2xl">🅿️</span>
+                            <span class="text-gray-700 font-medium">Parking</span>
+                        </div>
+                    @endif
+                    @if($nocleg->has_bathroom)
+                        <div class="flex items-center gap-3 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                            <span class="text-2xl">🚿</span>
+                            <span class="text-gray-700 font-medium">Łazienka</span>
+                        </div>
+                    @endif
+                    @if($nocleg->has_wifi)
+                        <div class="flex items-center gap-3 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                            <span class="text-2xl">📶</span>
+                            <span class="text-gray-700 font-medium">Wi-Fi</span>
+                        </div>
+                    @endif
+                    @if($nocleg->has_tv)
+                        <div class="flex items-center gap-3 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                            <span class="text-2xl">📺</span>
+                            <span class="text-gray-700 font-medium">Telewizor</span>
+                        </div>
+                    @endif
+                    @if($nocleg->has_balcony)
+                        <div class="flex items-center gap-3 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                            <span class="text-2xl">🌅</span>
+                            <span class="text-gray-700 font-medium">Balkon</span>
+                        </div>
+                    @endif
                 </div>
 
-                <div class="p-4 bg-gray-50 rounded-lg">
-                    <p><strong>Telefon kontaktowy:</strong> 
-                        {{ $nocleg->contact_phone ?? '—' }}
-                    </p>
-                </div>
-
-                @if($nocleg->link)
-                    <div class="p-4 bg-gray-50 rounded-lg">
-                        <p>
-                            <strong>Strona obiektu:</strong><br>
-                            <a href="{{ $nocleg->link }}" class="text-blue-600 hover:underline" target="_blank">
-                                {{ $nocleg->link }}
-                            </a>
-                        </p>
+                @if($nocleg->amenities_other)
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <p class="text-sm text-gray-600 mb-2">Inne udogodnienia</p>
+                        <p class="text-gray-700">{{ $nocleg->amenities_other }}</p>
                     </div>
                 @endif
             </div>
 
-            {{-- ОЦІНКИ --}}
-            <div>
-                <h3 class="text-lg font-semibold mb-3 text-gray-800">Ocena</h3>
-                <div class="flex items-center space-x-4">
-                    @if($nocleg->average_rating)
-                        <div class="text-3xl font-bold text-yellow-600">
-                            {{ number_format($nocleg->average_rating, 1) }}
-                        </div>
-                        <div class="flex items-center">
-                            @for($i = 1; $i <= 5; $i++)
-                                @if($i <= floor($nocleg->average_rating))
-                                    <svg class="w-6 h-6 text-yellow-500 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                                    </svg>
-                                @elseif($i - 0.5 <= $nocleg->average_rating)
-                                    <svg class="w-6 h-6 text-yellow-500 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                                    </svg>
-                                @else
-                                    <svg class="w-6 h-6 text-gray-300 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                                    </svg>
-                                @endif
-                            @endfor
-                        </div>
-                        <div class="text-sm text-gray-600">
-                            ({{ $ratings->count() }} {{ trans_choice('ocena|oceny|ocen', $ratings->count()) }})
-                        </div>
-                    @else
-                        <p class="text-gray-700 text-lg">
-                            Średnia ocena: <strong>Brak ocen</strong>
-                        </p>
-                    @endif
-                </div>
-            </div>
-
-            <div class="pt-4">
-                <h3 class="text-lg font-semibold mb-2">Wyposażenie</h3>
-                <div class="flex flex-wrap gap-3 text-xl">
-                    @if($nocleg->has_kitchen) <span title="Kuchnia">🍳</span> @endif
-                    @if($nocleg->has_parking) <span title="Parking">🅿️</span> @endif
-                    @if($nocleg->has_bathroom) <span title="Łazienka">🚿</span> @endif
-                    @if($nocleg->has_wifi) <span title="Wi-Fi">📶</span> @endif
-                    @if($nocleg->has_tv) <span title="Telewizor">📺</span> @endif
-                    @if($nocleg->has_balcony) <span title="Balkon">🌅</span> @endif
-                </div>
-
-                @if($nocleg->amenities_other)
-                    <p class="mt-3 text-gray-700"><strong>Inne:</strong> {{ $nocleg->amenities_other }}</p>
-                @endif
-            </div>
-
-            {{-- КОМПОНЕНТ ДЛЯ ДОДАВАННЯ ОЦІНОК --}}
+            {{-- КОМПОНЕНТ ОЦІНЮВАННЯ --}}
             <x-ratings :rateable="$nocleg" :ratings="$ratings" />
             
             {{-- КНОПКА ПОВЕРНЕННЯ --}}
-            <div class="pt-6">
+            <div class="pt-6 border-t border-gray-200">
                 <a href="{{ route('noclegi.index') }}"
-                   class="inline-flex items-center px-5 py-3 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition duration-200 font-medium">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] font-semibold group">
+                    <svg class="w-5 h-5 mr-3 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
                     Powrót do listy noclegów
@@ -226,10 +315,13 @@
     </div>
 
     <style>
-        /* Фіксовані пропорції для фото (16:10) */
+        /* Пропорції 16:9 для основного фото */
         .aspect-w-16 {
             position: relative;
-            padding-bottom: 62.5%; /* 10/16 = 0.625 */
+        }
+        
+        .aspect-h-9 {
+            padding-bottom: 56.25%; /* 9/16 = 0.5625 */
         }
         
         .aspect-w-16 > * {
@@ -241,53 +333,118 @@
             bottom: 0;
             left: 0;
         }
-        
-        /* Обмеження ширини для каруселі */
-        .max-w-3xl {
-            max-width: 48rem; /* 768px */
+
+        /* Стилі для скроллбара мініатюр */
+        .scrollbar-thin::-webkit-scrollbar {
+            height: 4px;
         }
         
-        /* Плавні переходи */
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 2px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Анімації */
         .transition-all {
             transition-property: all;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            transition-duration: 200ms;
         }
-        
-        /* Приховування стандартного скролбару для мініатюр */
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+
+        /* Тіні та ефекти */
+        .shadow-inner {
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
         }
-        
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
+
+        /* Розмиття для фонової фотографії */
+        .blur-sm {
+            filter: blur(8px);
         }
-        
-        /* Медіа-запити для адаптивності */
+
+        /* Адаптивність */
         @media (max-width: 768px) {
-            .max-w-3xl {
-                max-width: 100%;
+            .aspect-h-9 {
+                padding-bottom: 66.67%; /* 2:3 на мобільних */
             }
             
-            .flex-shrink-0.w-16 {
-                width: 14px;
-                height: 12px;
+            .w-16 {
+                width: 3.5rem;
+                height: 2.5rem;
             }
             
-            .absolute.top-1.right-1.w-4.h-4 {
-                width: 3px;
-                height: 3px;
-                font-size: 8px;
+            .text-5xl {
+                font-size: 3rem;
+            }
+            
+            .grid.grid-cols-2 {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .w-10.h-10 {
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+            
+            .w-5.h-5 {
+                width: 1.25rem;
+                height: 1.25rem;
+            }
+            
+            .grid-cols-1.lg\:grid-cols-2 {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
-        
-        .bg-white\/80 {
-            background-color: rgba(255, 255, 255, 0.8);
+
+        @media (max-width: 640px) {
+            .text-3xl {
+                font-size: 1.75rem;
+            }
+            
+            .text-5xl {
+                font-size: 2.5rem;
+            }
+            
+            .h-60 {
+                height: 14rem;
+            }
+            
+            .grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Ефекти для кнопок */
+        .active\:scale-95:active {
+            transform: scale(0.95);
+        }
+
+        /* Уніфіковані розміри фото */
+        .h-full.w-auto {
+            height: 100%;
+            width: auto;
+            max-width: 100%;
         }
         
-        .hover\:scale-110:hover {
-            transform: scale(1.1);
+        .max-w-full {
+            max-width: 100%;
+        }
+        
+        .object-contain {
+            object-fit: contain;
         }
     </style>
 </x-app-layout>

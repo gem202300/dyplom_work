@@ -194,162 +194,167 @@
                 {{-- ЗМІНА: Показуємо атракцію тільки якщо вона активна АБО користувач адмін --}}
                 @if($attraction->is_active || (auth()->check() && Auth::user()->isAdmin()))
                     {{-- Картка атракції --}}
-                    <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow 
-                              duration-300 overflow-hidden border border-gray-100">
-                        
-                        {{-- Карусель з фото БЕЗ рейтингу --}}
-                        <x-photo-carousel 
-                            :photos="$attraction->photos" 
-                            :showRating="false"
-                            :rating="$attraction->rating"
-                            :alt="$attraction->name"
-                            containerClass="aspect-[4/3]"
-                            :showDots="true"
-                            :showCounter="false"
-                        />
+                    <div class="bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100">
+                      {{-- Карусель з фото БЕЗ рейтингу --}}
+                      <x-photo-carousel 
+                          :photos="$attraction->photos" 
+                          :showRating="false"
+                          :rating="$attraction->rating"
+                          :alt="$attraction->name"
+                          containerClass="aspect-[4/3]"
+                          :showDots="true"
+                          :showCounter="false"
+                      />
 
-                        {{-- Інформація --}}
-                        <div class="p-4 space-y-3">
-                            {{-- Заголовок з рейтингом поруч --}}
-                            <div class="flex items-start justify-between gap-2">
-                                <div class="flex-1">
-                                    <h3 class="text-lg font-bold text-gray-900 line-clamp-1">
-                                        <a href="{{ route('attractions.show', $attraction->id) }}" 
-                                          class="hover:text-blue-600 transition-colors">
-                                            {{ $attraction->name }}
-                                        </a>
-                                    </h3>
-                                    <div class="flex items-center gap-1 text-sm text-gray-600 mt-1">
-                                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                        <span class="line-clamp-1">{{ $attraction->location }}</span>
-                                    </div>
-                                </div>
-                                
-                                {{-- Бейдж рейтингу --}}
-                                @if($attraction->rating)
+                      {{-- Інформація --}}
+                      <div class="p-4 space-y-3">
+                          {{-- Весь внутрішній контент залишається без змін --}}
+                          <div class="flex items-start justify-between gap-2">
+                              <div class="flex-1">
+                                  <h3 class="text-lg font-bold text-gray-900 line-clamp-1">
+                                      <a href="{{ route('attractions.show', $attraction->id) }}" 
+                                        class="hover:text-blue-600 transition-colors">
+                                          {{ $attraction->name }}
+                                      </a>
+                                  </h3>
+                                  <div class="flex items-center gap-1 text-sm text-gray-600 mt-1">
+                                      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                      </svg>
+                                      <span class="line-clamp-1">{{ $attraction->location }}</span>
+                                  </div>
+                              </div>
+                              
+                              @if($attraction->average_rating)
                                     <div class="flex-shrink-0">
-                                        <div class="bg-white px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1 border border-gray-200">
-                                            <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                            </svg>
-                                            <span class="font-bold text-gray-800 text-sm">
-                                                {{ number_format($attraction->rating, 1) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                @endif
-                            </div>
+                                  <div class="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 shadow-sm flex items-center gap-1">
+                                      <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                      </svg>
+                                      <span class="text-sm font-semibold text-gray-800">
+                                          {{ number_format($attraction->average_rating ?? 0, 1) }}
+                                      </span>
+                                  </div>
+                              </div>
+                              @endif
+                          </div>
 
-                            <p class="text-sm text-gray-700 line-clamp-2">
-                                {{ $attraction->description }}
-                            </p>
+                          <p class="text-sm text-gray-700 line-clamp-2">
+                              {{ $attraction->description }}
+                          </p>
 
-                            @if($attraction->categories->isNotEmpty())
-                                <div class="flex flex-wrap gap-1">
-                                    @foreach($attraction->categories as $category)
-                                        <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                                            {{ $category->name }}
-                                        </span>
-                                    @endforeach
-                                </div>
-                            @endif
+                          @if($attraction->categories->isNotEmpty())
+                              <div class="flex flex-wrap gap-1">
+                                  @foreach($attraction->categories as $category)
+                                      <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                                          {{ $category->name }}
+                                      </span>
+                                  @endforeach
+                              </div>
+                          @endif
 
-                            @if($attraction->opening_time || $attraction->closing_time)
-                                <div class="flex items-center text-sm text-gray-600">
-                                    <svg class="w-4 h-4 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <span>
-                                        @if($attraction->opening_time && $attraction->closing_time)
-                                            {{ \Carbon\Carbon::parse($attraction->opening_time)->format('H:i') }} - 
-                                            {{ \Carbon\Carbon::parse($attraction->closing_time)->format('H:i') }}
-                                        @elseif($attraction->opening_time)
-                                            Od {{ \Carbon\Carbon::parse($attraction->opening_time)->format('H:i') }}
-                                        @elseif($attraction->closing_time)
-                                            Do {{ \Carbon\Carbon::parse($attraction->closing_time)->format('H:i') }}
-                                        @endif
-                                    </span>
-                                </div>
-                            @endif
+                          @if($attraction->opening_time || $attraction->closing_time)
+                              <div class="flex items-center text-sm text-gray-600">
+                                  <svg class="w-4 h-4 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  <span>
+                                      @if($attraction->opening_time && $attraction->closing_time)
+                                          {{ \Carbon\Carbon::parse($attraction->opening_time)->format('H:i') }} - 
+                                          {{ \Carbon\Carbon::parse($attraction->closing_time)->format('H:i') }}
+                                      @elseif($attraction->opening_time)
+                                          Od {{ \Carbon\Carbon::parse($attraction->opening_time)->format('H:i') }}
+                                      @elseif($attraction->closing_time)
+                                          Do {{ \Carbon\Carbon::parse($attraction->closing_time)->format('H:i') }}
+                                      @endif
+                                  </span>
+                              </div>
+                          @endif
 
-                            {{-- ЗМІНА: Бейдж "Ukryta" тільки для адміна --}}
-                            @if(auth()->check() && Auth::user()->isAdmin() && !$attraction->is_active)
-                                <div class="inline-flex items-center gap-1 px-2 py-1 bg-red-100 
-                                            text-red-700 text-xs rounded-full border border-red-200">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Ukryta
-                                </div>
-                            @endif
-                        </div>
-
-                        {{-- Кнопки дій --}}
-                        <div class="px-4 pb-4 pt-3 border-t border-gray-100">
-                            <div class="flex items-center justify-between gap-2">
-                                <a href="{{ route('attractions.show', $attraction->id) }}" 
-                                  class="flex-1 py-2.5 bg-blue-600 text-white text-center rounded-lg 
-                                          hover:bg-blue-700 transition-colors font-medium text-sm">
-                                    Zobacz więcej
-                                </a>
-                                
-                                {{-- Кнопки управління тільки для адміна --}}
-                                @if(auth()->check() && Auth::user()->isAdmin())
-                                    <div class="flex gap-2">
-                                        <a href="{{ route('attractions.edit', $attraction->id) }}" 
-                                          class="w-10 h-10 flex items-center justify-center 
-                                                  bg-gray-100 text-gray-700 rounded-lg 
-                                                  hover:bg-gray-200 transition-colors"
-                                          title="Edytuj">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                            </svg>
-                                        </a>
-                                        
-                                        <button wire:click="toggleActive({{ $attraction->id }})"
-                                                class="w-10 h-10 flex items-center justify-center 
-                                                      {{ $attraction->is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' }} 
-                                                      rounded-lg transition-colors"
-                                                title="{{ $attraction->is_active ? 'Ukryj' : 'Aktywuj' }}">
-                                            @if($attraction->is_active)
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                          d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                                </svg>
-                                            @else
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                </svg>
-                                            @endif
-                                        </button>
-                                        
-                                        <button wire:click="deleteAttraction({{ $attraction->id }})"
-                                                onclick="return confirm('Czy na pewno chcesz usunąć tę atrakcję?')"
-                                                class="w-10 h-10 flex items-center justify-center 
-                                                      bg-red-100 text-red-700 rounded-lg 
-                                                      hover:bg-red-200 transition-colors"
-                                                title="Usuń">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
+                          @if(auth()->check() && Auth::user()->isAdmin() && !$attraction->is_active)
+                              <div class="inline-flex items-center gap-1 px-2 py-1 bg-red-100 
+                                          text-red-700 text-xs rounded-full border border-red-200">
+                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  Ukryta
+                              </div>
+                          @endif
+                      </div>
+                      @if($attraction->latitude && $attraction->longitude)
+                          <button wire:click="showOnMap({{ $attraction->id }})"
+                                  class="w-56 py-3 bg-green-600 text-white text-center rounded-lg 
+                                        hover:bg-green-700 transition-colors font-medium text-sm
+                                        flex items-center justify-center gap-2 ml-4 mt-2">
+                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                              </svg>
+                              Pokaż na mapie
+                          </button>
+                      @endif
+                      {{-- Кнопки дій --}}
+                      <div class="px-4 pb-4 pt-3 border-t border-gray-100">
+                          <div class="flex items-center justify-between gap-2">
+                              <a href="{{ route('attractions.show', $attraction->id) }}" 
+                                class="flex-1 py-2.5 bg-blue-600 text-white text-center rounded-lg 
+                                        hover:bg-blue-700 transition-colors font-medium text-sm">
+                                  Zobacz więcej
+                              </a>
+                               
+                              @if(auth()->check() && Auth::user()->isAdmin())
+                                  <div class="flex gap-2">
+                                      <a href="{{ route('attractions.edit', $attraction->id) }}" 
+                                        class="w-10 h-10 flex items-center justify-center 
+                                                bg-gray-100 text-gray-700 rounded-lg 
+                                                hover:bg-gray-200 transition-colors"
+                                        title="Edytuj">
+                                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                          </svg>
+                                      </a>
+                                      
+                                      <button wire:click="toggleActive({{ $attraction->id }})"
+                                              class="w-10 h-10 flex items-center justify-center 
+                                                    {{ $attraction->is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' }} 
+                                                    rounded-lg transition-colors"
+                                              title="{{ $attraction->is_active ? 'Ukryj' : 'Aktywuj' }}">
+                                          @if($attraction->is_active)
+                                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                              </svg>
+                                          @else
+                                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                              </svg>
+                                          @endif
+                                      </button>
+                                      
+                                      <button wire:click="attemptDelete({{ $attraction->id }})"
+                                              class="w-10 h-10 flex items-center justify-center 
+                                                    bg-red-100 text-red-700 rounded-lg 
+                                                    hover:bg-red-200 transition-colors cursor-pointer"
+                                              title="Usuń">
+                                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                          </svg>
+                                      </button>
+                                  </div>
+                              @endif
+                          </div>
+                      </div>
+                  </div>
                 @endif
             @endforeach
         </div>

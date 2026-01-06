@@ -244,6 +244,7 @@
                             :showRating="false"
                             :rating="$n->average_rating ?? 0"
                             :alt="$n->title"
+                            :showDots="true"
                             aspectRatio="aspect-video"
                             containerClass="rounded-t-xl"
                             arrowSize="w-8 h-8"
@@ -260,14 +261,14 @@
                                     {{ $n->title }}
                                 </a>
                             </h3>
-                            
-                           {{-- Компактний рейтинг --}}
-                          <div class="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 shadow-sm flex items-center gap-1">
-                              <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                              </svg>
-                              <span class="text-sm font-semibold text-gray-800">{{ number_format($n->average_rating, 1) }}</span>
-                          </div>
+                          @if($n->average_rating && $n->average_rating > 0)
+                              <div class="bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 shadow-sm flex items-center gap-1">
+                                  <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                  </svg>
+                                  <span class="text-sm font-semibold text-gray-800">{{ number_format($n->average_rating, 1) }}</span>
+                              </div>
+                          @endif
                         </div>
                         
                         {{-- Місце --}}
@@ -296,7 +297,18 @@
                             @if($n->has_balcony) <span class="px-1.5 py-0.5 bg-gray-100 rounded">🌅</span> @endif
                         </div>
                     </div>
-
+                    @if($n->latitude && $n->longitude)
+                        <button wire:click="showOnMap({{ $n->id }})"
+                                class="w-56 py-3 bg-green-600 text-white text-center rounded-lg 
+                                      hover:bg-green-700 transition-colors font-medium text-sm
+                                      flex items-center justify-center gap-2 ml-4 mt-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                            </svg>
+                            Pokaż na mapie
+                        </button>
+                    @endif
                     {{-- КНОПКИ ДІЙ (ЗМІНЕНО ЯК У ПРИКЛАДІ) --}}
                     <div class="px-4 pb-4 pt-3 border-t border-gray-100">
                         <div class="flex items-center justify-between gap-2">
@@ -320,12 +332,12 @@
                                         </svg>
                                     </a>
                                     
-                                    <button wire:click="deleteNocleg({{ $n->id }})"
-                                            onclick="return confirm('Czy na pewno chcesz usunąć ten nocleg?')"
-                                            class="w-10 h-10 flex items-center justify-center 
-                                                  bg-red-100 text-red-700 rounded-lg 
-                                                  hover:bg-red-200 transition-colors"
-                                            title="Usuń obiekt">
+                                    <button wire:click="attemptDeleteNocleg({{ $n->id }})"
+                                        class="w-10 h-10 flex items-center justify-center 
+                                              bg-red-100 text-red-700 rounded-lg 
+                                              hover:bg-red-200 transition-colors cursor-pointer"
+                                        title="Usuń obiekt">
+
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

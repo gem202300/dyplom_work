@@ -12,4 +12,12 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
     Route::get('/users', [UserController::class, 'index']);
+    // Маршрути для фільтрів карти
+    Route::get('/api/object-types', function () {
+        return \App\Models\ObjectType::select('id', 'name')->get();
+    })->name('api.object-types');
+
+    Route::get('/api/categories', function () {
+        return \App\Models\Category::select('id', 'name')->get();
+    })->name('api.categories');
 });
