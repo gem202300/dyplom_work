@@ -9,40 +9,34 @@ use App\Enums\Auth\PermissionType;
 class CategoryPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * Дозволяємо всім (включаючи гостей) бачити список категорій
      */
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
-        return $user->can(PermissionType::CATEGORY_ACCESS->value);
+        return true;
     }
 
     /**
-     * Determine whether the user can view the model.
+     * Дозволяємо всім бачити окрему категорію
      */
-    public function view(User $user, Category $category): bool
+    public function view(?User $user, Category $category): bool
     {
-        return $user->can(PermissionType::CATEGORY_ACCESS->value);
+        return true;
     }
 
     /**
-     * Determine whether the user can create models.
+     * Тільки з правами — створення, редагування, видалення
      */
     public function create(User $user): bool
     {
         return $user->can(PermissionType::CATEGORY_MANAGE->value);
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, Category $category): bool
     {
         return $user->can(PermissionType::CATEGORY_MANAGE->value);
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Category $category): bool
     {
         return $user->can(PermissionType::CATEGORY_MANAGE->value);

@@ -8,9 +8,22 @@ class AttractionController extends Controller
 {
     public function index()
     {
-        $this->authorize('viewAny', Attraction::class); 
-        return view('attractions.index');
+        $attractions = Attraction::where('is_active', true)->get();
+        return view('attractions.index', compact('attractions'));
     }
+
+    public function show(Attraction $attraction)
+    {
+        if (!$attraction->is_active && !auth()->check()) {
+            abort(404);
+        }
+
+        $attraction->load(['photos', 'categories']);
+        $ratings = $attraction->ratings()->with('user')->latest()->paginate(5);
+
+        return view('attractions.show', compact('attraction', 'ratings'));
+    }
+
 
     public function create()
     {
@@ -24,20 +37,5 @@ class AttractionController extends Controller
         return view('attractions.edit', compact('attraction'));
     }
 
-    public function show(Attraction $attraction)
-    {
-        $this->authorize('view', $attraction); 
-        if (!$attraction->is_active && !auth()->check()) {
-            abort(404);
-        }
-
-        $attraction->load(['photos', 'categories']);
-
-        $ratings = $attraction->ratings()
-            ->with('user')
-            ->latest()
-            ->paginate(5);
-
-        return view('attractions.show', compact('attraction', 'ratings'));
-    }
+    
 }

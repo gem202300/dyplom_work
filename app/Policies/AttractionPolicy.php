@@ -8,16 +8,16 @@ use App\Enums\Auth\PermissionType;
 
 class AttractionPolicy
 {
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
-        return $user->can(PermissionType::ATTRACTION_ACCESS->value);
+        return true; // усі можуть переглядати список атракцій
     }
 
-    public function view(User $user, Attraction $attraction): bool
+    public function view(?User $user, Attraction $attraction): bool
     {
-        return $user->can(PermissionType::ATTRACTION_ACCESS->value);
+        // дозволити перегляд, якщо активна, або адміну
+        return $attraction->is_active || ($user?->isAdmin() ?? false);
     }
-
     public function create(User $user): bool
     {
         return $user->can(PermissionType::ATTRACTION_MANAGE->value);

@@ -14,9 +14,35 @@ use App\Http\Controllers\RatingReportController;
 use App\Http\Controllers\CategoryDeleteController;
 use App\Http\Controllers\NoclegCalendarController;
 
-Route::get('/', fn() => view('welcome'));
-
+Route::get('/', [MapController::class, 'index'])->name('home');
 Route::get('/map', [MapController::class, 'index'])->name('map.index');
+// Відкриті маршрути для всіх
+Route::prefix('attractions')->name('attractions.')->group(function () {
+    Route::get('/', [AttractionController::class, 'index'])->name('index'); // список атракцій
+    Route::get('/{attraction}', [AttractionController::class, 'show'])->name('show'); // перегляд конкретної атракції
+
+    // Тільки для авторизованих користувачів
+    Route::middleware('auth')->group(function () {
+        Route::get('/create', [AttractionController::class, 'create'])->name('create');
+        Route::get('/{attraction}/edit', [AttractionController::class, 'edit'])->name('edit');
+    });
+});
+
+// Відкриті маршрути для всіх
+Route::prefix('noclegi')->name('noclegi.')->group(function () {
+    Route::get('/', [NoclegController::class, 'index'])->name('index'); // список noclegi
+    Route::get('/{nocleg}', [NoclegController::class, 'show'])->name('show'); // перегляд конкретного nocleg
+    Route::get('/{nocleg}/calendar-data', [NoclegController::class, 'getCalendarData'])->name('noclegi.calendar.data');
+
+    // Тільки для авторизованих
+    Route::middleware('auth')->group(function () {
+        Route::get('/create', [NoclegController::class, 'create'])->name('create');
+        Route::get('/{nocleg}/edit', [NoclegController::class, 'edit'])->name('edit');
+        Route::get('/{nocleg}/calendar', [NoclegCalendarController::class, 'index'])->name('calendar');
+        Route::post('/{nocleg}/calendar', [NoclegCalendarController::class, 'update'])->name('calendar.update');
+        });
+});
+
 Route::get('/map-data', [App\Http\Controllers\MapDataController::class, 'index'])->name('map.data');
 Route::get('/api/object-types', function () {
     return \App\Models\ObjectType::select('id', 'name')->get();
@@ -30,25 +56,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 
-    Route::get('/attractions', fn() => view('attractions.index'))->name('attractions.index');
-
-    Route::prefix('attractions')->name('attractions.')->group(function () {
-        Route::get('/', [AttractionController::class, 'index'])->name('index');
-        Route::get('/create', [AttractionController::class, 'create'])->name('create');
-        Route::get('/{attraction}/edit', [AttractionController::class, 'edit'])->name('edit');
-        Route::get('/{attraction}', [AttractionController::class, 'show'])->name('show');
-    });
-
-    Route::prefix('noclegi')->name('noclegi.')->group(function () {
-        Route::get('/', fn() => view('noclegi.index'))->name('index');
-        Route::get('/create', [NoclegController::class, 'create'])->name('create');
-        Route::get('/{nocleg}', [NoclegController::class, 'show'])->name('show');
-        Route::get('/{nocleg}/edit', [NoclegController::class, 'edit'])->name('edit');
-        Route::get('/{nocleg}/calendar', [NoclegCalendarController::class, 'index'])->name('calendar');
-        Route::post('/{nocleg}/calendar', [NoclegCalendarController::class, 'update'])->name('calendar.update');
-    });
-// Додайте цей маршрут до групи noclegi
-Route::get('/noclegi/{nocleg}/calendar-data', [NoclegController::class, 'getCalendarData'])->name('noclegi.calendar.data');
+   
     Route::get('/my-noclegi', [MyNoclegiController::class, 'index'])->name('my-noclegi');
 
     Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');

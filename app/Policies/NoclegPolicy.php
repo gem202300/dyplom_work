@@ -8,15 +8,16 @@ use App\Enums\Auth\PermissionType;
 
 class NoclegPolicy
 {
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
-        return $user->can(PermissionType::NOCLEG_VIEW->value);
+        return true; // усі можуть переглядати список noclegi
     }
 
-    public function view(User $user, Nocleg $nocleg): bool
+    public function view(?User $user, Nocleg $nocleg): bool
     {
-        return $user->can(PermissionType::NOCLEG_VIEW->value);
+        return $nocleg->status === 'approved' || ($user?->can(PermissionType::NOCLEG_MANAGE->value) ?? false);
     }
+
 
     // Створення — адмін або owner
     public function create(User $user): bool

@@ -10,19 +10,27 @@ use App\Models\NoclegAvailability;
 class NoclegController extends Controller
 {
     
+    
+    public function index()
+    {
+        $noclegi = Nocleg::where('status', 'approved')->get();
+        return view('noclegi.index', compact('noclegi'));
+    }
+
     public function show(Nocleg $nocleg, Request $request)
     {
-        $this->authorize('view', $nocleg);  
+        if ($nocleg->status !== 'approved' && !auth()->check()) {
+            abort(404);
+        }
+
         $ratings = $nocleg->ratings()->latest()->paginate(5);
-        
-        // Calculate calendar variables for initial display
         $currentMonth = $request->get('month', date('Y-m'));
         $carbonMonth = Carbon::parse($currentMonth);
         $firstDayOfWeek = $carbonMonth->copy()->startOfMonth()->dayOfWeekIso;
-        
+
         return view('noclegi.show', compact('nocleg', 'ratings', 'carbonMonth', 'firstDayOfWeek'));
     }
-    
+
     public function details(Nocleg $nocleg)
     {
         $this->authorize('view', $nocleg);  

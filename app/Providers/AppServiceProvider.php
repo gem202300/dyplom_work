@@ -53,10 +53,10 @@ class AppServiceProvider extends ServiceProvider
         });
         Gate::define('admin-access', [AdminPolicy::class, 'adminAccess']);
         Gate::policy(User::class, UserPolicy::class);
-        Gate::policy(Attraction::class, AttractionPolicy::class);
-        Gate::policy(Category::class, CategoryPolicy::class);
+        //Gate::policy(Attraction::class, AttractionPolicy::class);
+        //Gate::policy(Category::class, CategoryPolicy::class);
         Gate::policy(Nocleg::class, NoclegPolicy::class);
-        Gate::policy(Rating::class, RatingPolicy::class);
+        //Gate::policy(Rating::class, RatingPolicy::class);
         Gate::policy(BannedWord::class, BannedWordPolicy::class);
     }
 }

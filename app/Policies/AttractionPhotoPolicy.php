@@ -8,15 +8,16 @@ use App\Enums\Auth\PermissionType;
 
 class AttractionPhotoPolicy
 {
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
-        return $user->can(PermissionType::ATTRACTION_ACCESS->value);
+        return true; // усі можуть бачити фото
     }
 
-    public function view(User $user, AttractionPhoto $photo): bool
+    public function view(?User $user, AttractionPhoto $photo): bool
     {
-        return $user->can(PermissionType::ATTRACTION_ACCESS->value);
+        return true; // усі можуть бачити фото
     }
+
 
     public function create(User $user): bool
     {

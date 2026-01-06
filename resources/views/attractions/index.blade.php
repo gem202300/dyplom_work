@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between">
             <h2 class="text-xl font-semibold text-gray-800">Atrakcje</h2>
-            @if (Auth::user()->isAdmin())
+            @if (auth()->check() && auth()->user()->isAdmin())
                 <x-wireui-button href="{{ route('attractions.create') }}" primary label="Dodaj atrakcję" />
             @endif
         </div>

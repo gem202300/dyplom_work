@@ -4,7 +4,7 @@
             <div class="flex">
                 <!-- Логотип -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                    <a href="{{ auth()->check() ? route('dashboard') : route('home') }}">
                         <x-application-mark class="block h-9 w-auto" />
                     </a>
                 </div>
@@ -12,18 +12,20 @@
                 <!-- Десктопне меню -->
                 <div class="hidden sm:flex items-center space-x-8 sm:-my-px sm:ms-10">
                     <!-- Загальні посилання для всіх авторизованих користувачів -->
-                    <x-nav-link href="{{ route('map.index') }}" :active="request()->routeIs('map.*')">
-                        Mapa
-                    </x-nav-link>
+                     <x-nav-link href="{{ route('map.index') }}">
+                          Mapa
+                      </x-nav-link>
 
-                    <x-nav-link href="{{ route('attractions.index') }}" :active="request()->routeIs('attractions.*')">
-                        Atrakcje
-                    </x-nav-link>
+                      <x-nav-link href="{{ route('attractions.index') }}">
+                          Atrakcje
+                      </x-nav-link>
 
-                    <x-nav-link href="{{ route('noclegi.index') }}" :active="request()->routeIs('noclegi.*') && !request()->routeIs('my-noclegi')">
-                        Noclegi
-                    </x-nav-link>
+                      <x-nav-link href="{{ route('noclegi.index') }}">
+                          Noclegi
+                      </x-nav-link>
 
+                      {{-- ТІЛЬКИ ДЛЯ AUTH --}}
+                      @auth
                     @if (Auth::user()->isOwner())
                         <x-nav-link href="{{ route('my-noclegi') }}" :active="request()->routeIs('my-noclegi')">
                             Moje noclegi
@@ -77,14 +79,15 @@
                             </div>
                         </div>
                     @endif
+                  @endauth
                 </div>
             </div>
 
-            <!-- Правий бік: сповіщення + профіль -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <!-- Правий бік: сповіщення + профіль АБО кнопки входу/реєстрації -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 space-x-4">
                 @auth
                     <!-- Сповіщення -->
-                    <div class="mr-4">
+                    <div class="mr-2">
                         <livewire:notification-bell />
                     </div>
 
@@ -139,6 +142,107 @@
                                 </form>
                             </div>
                         </div>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-md mr-2">
+                        Zaloguj się
+                    </a>
+                    <a href="{{ route('register') }}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">
+                        Zarejestruj się
+                    </a>
+                @endauth
+            </div>
+
+            <div class="sm:hidden flex items-center">
+                <button @click="navOpen = !navOpen" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path :class="{'hidden': navOpen, 'inline-flex': !navOpen}" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{'hidden': !navOpen, 'inline-flex': navOpen}" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div x-show="navOpen" x-cloak class="sm:hidden">
+            <div class="pt-2 pb-3 space-y-1">
+                <x-responsive-nav-link href="{{ route('map.index') }}" :active="request()->routeIs('map.*')">
+                    Mapa
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('attractions.index') }}" :active="request()->routeIs('attractions.*')">
+                    Atrakcje
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('noclegi.index') }}" :active="request()->routeIs('noclegi.*')">
+                    Noclegi
+                </x-responsive-nav-link>
+
+                @auth
+                    @if (Auth::user()->isOwner())
+                        <x-responsive-nav-link href="{{ route('my-noclegi') }}" :active="request()->routeIs('my-noclegi')">
+                            Moje noclegi
+                        </x-responsive-nav-link>
+                    @endif
+
+                    @if (Auth::user()->isAdmin())
+                        <x-responsive-nav-link href="{{ route('users.index') }}" :active="request()->routeIs('users.*')">
+                            Użytkownicy
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link href="{{ route('categories.index') }}" :active="request()->routeIs('categories.*')">
+                            Kategorie atrakcji
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link href="{{ route('admin.noclegi.index') }}" :active="request()->routeIs('admin.noclegi.*')">
+                            Zgłoszone noclegi
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link href="{{ route('admin.owner-requests.index') }}" :active="request()->routeIs('admin.owner-requests.*')">
+                            Zgłoszenia właścicieli
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link href="{{ route('admin.ratings.reports') }}" :active="request()->routeIs('admin.ratings.reports')">
+                            Zgłoszone komentarze
+                        </x-responsive-nav-link>
+                    @endif
+                @endauth
+            </div>
+
+            <div class="pt-4 pb-3 border-t border-gray-200 dark:border-gray-700">
+                @auth
+                    <div class="flex items-center px-4">
+                        @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
+                            <div class="shrink-0 mr-3">
+                                <img class="h-10 w-10 rounded-full" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
+                            </div>
+                        @endif
+
+                        <div>
+                            <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
+                            <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 space-y-1">
+                        <x-responsive-nav-link href="{{ route('profile.show') }}">
+                            Profil
+                        </x-responsive-nav-link>
+
+                        @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
+                            <x-responsive-nav-link href="{{ route('api-tokens.index') }}">
+                                API Tokens
+                            </x-responsive-nav-link>
+                        @endif
+
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <x-responsive-nav-link href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();">
+                                Wyloguj się
+                            </x-responsive-nav-link>
+                        </form>
+                    </div>
+                @else
+                    <div class="space-y-2 px-4">
+                        <a href="{{ route('login') }}" class="block w-full text-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
+                            Zaloguj się
+                        </a>
+                        <a href="{{ route('register') }}" class="block w-full text-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">
+                            Zarejestruj się
+                        </a>
                     </div>
                 @endauth
             </div>
