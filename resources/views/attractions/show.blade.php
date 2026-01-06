@@ -193,7 +193,7 @@
                                   <div class="bg-white rounded-xl shadow-inner p-6 text-center">
                                       <p class="text-base text-gray-600 mb-3 font-medium">Liczba ocen</p>
                                       <div class="text-5xl font-extrabold text-gray-800 tracking-tight">
-                                          {{ $ratings->count() }}
+                                          {{ $ratings->total() }}
                                       </div>
                                   </div>
                               </div>

@@ -11,7 +11,6 @@
                 <h1 style="font-size: 25px; font-weight: 800; margin-bottom: 1rem; color: #1f2937;">
                     {{ $nocleg->title }}
                 </h1>
-
             </div>
 
             {{-- КАРУСЕЛЬ ФОТО --}}
@@ -204,7 +203,7 @@
                                     <div class="bg-white rounded-xl shadow-inner p-6 text-center">
                                         <p class="text-base text-gray-600 mb-3 font-medium">Liczba ocen</p>
                                         <div class="text-5xl font-extrabold text-gray-800 tracking-tight">
-                                            {{ $ratings->count() }}
+                                            {{ $ratings->total() }}
                                         </div>
                                     </div>
                                 </div>
@@ -297,6 +296,251 @@
                     </div>
                 @endif
             </div>
+            @if($nocleg->status === 'approved')
+                <div id="calendar-container" class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-semibold mb-6 text-gray-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Kalendarz dostępności
+                    </h3>
+
+                    <div x-data="{
+                        isLoading: false,
+                        currentMonth: '{{ request('month', date('Y-m')) }}',
+                        currentMonthName: '{{ $carbonMonth->translatedFormat('F Y') }}',
+                        emptyDays: {{ $firstDayOfWeek - 1 }},
+                        days: [],
+                        
+                        init() {
+                            this.loadDays();
+                        },
+                        
+                        async loadDays() {
+                            this.isLoading = true;
+                            
+                            try {
+                                const response = await fetch(`/noclegi/{{ $nocleg->id }}/calendar-data?month=${this.currentMonth}`, {
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                });
+                                
+                                if (!response.ok) {
+                                    throw new Error('Błąd ładowania kalendarza');
+                                }
+                                
+                                const data = await response.json();
+                                
+                                this.currentMonthName = data.monthName;
+                                this.emptyDays = data.emptyDays;
+                                this.days = data.days;
+                                
+                                // Оновлюємо URL без перезавантаження сторінки
+                                window.history.pushState({}, '', `?month=${this.currentMonth}`);
+                                
+                            } catch (error) {
+                                console.error('Error loading calendar:', error);
+                                alert('Nie udało się załadować kalendarza. Spróbuj ponownie.');
+                            } finally {
+                                this.isLoading = false;
+                            }
+                        },
+                        
+                        changeMonth(direction) {
+                            const current = new Date(this.currentMonth + '-01');
+                            current.setMonth(current.getMonth() + direction);
+                            
+                            const year = current.getFullYear();
+                            const month = String(current.getMonth() + 1).padStart(2, '0');
+                            this.currentMonth = `${year}-${month}`;
+                            
+                            this.loadDays();
+                        },
+                        
+                        getDayClass(day) {
+                            const isPast = day.isPast;
+                            const capacity = day.capacity;
+                            const totalCapacity = {{ $nocleg->capacity }};
+                            
+                            // Повертаємо Tailwind класи, а не кольори
+                            if (isPast) {
+                                return {
+                                    bgClass: 'bg-gray-100',
+                                    textClass: 'text-gray-500',
+                                    indicatorClass: 'bg-gray-500',
+                                    capacityTextClass: 'text-gray-400'
+                                };
+                            } else if (capacity === 0) {
+                                return {
+                                    bgClass: 'bg-red-100',
+                                    textClass: 'text-red-700',
+                                    indicatorClass: 'bg-red-500',
+                                    capacityTextClass: 'text-red-700'
+                                };
+                            } else if (capacity === totalCapacity) {
+                                return {
+                                    bgClass: 'bg-green-100',
+                                    textClass: 'text-green-800',
+                                    indicatorClass: 'bg-green-500',
+                                    capacityTextClass: 'text-green-700'
+                                };
+                            } else {
+                                return {
+                                    bgClass: 'bg-yellow-100',
+                                    textClass: 'text-yellow-800',
+                                    indicatorClass: 'bg-yellow-500',
+                                    capacityTextClass: 'text-yellow-700'
+                                };
+                            }
+                        },
+                        
+                        // Допоміжна функція для конвертації кольорів
+                        getColorValue(colorClass) {
+                            const colors = {
+                                // Gray
+                                'gray-100': '#f3f4f6',
+                                'gray-500': '#6b7280',
+                                'gray-400': '#9ca3af',
+                                'gray-700': '#374151',
+                                
+                                // Red
+                                'red-100': '#fee2e2',
+                                'red-500': '#ef4444',
+                                'red-700': '#b91c1c',
+                                
+                                // Green
+                                'green-100': '#dcfce7',
+                                'green-500': '#22c55e',
+                                'green-800': '#166534',
+                                'green-700': '#15803d',
+                                
+                                // Yellow
+                                'yellow-100': '#fef9c3',
+                                'yellow-500': '#eab308',
+                                'yellow-800': '#854d0e',
+                                'yellow-700': '#a16207',
+                                
+                                // Blue
+                                'blue-500': '#3b82f6',
+                                'blue-300': '#93c5fd'
+                            };
+                            return colors[colorClass] || '#000000';
+                        }
+                    }" x-init="init()">
+                        {{-- НАВІГАЦІЯ ПО МІСЯЦЯХ --}}
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                            <div>
+                                <p class="text-gray-600 text-sm">
+                                    <span class="font-semibold">{{ $nocleg->capacity }}</span> miejsc dostępnych
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span x-text="currentMonthName" class="text-xl font-semibold text-gray-800"></span>
+                                <div class="flex items-center gap-2">
+                                    <button @click="changeMonth(-1)" 
+                                            :disabled="isLoading"
+                                            class="p-2 hover:bg-gray-100 rounded-lg transition border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                        </svg>
+                                    </button>
+                                    <button @click="changeMonth(1)" 
+                                            :disabled="isLoading"
+                                            class="p-2 hover:bg-gray-100 rounded-lg transition border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- ЗАВАНТАЖЕННЯ --}}
+                        <div x-show="isLoading" class="text-center py-12">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <p class="mt-2 text-gray-600">Ładowanie kalendarza...</p>
+                        </div>
+
+                        {{-- КАЛЕНДАР --}}
+                        <div x-show="!isLoading">
+                            <div class="bg-white rounded-xl border border-gray-200 p-4">
+                                {{-- ДНІ ТИЖНЯ --}}
+                                <div class="grid grid-cols-7 gap-1 mb-4">
+                                    @foreach(['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So', 'N'] as $day)
+                                        <div class="text-center text-sm font-semibold text-gray-700 py-3 px-1 bg-gray-50 rounded">
+                                            {{ $day }}
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                {{-- ДНІ МІСЯЦЯ --}}
+                                <div class="grid grid-cols-7 gap-2">
+                                    <template x-for="i in emptyDays" :key="'empty-' + i">
+                                        <div class="h-16"></div>
+                                    </template>
+
+                                    <template x-for="day in days" :key="day.date">
+                                        <div class="h-16 flex flex-col items-center justify-between p-2 rounded-lg border border-gray-300 transition-all hover:shadow-md hover:scale-[1.02]"
+                                            :class="{
+                                                'border-2 border-blue-500 shadow-sm': day.isToday,
+                                                'ring-1 ring-blue-300': day.isToday,
+                                                [getDayClass(day).bgClass]: true,
+                                                [getDayClass(day).textClass]: true
+                                            }">
+                                            {{-- ДАТА --}}
+                                            <div class="text-sm font-bold w-full text-center"
+                                                :class="getDayClass(day).textClass">
+                                                <span x-text="day.number"></span>
+                                            </div>
+                                            
+                                            {{-- КІЛЬКІСТЬ МІСЦЬ --}}
+                                            <div class="text-xs font-semibold mt-1"
+                                                :class="getDayClass(day).capacityTextClass">
+                                                <template x-if="!day.isPast">
+                                                    <span x-text="day.capacity"></span>
+                                                </template>
+                                                <template x-if="day.isPast">
+                                                    <span>—</span>
+                                                </template>
+                                            </div>
+                                            
+                                            {{-- ІНДИКАТОР --}}
+                                            <div class="mt-1 w-full flex justify-center">
+                                                <div class="w-8 h-1.5 rounded-full shadow-sm"
+                                                    :class="getDayClass(day).indicatorClass"></div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            {{-- ЛЕГЕНДА --}}
+                            <div class="mt-8 pt-6 border-t border-gray-300">
+                                <p class="text-sm font-medium text-gray-700 mb-3">Legenda:</p>
+                                <div class="flex flex-wrap gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-4 h-4 bg-green-500 rounded"></div>
+                                        <span class="text-xs text-gray-600">Wolne</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-4 h-4 bg-yellow-500 rounded"></div>
+                                        <span class="text-xs text-gray-600">Częściowo</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-4 h-4 bg-red-500 rounded"></div>
+                                        <span class="text-xs text-gray-600">Brak miejsc</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-4 h-4 bg-gray-400 rounded"></div>
+                                        <span class="text-xs text-gray-600">Minęło</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             {{-- КОМПОНЕНТ ОЦІНЮВАННЯ --}}
             <x-ratings :rateable="$nocleg" :ratings="$ratings" />
@@ -313,6 +557,29 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Функція для отримання кольорів Tailwind CSS
+        function getTailwindColor(colorClass) {
+            const colors = {
+                'gray-100': '#f3f4f6',
+                'gray-500': '#6b7280',
+                'gray-400': '#9ca3af',
+                'red-100': '#fee2e2',
+                'red-500': '#ef4444',
+                'red-700': '#b91c1c',
+                'green-100': '#dcfce7',
+                'green-500': '#22c55e',
+                'green-800': '#166534',
+                'green-700': '#15803d',
+                'yellow-100': '#fef9c3',
+                'yellow-500': '#eab308',
+                'yellow-800': '#854d0e',
+                'yellow-700': '#a16207'
+            };
+            return colors[colorClass] || '#000000';
+        }
+    </script>
 
     <style>
         /* Пропорції 16:9 для основного фото */
@@ -369,6 +636,16 @@
             filter: blur(8px);
         }
 
+        /* Стилі для календаря */
+        .grid-cols-7 {
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+        }
+        
+        /* Анімація для ховера */
+        .transition-all {
+            transition: all 0.2s ease;
+        }
+
         /* Адаптивність */
         @media (max-width: 768px) {
             .aspect-h-9 {
@@ -407,6 +684,24 @@
             .grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4 {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            /* Адаптивність календаря */
+            .grid-cols-7 {
+                grid-template-columns: repeat(7, 1fr);
+            }
+            
+            .h-16 {
+                height: 4.5rem;
+                padding: 0.5rem 0.25rem;
+            }
+            
+            .text-sm {
+                font-size: 0.75rem;
+            }
+            
+            .text-xs {
+                font-size: 0.7rem;
+            }
         }
 
         @media (max-width: 640px) {
@@ -424,6 +719,34 @@
             
             .grid-cols-2.sm\:grid-cols-3.md\:grid-cols-4 {
                 grid-template-columns: 1fr;
+            }
+            
+            .h-16 {
+                height: 4rem;
+                padding: 0.4rem 0.2rem;
+            }
+            
+            .text-xs {
+                font-size: 0.65rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid-cols-7 {
+                gap: 0.5rem;
+            }
+            
+            .h-16 {
+                height: 3.5rem;
+                padding: 0.3rem 0.1rem;
+            }
+            
+            .text-sm {
+                font-size: 0.7rem;
+            }
+            
+            .text-xs {
+                font-size: 0.6rem;
             }
         }
 
@@ -445,6 +768,15 @@
         
         .object-contain {
             object-fit: contain;
+        }
+        
+        /* Стилі для ховера календаря */
+        .hover\:scale-\[1\.02\]:hover {
+            transform: scale(1.02);
+        }
+        
+        .hover\:shadow-md:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
     </style>
 </x-app-layout>

@@ -47,7 +47,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{nocleg}/calendar', [NoclegCalendarController::class, 'index'])->name('calendar');
         Route::post('/{nocleg}/calendar', [NoclegCalendarController::class, 'update'])->name('calendar.update');
     });
-
+// Додайте цей маршрут до групи noclegi
+Route::get('/noclegi/{nocleg}/calendar-data', [NoclegController::class, 'getCalendarData'])->name('noclegi.calendar.data');
     Route::get('/my-noclegi', [MyNoclegiController::class, 'index'])->name('my-noclegi');
 
     Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
