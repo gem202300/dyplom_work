@@ -14,7 +14,7 @@ class NoclegiGrid extends Component
 
     public $search = '';
     public $selectedTypeIds = [];
-    public $selectedAmenities = []; // Додано для зручностей
+    public $selectedAmenities = []; 
     public $minCapacity = null;
     public $maxCapacity = null;
     public $minRating = null;
@@ -52,7 +52,63 @@ class NoclegiGrid extends Component
             $this->selectedTypeIds[] = $typeId;
         }
     }
+    public function attemptDeleteNocleg(int $id): void
+    {
+        if (!auth()->check() || !auth()->user()->isAdmin()) {
+            return;
+        }
 
+        $nocleg = Nocleg::findOrFail($id);
+
+        $this->dialog()->confirm([
+            'title'       => 'Usuń nocleg',
+            'description' => "Nocleg „{$nocleg->title}” zostanie trwale usunięty.",
+            'icon'        => 'warning',
+            'accept'      => [
+                'label' => 'Tak, usuń',
+                'color' => 'negative',
+            ],
+            'reject' => [
+                'label' => 'Anuluj',
+            ],
+            'method' => 'deleteNoclegConfirmed',
+            'params' => $id,
+        ]);
+    }
+    public function deleteNoclegConfirmed(int $id): void
+    {
+        if (!auth()->check() || !auth()->user()->isAdmin()) {
+            return;
+        }
+
+        $nocleg = Nocleg::findOrFail($id);
+
+        $nocleg->delete();
+
+        $this->notification()->success(
+            title: 'Usunięto',
+            description: "Nocleg „{$nocleg->title}” został usunięty."
+        );
+
+        $this->resetPage();
+    }
+    public function showOnMap($noclegId)
+    {
+        $nocleg = Nocleg::find($noclegId);
+        
+        if (!$nocleg || !$nocleg->latitude || !$nocleg->longitude) {
+            $this->notification()->warning(
+                title: 'Uwaga',
+                description: 'Ten nocleg nie ma współrzędnych na mapie.'
+            );
+            return;
+        }
+        
+        return redirect()->route('map.index', [
+            'focus' => $noclegId,
+            'type' => 'nocleg'
+        ]);
+    }
     public function removeType($typeId)
     {
         $this->selectedTypeIds = array_filter(
@@ -91,19 +147,6 @@ class NoclegiGrid extends Component
             $this->sortDirection = 'asc';
         }
         $this->resetPage();
-    }
-
-    public function deleteNocleg($id)
-    {
-        $nocleg = Nocleg::find($id);
-        if (!$nocleg) return;
-
-        $nocleg->delete();
-
-        $this->notification()->success(
-            'Usunięto',
-            "Nocleg \"{$nocleg->title}\" został usunięty."
-        );
     }
 
     public function render()

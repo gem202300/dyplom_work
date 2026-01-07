@@ -14,6 +14,7 @@ class RatingController extends Controller
      */
     public function filter(Request $request, $rateableType, $rateableId)
     {
+        // Публічний, без authorize (фільтрація рейтингів)
         $query = Rating::where('rateable_type', $rateableType)
             ->where('rateable_id', $rateableId)
             ->with('user')
@@ -55,6 +56,8 @@ class RatingController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Rating::class);  // Для tourist/owner (create rating)
+
         $validated = $request->validate([
             'rateable_type' => 'required|string',
             'rateable_id' => 'required|integer',
@@ -62,7 +65,6 @@ class RatingController extends Controller
             'comment' => 'nullable|string|max:1000',
         ]);
 
-        // Перевірка, чи користувач вже додав рейтинг для цього об'єкта
         $existingRating = Rating::where('user_id', auth()->id())
             ->where('rateable_id', $validated['rateable_id'])
             ->where('rateable_type', $validated['rateable_type'])
@@ -74,7 +76,6 @@ class RatingController extends Controller
             ])->withInput();
         }
 
-        // Чистимо коментар від заборонених слів
         $comment = $this->cleanComment($validated['comment']);
 
         if ($comment === null) {
@@ -83,7 +84,6 @@ class RatingController extends Controller
             ])->withInput();
         }
 
-        // Створюємо рейтинг
         Rating::create([
             'rating' => $validated['rating'],
             'comment' => $comment,
@@ -102,11 +102,12 @@ class RatingController extends Controller
      */
     public function report(Request $request, Rating $rating)
     {
+        $this->authorize('view', $rating);
+
         $request->validate([
             'reason' => 'required|string|max:255'
         ]);
 
-        // Перевірка, чи користувач вже скаржився на цей коментар
         $existingReport = $rating->reports()
             ->where('user_id', $request->user()->id)
             ->first();
@@ -131,36 +132,54 @@ class RatingController extends Controller
     /**
      * Clean comment from banned words.
      */
-    private function cleanComment(?string $comment): ?string
-    {
-        if (!$comment) return null;
-
-        $bannedWords = BannedWord::all();
-
-        foreach ($bannedWords as $word) {
-            $bad = mb_strtolower($word->word);
-
-            if (!$word->partial) {
-                if (preg_match('/\b' . preg_quote($bad, '/') . '\b/iu', $comment)) {
-                    return null;
-                }
-            } else {
-                $comment = preg_replace_callback(
-                    '/' . preg_quote($bad, '/') . '/iu',
-                    function ($matches) {
-                        $w = $matches[0];
-                        if (mb_strlen($w) <= 2) {
-                            return str_repeat('*', mb_strlen($w));
-                        }
-                        return mb_substr($w, 0, 1)
-                            . str_repeat('*', mb_strlen($w) - 2)
-                            . mb_substr($w, -1);
-                    },
-                    $comment
-                );
-            }
-        }
-
+    /**
+ * Clean comment from banned words.
+ */
+   
+private function cleanComment(?string $comment): ?string
+{
+    if (!$comment || trim($comment) === '') {
         return $comment;
     }
+
+    // Отримуємо унікальні заборонені слова в нижньому регістрі + їх partial
+    $bannedWords = BannedWord::all()
+        ->mapWithKeys(function ($word) {
+            return [mb_strtolower($word->word) => $word->partial];
+        })
+        ->unique()
+        ->all();
+
+    foreach ($bannedWords as $badWordLower => $isPartial) {
+        // Повний бан
+        if (!$isPartial) {
+            if (preg_match('/\b' . preg_quote($badWordLower, '/') . '\b/iu', $comment)) {
+                return null;
+            }
+            continue;
+        }
+
+        // Часткове маскування — замінюємо ВСІ входження правильно
+        $comment = preg_replace_callback(
+            '/\b' . preg_quote($badWordLower, '/') . '\b/iu',
+            function ($matches) {
+                $word = $matches[0];
+                $length = mb_strlen($word);
+
+                if ($length < 3) {
+                    return str_repeat('*', $length);
+                }
+
+                $first = mb_substr($word, 0, 1);
+                $last = mb_substr($word, -1);
+                $middle = str_repeat('*', $length - 2);
+
+                return $first . $middle . $last;
+            },
+            $comment
+        );
+    }
+
+    return $comment;
+}
 }

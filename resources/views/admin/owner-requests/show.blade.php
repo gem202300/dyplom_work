@@ -1,158 +1,228 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Szczegóły zgłoszenia
-        </h2>
+        <div class="flex justify-between items-center p-6 bg-gray-100 dark:bg-gray-900 rounded-lg">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                Szczegóły zgłoszenia o rolę właściciela
+            </h2>
+            <a href="{{ route('admin.owner-requests.index') }}">
+                <x-wireui-button flat label="Wróć do listy" icon="arrow-left" class="px-4 py-2" />
+            </a>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 space-y-6">
+    <div class="py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto space-y-10">
 
-                <div>
-                    <h3 class="text-lg font-bold">Użytkownik:</h3>
-                    <p>{{ $owner_request->user->name }} ({{ $owner_request->user->email }})</p>
+        <!-- Основний контент -->
+        <div class="bg-white dark:bg-gray-800 shadow-xl sm:rounded-lg p-10 space-y-10">
+
+            <!-- Інформація про користувача та телефон -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-3 p-6 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        Użytkownik
+                    </h3>
+                    <p class="text-gray-700 dark:text-gray-300">
+                        <span class="font-medium">Nazwa:</span> {{ $ownerRequest->user->name }}
+                    </p>
+                    <p class="text-gray-700 dark:text-gray-300">
+                        <span class="font-medium">Email:</span> {{ $ownerRequest->user->email }}
+                    </p>
                 </div>
 
-                <div>
-                    <h3 class="text-lg font-bold">Numer telefonu:</h3>
-                    <p>{{ $owner_request->phone }}</p>
+                <div class="space-y-3 p-6 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        Numer telefonu
+                    </h3>
+                    <p class="text-gray-700 dark:text-gray-300 text-lg">
+                        {{ $ownerRequest->phone ?? '—' }}
+                    </p>
                 </div>
+            </div>
 
-                <div>
-                    <h3 class="text-lg font-bold">Powód zgłoszenia:</h3>
-                    <p>{{ $owner_request->reason }}</p>
-                </div>
+            <!-- Причина заявки -->
+            <div class="space-y-4 p-6 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    Powód zgłoszenia
+                </h3>
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                    {{ $ownerRequest->reason }}
+                </p>
+            </div>
 
-                <div>
-                    <h3 class="text-lg font-bold">Status:</h3>
-                    <p>{{ ucfirst($owner_request->status) }}</p>
-                </div>
+            <!-- Статус -->
+            <div class="space-y-4 p-6 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    Status
+                </h3>
 
-                <div class="flex gap-3 mt-4 items-center">
-                    @if ($owner_request->status === 'pending')
-                        {{-- Кнопка "Zatwierdź" --}}
-                        <form method="POST" action="{{ route('admin.owner-requests.approve', $owner_request->id) }}">
-                            @csrf
-                            <button
-                                class="px-6 py-2 rounded text-white 
-                                      bg-green-600 hover:bg-green-700 
-                                      dark:bg-green-700 dark:hover:bg-green-800">
-                                Zatwierdź
-                            </button>
-                        </form>
+                <span class="inline-block px-6 py-2.5 rounded-full text-white font-medium text-sm
+                    @if($ownerRequest->status === 'pending') bg-yellow-600
+                    @elseif($ownerRequest->status === 'approved') bg-green-600
+                    @elseif($ownerRequest->status === 'rejected') bg-red-600
+                    @endif">
+                    {{ ucfirst(__($ownerRequest->status)) }}
+                </span>
 
-                        {{-- Кнопка "Odrzuć" (відкриває модальне вікно) --}}
-                        <button id="rejectBtn" class="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-                            Odrzuć
-                        </button>
+                @if($ownerRequest->status === 'rejected' && $ownerRequest->rejection_reason)
+                    <div class="mt-6 rounded-xl border border-red-200 dark:border-red-800
+                            bg-red-50 dark:bg-red-900/20
+                            px-6 py-5">
 
-                        {{-- Модальне вікно для відмови --}}
-                        <div id="rejectModal"
-                            class="fixed inset-0 bg-black bg-opacity-25 hidden z-50 flex items-center justify-center p-4">
-                            <div class="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
-                                <h3 class="text-lg font-bold mb-4">Odrzucenie wniosku</h3>
+                    <div class="flex items-start gap-4">
+                        <!-- Ліва смужка -->
+                        <div class="w-1.5 bg-red-500 rounded-full mt-1"></div>
 
-                                <form method="POST"
-                                    action="{{ route('admin.owner-requests.reject', $owner_request->id) }}">
-                                    @csrf
+                        <div class="space-y-2">
+                            <h4 class="font-semibold text-red-700 dark:text-red-400 text-sm uppercase tracking-wide">
+                                Powód odrzucenia
+                            </h4>
 
-                                    <div class="mb-4">
-                                        <label class="block font-medium text-gray-700 mb-2">
-                                            Powód odrzucenia <span class="text-red-500">*</span>
-                                        </label>
-                                        <textarea name="rejection_reason" required rows="4" placeholder="Podaj szczegółowy powód odrzucenia wniosku..."
-                                            class="w-full rounded border border-gray-300 p-3 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 focus:outline-none"></textarea>
-                                        @error('rejection_reason')
-                                            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <div class="mb-6">
-                                        <label class="flex items-center">
-                                            <input type="checkbox" name="can_resubmit" value="1" checked
-                                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                            <span class="ml-2 text-gray-700 text-sm">
-                                                Pozwól użytkownikowi wysłać wniosek ponownie
-                                            </span>
-                                        </label>
-                                    </div>
-
-                                    <div class="flex justify-end gap-3">
-                                        <button type="button" id="cancelBtn"
-                                            class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition">
-                                            Anuluj
-                                        </button>
-                                        <button type="submit"
-                                            class="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
-                                            Potwierdź odrzucenie
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
+                            <p class="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+                                {{ $ownerRequest->rejection_reason }}
+                            </p>
                         </div>
-                    @endif
-
-                    <a href="{{ route('admin.owner-requests.index') }}"
-                        class="px-6 py-2 bg-gray-200 text-black rounded hover:bg-gray-300 transition">
-                        Powrót do listy
-                    </a>
+                    </div>
                 </div>
 
+                @endif
+            </div>
+
+            <!-- Кнопки дій -->
+          @if($ownerRequest->status === 'pending')
+              <div class="mt-14 pt-10 px-6 pb-6
+                          flex flex-wrap justify-start gap-6">
+
+                  <form method="POST"
+                        action="{{ route('admin.owner-requests.approve', $ownerRequest->id) }}"
+                        onsubmit="return confirm('Na pewno chcesz zatwierdzić ten wniosek?')">
+                      @csrf
+                      <x-wireui-button
+                          positive
+                          type="submit"
+                          label="Zatwierdź wniosek"
+                          icon="check"
+                          class="inline-flex px-7 py-3.5"
+                      />
+                  </form>
+
+                  <x-wireui-button
+                      negative
+                      id="rejectBtn"
+                      label="Odrzuć wniosek"
+                      icon="x-mark"
+                      class="inline-flex px-7 py-3.5"
+                  />
+              </div>
+          @endif
+
+
+        </div>
+    </div>
+</div>
+
+
+    <!-- Модальне вікно відхилення -->
+    <div id="rejectModal"
+        class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-8">
+
+            <!-- ВНУТРІШНІ ВІДСТУПИ ДЛЯ ВСЬОГО КОНТЕНТУ -->
+            <div class="px-4 py-4 space-y-5">
+
+                <!-- Заголовок -->
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    Odrzucenie wniosku
+                </h3>
+
+                <form method="POST"
+                      action="{{ route('admin.owner-requests.reject', $ownerRequest->id) }}"
+                      class="space-y-5">
+                    @csrf
+
+                    <!-- Причина відхилення -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Powód odrzucenia <span class="text-red-500">*</span>
+                        </label>
+                        <textarea
+                            name="rejection_reason"
+                            required
+                            rows="5"
+                            placeholder="Podaj szczegółowy powód odrzucenia..."
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600
+                                  px-5 py-4
+                                  focus:outline-none focus:ring-2 focus:ring-red-500
+                                  dark:bg-gray-700 dark:text-gray-200 resize-none leading-relaxed"></textarea>
+                    </div>
+
+                    <!-- Чекбокс -->
+                    <div class="flex items-center">
+                        <label class="flex items-center cursor-pointer select-none gap-3">
+                            <input type="checkbox" name="can_resubmit" value="1" checked
+                                  class="rounded border-gray-300 dark:border-gray-600
+                                          text-red-600 focus:ring-red-500 h-4 w-4">
+                            <span class="text-gray-700 dark:text-gray-300">
+                                Pozwól użytkownikowi wysłać wniosek ponownie
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Кнопки -->
+                    <div class="flex justify-end gap-4 pt-5 mt-4
+                                border-t border-gray-200 dark:border-gray-700">
+                        <button type="button" id="cancelBtn"
+                                class="px-6 py-3 border border-gray-300 dark:border-gray-600
+                                      text-gray-700 dark:text-gray-300
+                                      rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700
+                                      transition font-medium">
+                            Anuluj
+                        </button>
+                        <button type="submit"
+                                class="px-6 py-3 bg-red-600 text-white
+                                      rounded-lg hover:bg-red-700
+                                      transition font-medium">
+                            Potwierdź odrzucenie
+                        </button>
+                    </div>
+
+                </form>
             </div>
         </div>
     </div>
 
+
+
+    <!-- JavaScript для модалки -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const rejectBtn = document.getElementById('rejectBtn');
             const cancelBtn = document.getElementById('cancelBtn');
             const modal = document.getElementById('rejectModal');
-            const form = modal.querySelector('form');
 
-            // Відкрити модальне вікно
             if (rejectBtn) {
-                rejectBtn.addEventListener('click', function() {
+                rejectBtn.addEventListener('click', () => {
                     modal.classList.remove('hidden');
-                    modal.classList.add('flex');
                 });
             }
 
-            // Закрити модальне вікно
             if (cancelBtn) {
-                cancelBtn.addEventListener('click', function() {
+                cancelBtn.addEventListener('click', () => {
                     modal.classList.add('hidden');
-                    modal.classList.remove('flex');
                 });
             }
 
-            // Закрити при кліку на темний фон
-            modal.addEventListener('click', function(e) {
+            modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.classList.add('hidden');
-                    modal.classList.remove('flex');
                 }
             });
 
-            // Закрити при натисканні Escape
-            document.addEventListener('keydown', function(e) {
+            document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
                     modal.classList.add('hidden');
-                    modal.classList.remove('flex');
                 }
             });
-
-            // Валідація форми перед відправленням
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    const textarea = this.querySelector('textarea[name="rejection_reason"]');
-                    if (!textarea.value.trim()) {
-                        e.preventDefault();
-                        textarea.focus();
-                        textarea.classList.add('border-red-500');
-                    }
-                });
-            }
         });
     </script>
 </x-app-layout>

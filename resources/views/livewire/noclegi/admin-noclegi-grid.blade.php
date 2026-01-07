@@ -225,20 +225,19 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             @foreach ($noclegi as $n)
                 <div class="bg-white shadow-md rounded-lg overflow-hidden border">
-                    {{-- Карусель фото --}}
-                    
-                        <x-photo-carousel 
-                            :photos="$n->photos"
-                            :showRating="true"
-                            :rating="$n->average_rating ?? 0"
-                            :alt="$n->title"
-                            aspectRatio="aspect-video"
-                            containerClass="rounded-t-lg"
-                            arrowSize="w-6 h-6"
-                            ratingBadgePosition="top-3 right-3"
-                            showDots="true"
-                        />
-                    
+                    {{-- Карусель фото БЕЗ рейтингу --}}
+                    <x-photo-carousel 
+                        :photos="$n->photos"
+                        :showRating="false" {{-- РЕЙТИНГ ВИМКНЕНО --}}
+                        :rating="$n->average_rating ?? 0"
+                        :alt="$n->title"
+                        aspectRatio="aspect-video"
+                        containerClass="rounded-t-lg"
+                        arrowSize="w-6 h-6"
+                        ratingBadgePosition="top-3 right-3"
+                        showDots="true"
+                        wire:key="carousel-{{ $n->id }}"
+                    />
 
                     <div class="p-4 space-y-1 text-sm">
                         <h3 class="text-lg font-semibold">{{ $n->title }}</h3>
@@ -323,7 +322,7 @@
     @endif
 
     @if ($rejectModal)
-        <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+        <div class="fixed inset-0 flex items-center justify-center z-50 p-4">
             <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
                 <h3 class="text-xl font-bold text-gray-900 mb-4">
                     Odrzucenie obiektu

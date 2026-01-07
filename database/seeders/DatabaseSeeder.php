@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
             MapIconSeeder::class,
             ObjectTypeSeeder::class,
             NoclegSeeder::class,
-            RatingSeeder::class,
+            //RatingSeeder::class,
             BannedWordsSeeder::class,
         ]);
 

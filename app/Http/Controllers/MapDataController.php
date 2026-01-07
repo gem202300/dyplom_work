@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Nocleg;
 use App\Models\Attraction;
+use App\Models\ObjectType;
 use Illuminate\Http\Request;
 
 class MapDataController extends Controller
@@ -11,22 +12,26 @@ class MapDataController extends Controller
     public function index()
     {
         try {
-            // Затверджені ночлеги
+            // Затверджені ночлеги з рейтингом та типом
             $noclegs = Nocleg::where('status', 'approved')
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
                 ->where('latitude', '!=', 0)
                 ->where('longitude', '!=', 0)
-                ->select('id', 'title', 'city', 'street', 'latitude', 'longitude', 'capacity', 'description', 'map_icon')
+                ->with(['ratings', 'objectType'])
+                ->select('id', 'title', 'city', 'street', 'latitude', 'longitude', 
+                         'capacity', 'description', 'map_icon', 'object_type_id')
                 ->get();
 
-            // Активні атракції
+            // Активні атракції з рейтингом та категоріями
             $attractions = Attraction::where('is_active', true)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
                 ->where('latitude', '!=', 0)
                 ->where('longitude', '!=', 0)
-                ->select('id', 'name as title', 'location as city', 'description', 'latitude', 'longitude', 'rating', 'map_icon')
+                ->with(['ratings', 'categories'])
+                ->select('id', 'name as title', 'location as city', 'description', 
+                         'latitude', 'longitude', 'map_icon')
                 ->get();
 
             $features = [];
@@ -36,6 +41,9 @@ class MapDataController extends Controller
                     continue;
                 }
 
+                // Обчислюємо середній рейтинг
+                $avgRating = $n->ratings->avg('rating');
+                
                 $features[] = [
                     'type' => 'Feature',
                     'geometry' => [
@@ -48,8 +56,12 @@ class MapDataController extends Controller
                         'address' => ($n->city ?? '') . ($n->street ? ', ' . $n->street : ''),
                         'description' => $n->description ?? '',
                         'type' => 'nocleg',
-                        'capacity' => $n->capacity ?? 0,
+                        'capacity' => (int)($n->capacity ?? 0),
+                        'rating' => round($avgRating, 1) ?? 0,
+                        'object_type_id' => $n->object_type_id,
+                        'object_type_name' => $n->objectType->name ?? null,
                         'icon_url' => $n->map_icon ?: '/images/map-icons/icons8-hotel-50.png',
+                        'categories' => [] // Для ночлегів категорій немає
                     ]
                 ];
             }
@@ -59,6 +71,9 @@ class MapDataController extends Controller
                     continue;
                 }
 
+                // Обчислюємо середній рейтинг
+                $avgRating = $a->ratings->avg('rating');
+                
                 $features[] = [
                     'type' => 'Feature',
                     'geometry' => [
@@ -70,9 +85,12 @@ class MapDataController extends Controller
                         'title' => $a->title ?? 'Brak nazwy',
                         'address' => $a->city ?? '',
                         'description' => $a->description ?? '',
-                        'rating' => $a->rating ? number_format($a->rating, 1) : '0.0',
+                        'rating' => round($avgRating, 1) ?? 0,
                         'type' => 'attraction',
+                        'capacity' => null, // Для атракцій вмістимість немає
+                        'object_type_id' => null,
                         'icon_url' => $a->map_icon ?: '/images/map-icons/icons8-museum-50.png',
+                        'categories' => $a->categories->pluck('id')->toArray(),
                     ]
                 ];
             }

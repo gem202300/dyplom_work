@@ -36,10 +36,7 @@ class OwnerRequestController extends Controller
             'terms' => 'accepted'
         ]);
 
-        $user->update([
-            'phone' => $request->phone,
-        ]);
-
+        $user->update(['phone' => $request->phone]);
 
         if ($lastRequest && $lastRequest->status === 'rejected') {
             $lastRequest->update([
@@ -64,15 +61,12 @@ class OwnerRequestController extends Controller
         foreach ($admins as $admin) {
             $admin->notify(new TestNotification(
                 'Nowy wniosek o rolę właściciela',
-                'Użytkownik ' . $user->name . ' złożył wniosek o nadanie roli właściciela obiektu.
-            Wniosek zawiera dane kontaktowe oraz uzasadnienie. Prosimy o jego weryfikację.'
+                "Użytkownik {$user->name} złożył wniosek o nadanie roli właściciela obiektu.\nWniosek zawiera dane kontaktowe oraz uzasadnienie. Prosimy o jego weryfikację."
             ));
-
         }
 
         return back()->with('status', 'Wniosek został wysłany do administratora.');
     }
-
 
     public function approve(OwnerRequest $ownerRequest)
     {
@@ -80,13 +74,11 @@ class OwnerRequestController extends Controller
         $ownerRequest->user->assignRole('owner');
 
         $ownerRequest->user->notify(new TestNotification(
-            'Wniosek zaakceptowany ',
-            'Twoja prośba o nadanie roli właściciela została zaakceptowana przez administratora.
-        Od teraz masz dostęp do funkcji właściciela i możesz zarządzać swoim obiektem w systemie.'
+            'Wniosek zaakceptowany',
+            "Twoja prośba o nadanie roli właściciela została zaakceptowana przez administratora.\nOd teraz masz dostęp do funkcji właściciela i możesz zarządzać swoim obiektem w systemie."
         ));
 
-        session()->flash('message', 'Wniosek zatwierdzony.');
-        return back();
+        return back()->with('message', 'Wniosek zatwierdzony.');
     }
 
     public function reject(Request $request, OwnerRequest $ownerRequest)
@@ -103,23 +95,16 @@ class OwnerRequestController extends Controller
 
         $editUrl = $ownerRequest->can_resubmit ? route('owner.request.form') : null;
 
-        // Оновити попередні повідомлення, щоб прибрати кнопку "Edytuj i wyślij ponownie"
         DB::table('notifications')
             ->where('notifiable_type', get_class($ownerRequest->user))
             ->where('notifiable_id', $ownerRequest->user->id)
             ->where('type', TestNotification::class)
-            ->where('data->can_resubmit', true)
+            ->whereJsonContains('data->can_resubmit', true)
             ->update(['data->can_resubmit' => false]);
 
         $message = $ownerRequest->can_resubmit
-            ? "Twoja prośba o nadanie roli właściciela została odrzucona przez administratora.\n\n"
-                . "Powód odrzucenia:\n"
-                . $request->rejection_reason . "\n\n"
-                . "Możesz poprawić dane i wysłać wniosek ponownie, korzystając z przycisku poniżej."
-            : "Twoja prośba o nadanie roli właściciela została odrzucona przez administratora.\n\n"
-                . "Powód odrzucenia:\n"
-                . $request->rejection_reason . "\n\n"
-                . "Możliwość ponownego złożenia wniosku została zablokowana przez administratora.";
+            ? "Twoja prośba o nadanie roli właściciela została odrzucona przez administratora.\n\nPowód odrzucenia:\n{$request->rejection_reason}\n\nMożesz poprawić dane i wysłać wniosek ponownie."
+            : "Twoja prośba o nadanie roli właściciela została odrzucona przez administratora.\n\nPowód odrzucenia:\n{$request->rejection_reason}\n\nMożliwość ponownego złożenia wniosku została zablokowana.";
 
         $ownerRequest->user->notify(new TestNotification(
             'Wniosek odrzucony',
@@ -128,13 +113,11 @@ class OwnerRequestController extends Controller
             $ownerRequest->can_resubmit
         ));
 
-
         return back()->with('message', 'Wniosek odrzucony.');
     }
 
-
-    public function show(OwnerRequest $owner_request)
+    public function show(OwnerRequest $ownerRequest)
     {
-        return view('admin.owner-requests.show', compact('owner_request'));
+        return view('admin.owner-requests.show', compact('ownerRequest'));
     }
 }

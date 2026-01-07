@@ -57,9 +57,21 @@
         </form>
     </div>
     @else
-    <p class="text-sm text-gray-600">
-        Aby dodać opinię, <a href="{{ route('login') }}" class="text-indigo-600 underline">zaloguj się</a>.
-    </p>
+        <div class="bg-gray-50 p-6 rounded shadow text-center space-y-4">
+            <p class="text-gray-700 text-base">
+                Aby dodać opinię, musisz być zalogowany lub zarejestrowany.
+            </p>
+            <div class="flex justify-center gap-4 mt-4">
+                <a href="{{ route('login') }}" 
+                  class="px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700 transition">
+                    Zaloguj się
+                </a>
+                <a href="{{ route('register') }}" 
+                  class="px-4 py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600 transition">
+                    Zarejestruj się
+                </a>
+            </div>
+        </div>
     @endauth
 
     {{-- Фільтри та сортування для відгуків --}}

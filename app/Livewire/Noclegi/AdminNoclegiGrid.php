@@ -191,7 +191,7 @@ class AdminNoclegiGrid extends Component
                     ->whereColumn('ratings.rateable_id', 'noclegs.id')
                     ->where('ratings.rateable_type', Nocleg::class);
             }, 'average_rating')
-            ->whereIn('status', ['pending', 'rejected']);
+            ->whereIn('status', ['pending']);
 
         if ($this->search) {
             $query->where(function ($q) {

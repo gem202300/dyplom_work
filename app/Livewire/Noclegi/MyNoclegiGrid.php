@@ -133,15 +133,31 @@ class MyNoclegiGrid extends Component
             ->firstOrFail();
 
         $this->dialog()->confirm([
-            'title'       => __('noclegi.delete.confirm_title'),
-            'description' => __('noclegi.delete.confirm_description', ['title' => $nocleg->title]),
-            'acceptLabel' => __('noclegi.delete.confirm_accept'),
-            'rejectLabel' => __('noclegi.delete.confirm_reject'),
+            'title'       => 'Czy na pewno chcesz usunąć nocleg?',
+            'description' => "Nocleg „{$nocleg->title}” zostanie trwale usunięty.",
+            'acceptLabel' => 'Tak, usuń',
+            'rejectLabel' => 'Anuluj',
             'method'      => 'confirmDeleteNocleg',
             'params'      => $noclegId,
         ]);
     }
-
+    public function showOnMap($noclegId)
+    {
+        $nocleg = Nocleg::find($noclegId);
+        
+        if (!$nocleg || !$nocleg->latitude || !$nocleg->longitude) {
+            $this->notification()->warning(
+                title: 'Uwaga',
+                description: 'Ten nocleg nie ma współrzędnych na mapie.'
+            );
+            return;
+        }
+        
+        return redirect()->route('map.index', [
+            'focus' => $noclegId,
+            'type' => 'nocleg'
+        ]);
+    }
     public function confirmDeleteNocleg($noclegId)
     {
         $nocleg = Nocleg::where('id', $noclegId)

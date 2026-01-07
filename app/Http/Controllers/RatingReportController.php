@@ -8,6 +8,11 @@ use Illuminate\Http\RedirectResponse;
 
 class RatingReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorize('admin-access');
+    }
+
     public function delete(Rating $rating): RedirectResponse
     {
         $rating->delete();
