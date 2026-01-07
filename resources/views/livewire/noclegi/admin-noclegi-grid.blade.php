@@ -236,6 +236,7 @@
                         arrowSize="w-6 h-6"
                         ratingBadgePosition="top-3 right-3"
                         showDots="true"
+                        wire:key="carousel-{{ $n->id }}"
                     />
 
                     <div class="p-4 space-y-1 text-sm">

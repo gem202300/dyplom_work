@@ -204,6 +204,7 @@
                           containerClass="aspect-[4/3]"
                           :showDots="true"
                           :showCounter="false"
+                          wire:key="carousel-{{ $attraction->id }}"
                       />
 
                       {{-- Інформація --}}

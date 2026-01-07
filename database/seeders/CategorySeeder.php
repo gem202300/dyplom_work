@@ -7,17 +7,25 @@ use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         $categories = [
-            'Zamki',
-            'Jeziora',
+            'Zamki i pałace',
+            'Jeziora i rzeki',
             'Miejsca historyczne',
-            'Przyroda',
+            'Przyroda i parki narodowe',
+            'Muzea',
+            'Kościoły i sanktuaria',
+            'Góry i szlaki turystyczne',
+            'Plaże i wybrzeże',
+            'Parki rozrywki',
+            'Rejsy i sporty wodne',
+            'Zabytki UNESCO',
+            'Stare miasta i rynki',
         ];
 
         foreach ($categories as $name) {
-            Category::create(['name' => $name]);
+            Category::firstOrCreate(['name' => $name]);
         }
     }
 }

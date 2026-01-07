@@ -28,20 +28,23 @@ Route::prefix('attractions')->name('attractions.')->group(function () {
     });
 });
 
-// Відкриті маршрути для всіх
 Route::prefix('noclegi')->name('noclegi.')->group(function () {
-    Route::get('/', [NoclegController::class, 'index'])->name('index'); // список noclegi
-    Route::get('/{nocleg}', [NoclegController::class, 'show'])->name('show'); // перегляд конкретного nocleg
-    Route::get('/{nocleg}/calendar-data', [NoclegController::class, 'getCalendarData'])->name('noclegi.calendar.data');
 
-    // Тільки для авторизованих
+    Route::get('/', [NoclegController::class, 'index'])->name('index');
+
     Route::middleware('auth')->group(function () {
         Route::get('/create', [NoclegController::class, 'create'])->name('create');
         Route::get('/{nocleg}/edit', [NoclegController::class, 'edit'])->name('edit');
         Route::get('/{nocleg}/calendar', [NoclegCalendarController::class, 'index'])->name('calendar');
         Route::post('/{nocleg}/calendar', [NoclegCalendarController::class, 'update'])->name('calendar.update');
-        });
+    });
+
+    Route::get('/{nocleg}/calendar-data', [NoclegController::class, 'getCalendarData'])
+        ->name('calendar.data');
+
+    Route::get('/{nocleg}', [NoclegController::class, 'show'])->name('show');
 });
+
 
 Route::get('/map-data', [App\Http\Controllers\MapDataController::class, 'index'])->name('map.data');
 Route::get('/api/object-types', function () {

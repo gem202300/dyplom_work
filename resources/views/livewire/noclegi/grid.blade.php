@@ -248,6 +248,7 @@
                             aspectRatio="aspect-video"
                             containerClass="rounded-t-xl"
                             arrowSize="w-8 h-8"
+                            wire:key="carousel-{{ $n->id }}"
                         />
                     </div>
 

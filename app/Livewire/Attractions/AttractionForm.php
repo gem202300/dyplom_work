@@ -27,18 +27,15 @@ class AttractionForm extends Component
     public $closing_time = '';
     public $mapIcon = '';
 
-    // 📍 Współrzędne
     public $latitude = null;
     public $longitude = null;
 
-    // Kategorie i ikony
     public $selectedCategories = [];
     public $allCategories = [];
     public $mapIcons = [];
     public $suggestedIcon = null;
     public $showIconDropdown = false;
 
-    // Zdjęcia
     public $photos = [];
     public $photosToDelete = [];
 
@@ -47,7 +44,6 @@ class AttractionForm extends Component
         $this->attraction = $attraction ?? new Attraction();
         $this->allCategories = Category::all();
         
-        // ЗМІНА: Тільки іконки для атракцій (з категоріями)
         $this->mapIcons = MapIcon::whereNotNull('category_id')->get();
 
         if ($this->attraction->exists) {
