@@ -162,7 +162,9 @@
                         <div class="space-y-4">
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Typ obiektu</p>
-                                <p class="text-lg font-medium text-gray-800">{{ $nocleg->object_type }}</p>
+                                <p class="text-lg font-medium text-gray-800">
+                                    {{ $nocleg->objectType?->name ?? '—' }}
+                                </p>
                             </div>
                             <div>
                                 <p class="text-sm text-gray-600 mb-1">Liczba miejsc</p>

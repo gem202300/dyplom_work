@@ -132,7 +132,7 @@
             </div>
         </div>
     @endif
-    
+  
     {{-- Вибір іконки --}}
     <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 p-4 border border-gray-200 rounded-lg bg-gray-50">
         @foreach($mapIcons as $icon)
@@ -140,7 +140,7 @@
                 <input type="radio"
                        name="map_icon"
                        value="{{ $icon->icon_url }}"
-                       wire:model.live="mapIcon"
+                       wire:model="mapIcon"
                        class="sr-only peer">
 
                 <div class="border-2 border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center transition-all duration-300
@@ -153,16 +153,6 @@
                          class="w-12 h-12 object-contain filter grayscale transition-all duration-300
                                 group-hover:grayscale-0
                                 peer-checked:grayscale-0">
-
-                    <!-- Галочка тільки на вибраній іконці -->
-                    @if($mapIcon === $icon->icon_url)
-                        <div class="absolute -top-2 -right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                    @endif
-
                     <!-- Назва -->
                     <span class="mt-2 text-xs text-gray-600 text-center">{{ $icon->name }}</span>
                 </div>

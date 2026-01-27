@@ -28,7 +28,7 @@ class Nocleg extends Model
         'has_wifi',
         'has_tv',
         'has_balcony',
-
+        'map_icon',
         'amenities_other',
     ];
 

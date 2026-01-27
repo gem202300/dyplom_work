@@ -37,13 +37,12 @@ class RatingController extends Controller
             case 'lowest':
                 $query->orderBy('rating', 'asc')->orderBy('created_at', 'desc');
                 break;
-            default: // 'latest'
+            default: 
                 $query->orderBy('created_at', 'desc');
         }
 
         $ratings = $query->paginate(10)->withQueryString();
 
-        // Повертаємо JSON з HTML
         return response()->json([
             'html' => view('components.partials.ratings-list', compact('ratings'))->render(),
             'pagination' => $ratings->hasPages() ? $ratings->withQueryString()->links()->toHtml() : '',
@@ -97,9 +96,7 @@ class RatingController extends Controller
     }
 
 
-    /**
-     * Report a rating.
-     */
+    
     public function report(Request $request, Rating $rating)
     {
         $this->authorize('view', $rating);
@@ -129,57 +126,47 @@ class RatingController extends Controller
         return back()->with('success', 'Komentarz został zgłoszony.');
     }
 
-    /**
-     * Clean comment from banned words.
-     */
-    /**
- * Clean comment from banned words.
- */
-   
-private function cleanComment(?string $comment): ?string
-{
-    if (!$comment || trim($comment) === '') {
+ 
+    private function cleanComment(?string $comment): ?string
+    {
+        if (!$comment || trim($comment) === '') {
+            return $comment;
+        }
+
+        $bannedWords = BannedWord::all();
+
+        foreach ($bannedWords as $banned) {
+            $word = mb_strtolower(trim($banned->word));
+            $partial = $banned->partial;
+
+            if (!$partial) {
+                if (stripos($comment, $word) !== false) {
+                    return null;
+                }
+                continue;
+            }
+
+            $comment = preg_replace_callback(
+                '/' . preg_quote($word, '/') . '/i',
+                function($matches) {
+                    $word = $matches[0];
+                    $len = mb_strlen($word);
+
+                    if ($len < 3) return str_repeat('*', $len);
+
+                    $first = mb_substr($word, 0, 1);
+                    $last = mb_substr($word, -1);
+                    $middle = str_repeat('*', $len - 2);
+
+                    return $first . $middle . $last;
+                },
+                $comment
+            );
+        }
+
         return $comment;
     }
 
-    // Отримуємо унікальні заборонені слова в нижньому регістрі + їх partial
-    $bannedWords = BannedWord::all()
-        ->mapWithKeys(function ($word) {
-            return [mb_strtolower($word->word) => $word->partial];
-        })
-        ->unique()
-        ->all();
 
-    foreach ($bannedWords as $badWordLower => $isPartial) {
-        // Повний бан
-        if (!$isPartial) {
-            if (preg_match('/\b' . preg_quote($badWordLower, '/') . '\b/iu', $comment)) {
-                return null;
-            }
-            continue;
-        }
 
-        // Часткове маскування — замінюємо ВСІ входження правильно
-        $comment = preg_replace_callback(
-            '/\b' . preg_quote($badWordLower, '/') . '\b/iu',
-            function ($matches) {
-                $word = $matches[0];
-                $length = mb_strlen($word);
-
-                if ($length < 3) {
-                    return str_repeat('*', $length);
-                }
-
-                $first = mb_substr($word, 0, 1);
-                $last = mb_substr($word, -1);
-                $middle = str_repeat('*', $length - 2);
-
-                return $first . $middle . $last;
-            },
-            $comment
-        );
-    }
-
-    return $comment;
-}
 }

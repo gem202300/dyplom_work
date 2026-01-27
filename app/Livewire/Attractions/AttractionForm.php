@@ -81,7 +81,6 @@ class AttractionForm extends Component
             'opening_time' => 'nullable|date_format:H:i',
             'closing_time' => 'nullable|date_format:H:i',
 
-            // 📍 Współrzędne
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
 
@@ -93,7 +92,6 @@ class AttractionForm extends Component
         ];
     }
 
-    // Automatyczne sugerowanie ikony na podstawie pierwszej kategorii
     public function updatedSelectedCategories()
     {
         if (count($this->selectedCategories) > 0) {
@@ -108,7 +106,6 @@ class AttractionForm extends Component
             return;
         }
 
-        // Шукаємо іконку для кожної категорії по черзі
         foreach ($this->selectedCategories as $categoryId) {
             $suggested = MapIcon::where('category_id', $categoryId)->first();
             
@@ -118,7 +115,6 @@ class AttractionForm extends Component
             }
         }
         
-        // Якщо немає іконки для конкретної категорії, беремо першу іконку для атракцій
         $this->suggestedIcon = MapIcon::whereNotNull('category_id')->first();
     }
 
@@ -146,15 +142,13 @@ class AttractionForm extends Component
             'closing_time' => $this->closing_time,
             'map_icon' => $this->mapIcon,
 
-            // 📍 Zapis współrzędnych
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
         ])->save();
 
-        // Kategorie
+        
         $this->attraction->categories()->sync($this->selectedCategories);
-
-        // Nowe zdjęcia
+        
         foreach ($this->photos as $photo) {
             $path = $photo->store('images/attractions', 'public');
 
@@ -166,7 +160,6 @@ class AttractionForm extends Component
 
         $this->photos = [];
 
-        // Usuwanie zdjęć
         foreach ($this->photosToDelete as $photoId) {
             $photo = AttractionPhoto::find($photoId);
 

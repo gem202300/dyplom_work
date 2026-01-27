@@ -187,14 +187,14 @@
         </div>
     @endif
 
-    {{-- Сітка атракцій - 3 колонки --}}
+    {{-- Сітка атракцій - 3 колонки з однаковою висотою карток --}}
     @if($attractions->count() > 0)
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($attractions as $attraction)
                 {{-- ЗМІНА: Показуємо атракцію тільки якщо вона активна АБО користувач адмін --}}
                 @if($attraction->is_active || (auth()->check() && Auth::user()->isAdmin()))
-                    {{-- Картка атракції --}}
-                    <div class="bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100">
+                    {{-- Картка атракції з однаковою висотою --}}
+                    <div class="flex flex-col h-full bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-100">
                       {{-- Карусель з фото БЕЗ рейтингу --}}
                       <x-photo-carousel 
                           :photos="$attraction->photos" 
@@ -208,7 +208,7 @@
                       />
 
                       {{-- Інформація --}}
-                      <div class="p-4 space-y-3">
+                      <div class="p-4 space-y-3 flex-grow">
                           {{-- Весь внутрішній контент залишається без змін --}}
                           <div class="flex items-start justify-between gap-2">
                               <div class="flex-1">
@@ -287,20 +287,25 @@
                               </div>
                           @endif
                       </div>
+                      
+                      {{-- Кнопка мапи ВСЕРЕДИНІ основного контенту, перед кнопками дій --}}
                       @if($attraction->latitude && $attraction->longitude)
-                          <button wire:click="showOnMap({{ $attraction->id }})"
-                                  class="w-56 py-3 bg-green-600 text-white text-center rounded-lg 
-                                        hover:bg-green-700 transition-colors font-medium text-sm
-                                        flex items-center justify-center gap-2 ml-4 mt-2">
-                              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                              </svg>
-                              Pokaż na mapie
-                          </button>
+                          <div class="px-4 pb-2">
+                              <button wire:click="showOnMap({{ $attraction->id }})"
+                                      class="w-full py-2.5 bg-green-600 text-white text-center rounded-lg 
+                                            hover:bg-green-700 transition-colors font-medium text-sm
+                                            flex items-center justify-center gap-2">
+                                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                            d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                  </svg>
+                                  Pokaż na mapie
+                              </button>
+                          </div>
                       @endif
+
                       {{-- Кнопки дій --}}
-                      <div class="px-4 pb-4 pt-3 border-t border-gray-100">
+                      <div class="mt-auto px-4 pb-4 pt-3 border-t border-gray-100">
                           <div class="flex items-center justify-between gap-2">
                               <a href="{{ route('attractions.show', $attraction->id) }}" 
                                 class="flex-1 py-2.5 bg-blue-600 text-white text-center rounded-lg 

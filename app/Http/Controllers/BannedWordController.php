@@ -8,10 +8,12 @@ use Illuminate\Http\Request;
 
 class BannedWordController extends Controller
 {
+    protected $fillable = [
+        'word',
+        'partial',
+    ];
     public function store(Request $request)
     {
-        $this->authorize('create', BannedWord::class);  
-
         $request->validate([
             'word' => 'required|string|max:255',
             'partial' => 'required|boolean',

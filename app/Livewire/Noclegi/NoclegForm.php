@@ -34,8 +34,7 @@ class NoclegForm extends Component
     public $photos = [];
     public $photosToDelete = [];
     
-    // Для іконок
-    public $mapIcon = '';
+    public ?string $mapIcon = null;
     public $mapIcons = [];
     
     public $allAmenities = [

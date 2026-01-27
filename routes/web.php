@@ -9,23 +9,25 @@ use App\Http\Controllers\RatingController;
 use App\Http\Controllers\MyNoclegiController;
 use App\Http\Controllers\AttractionController;
 use App\Http\Controllers\AdminNoclegController;
+use App\Http\Controllers\BannedWordController;  
 use App\Http\Controllers\OwnerRequestController;
 use App\Http\Controllers\RatingReportController;
 use App\Http\Controllers\CategoryDeleteController;
 use App\Http\Controllers\NoclegCalendarController;
-
 Route::get('/', [MapController::class, 'index'])->name('home');
 Route::get('/map', [MapController::class, 'index'])->name('map.index');
-// Відкриті маршрути для всіх
-Route::prefix('attractions')->name('attractions.')->group(function () {
-    Route::get('/', [AttractionController::class, 'index'])->name('index'); // список атракцій
-    Route::get('/{attraction}', [AttractionController::class, 'show'])->name('show'); // перегляд конкретної атракції
 
-    // Тільки для авторизованих користувачів
+Route::prefix('attractions')->name('attractions.')->group(function () {
     Route::middleware('auth')->group(function () {
         Route::get('/create', [AttractionController::class, 'create'])->name('create');
         Route::get('/{attraction}/edit', [AttractionController::class, 'edit'])->name('edit');
     });
+
+
+    Route::get('/', [AttractionController::class, 'index'])->name('index'); 
+    Route::get('/{attraction}', [AttractionController::class, 'show'])->name('show');
+    
+    
 });
 
 Route::prefix('noclegi')->name('noclegi.')->group(function () {

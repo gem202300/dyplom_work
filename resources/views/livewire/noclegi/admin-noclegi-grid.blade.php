@@ -221,14 +221,16 @@
         </div>
     @endif
 
+    {{-- КАРТКИ З ФІКСОВАНОЮ ВИСОТОЮ --}}
     @if ($noclegi->count() > 0)
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             @foreach ($noclegi as $n)
-                <div class="bg-white shadow-md rounded-lg overflow-hidden border">
+                {{-- КАРТКА З ФІКСОВАНОЮ ВИСОТОЮ --}}
+                <div class="flex flex-col h-full bg-white shadow-md rounded-lg overflow-hidden border border-gray-200">
                     {{-- Карусель фото БЕЗ рейтингу --}}
                     <x-photo-carousel 
                         :photos="$n->photos"
-                        :showRating="false" {{-- РЕЙТИНГ ВИМКНЕНО --}}
+                        :showRating="false"
                         :rating="$n->average_rating ?? 0"
                         :alt="$n->title"
                         aspectRatio="aspect-video"
@@ -239,62 +241,78 @@
                         wire:key="carousel-{{ $n->id }}"
                     />
 
-                    <div class="p-4 space-y-1 text-sm">
+                    {{-- ОСНОВНИЙ КОНТЕНТ З FLEX-GROW --}}
+                    <div class="flex flex-col flex-grow p-4 space-y-2 text-sm">
                         <h3 class="text-lg font-semibold">{{ $n->title }}</h3>
-                        <p class="text-gray-600">📍 {{ $n->city }}, {{ $n->street }}</p>
+                        <div class="flex items-center gap-1 text-sm text-gray-600">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span class="line-clamp-1">
+                                {{ $n->city }}{{ $n->street ? ', '.$n->street : '' }}
+                            </span>
+                        </div>
+
                         <p class="text-gray-600">
                             <strong>Typ:</strong> {{ $n->objectType?->name ?? '—' }}
                         </p>
                         <p class="text-gray-600">
                             <strong>Kontakt:</strong> {{ $n->contact_phone ?? '—' }}
                         </p>
-                        <div class="text-sm font-medium text-gray-700">
-                            ⭐ {{ number_format($n->average_rating ?? 0, 2) }}
-                        </div>
-
-                        <div class="text-sm text-gray-700 flex gap-2 flex-wrap">
+                        
+                        {{-- ЗРУЧНОСТІ --}}
+                        <div class="text-sm text-gray-700 flex gap-1 flex-wrap">
                             @if ($n->has_kitchen)
-                                <span class="px-2 py-1 bg-gray-100 rounded">🍳 Kuchnia</span>
+                                <span class="px-2 py-1 bg-gray-100 rounded text-xs">🍳</span>
                             @endif
                             @if ($n->has_parking)
-                                <span class="px-2 py-1 bg-gray-100 rounded">🅿️ Parking</span>
+                                <span class="px-2 py-1 bg-gray-100 rounded text-xs">🅿️</span>
                             @endif
                             @if ($n->has_bathroom)
-                                <span class="px-2 py-1 bg-gray-100 rounded">🚿 Łazienka</span>
+                                <span class="px-2 py-1 bg-gray-100 rounded text-xs">🚿</span>
                             @endif
                             @if ($n->has_wifi)
-                                <span class="px-2 py-1 bg-gray-100 rounded">📶 Wi-Fi</span>
+                                <span class="px-2 py-1 bg-gray-100 rounded text-xs">📶</span>
                             @endif
                             @if ($n->has_tv)
-                                <span class="px-2 py-1 bg-gray-100 rounded">📺 TV</span>
+                                <span class="px-2 py-1 bg-gray-100 rounded text-xs">📺</span>
                             @endif
                             @if ($n->has_balcony)
-                                <span class="px-2 py-1 bg-gray-100 rounded">🌅 Balkon</span>
+                                <span class="px-2 py-1 bg-gray-100 rounded text-xs">🌅</span>
                             @endif
                         </div>
-                        <p class="text-gray-500 text-xs mt-2">
+                        
+                        <p class="text-gray-500 text-xs mt-1">
                             Dodano: {{ $n->created_at->format('d.m.Y') }} |
                             Właściciel: {{ $n->user?->name ?? 'Brak' }}
                         </p>
                     </div>
 
-                    <div class="p-4 pt-0 flex gap-3">
-                        <button wire:click="approveNocleg({{ $n->id }})" wire:loading.attr="disabled"
-                            class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium text-center">
-                            Zatwierdź
-                        </button>
+                    {{-- КНОПКИ ДІЙ ПРИТИСНУТІ ДО НИЗУ --}}
+                    <div class="mt-auto">
+                        {{-- КНОПКИ ЗАТВЕРДЖЕННЯ/ВІДХИЛЕННЯ --}}
+                        <div class="p-4 pb-0 flex gap-3">
+                            <button wire:click="approveNocleg({{ $n->id }})" wire:loading.attr="disabled"
+                                class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition font-medium text-center">
+                                Zatwierdź
+                            </button>
 
-                        <button wire:click="openRejectModal({{ $n->id }})"
-                            class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-medium text-center">
-                            Odrzuć
-                        </button>
-                    </div>
+                            <button wire:click="openRejectModal({{ $n->id }})"
+                                class="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition font-medium text-center">
+                                Odrzuć
+                            </button>
+                        </div>
 
-                    <div class="px-4 pb-4">
-                        <a href="{{ route('admin.noclegi.details', $n->id) }}"
-                            class="block text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium">
-                            Szczegóły
-                        </a>
+                        {{-- КНОПКА СХЕМАЛОГІЇ --}}
+                        <div class="px-4 pb-4 pt-3">
+                            <a href="{{ route('admin.noclegi.details', $n->id) }}"
+                                class="block text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium">
+                                Szczegóły
+                            </a>
+                        </div>
                     </div>
                 </div>
             @endforeach

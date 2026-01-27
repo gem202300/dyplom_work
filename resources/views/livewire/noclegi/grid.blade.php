@@ -235,7 +235,8 @@
     @if($noclegi->count() > 0)
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($noclegi as $n)
-                <div class="bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition">
+                {{-- КАРТКА З ФІКСОВАНОЮ ВИСОТОЮ --}}
+                <div class="flex flex-col h-full bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition border border-gray-100">
                     {{-- Контейнер для фото --}}
                     <div class="relative">
                         {{-- Карусель фото --}}
@@ -252,8 +253,8 @@
                         />
                     </div>
 
-                    {{-- Контент під фото --}}
-                    <div class="p-4 space-y-2">
+                    {{-- ОСНОВНИЙ КОНТЕНТ --}}
+                    <div class="flex flex-col flex-grow p-4 space-y-3">
                         {{-- Заголовок з рейтингом праворуч --}}
                         <div class="flex justify-between items-start">
                             {{-- Назва --}}
@@ -273,8 +274,18 @@
                         </div>
                         
                         {{-- Місце --}}
-                        <p class="text-sm text-gray-600">📍 {{ $n->city }}, {{ $n->street }}</p>
-                        
+                        <div class="flex items-center gap-1 text-sm text-gray-600">
+                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span class="line-clamp-1">
+                                {{ $n->city }}{{ $n->street ? ', '.$n->street : '' }}
+                            </span>
+                        </div>
+
                         {{-- Тип та місткість --}}
                         <p class="text-sm text-gray-600">
                             <span class="font-medium">Typ:</span> {{ $n->objectType?->name }}
@@ -298,54 +309,65 @@
                             @if($n->has_balcony) <span class="px-1.5 py-0.5 bg-gray-100 rounded">🌅</span> @endif
                         </div>
                     </div>
-                    @if($n->latitude && $n->longitude)
-                        <button wire:click="showOnMap({{ $n->id }})"
-                                class="w-56 py-3 bg-green-600 text-white text-center rounded-lg 
-                                      hover:bg-green-700 transition-colors font-medium text-sm
-                                      flex items-center justify-center gap-2 ml-4 mt-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                      d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                            </svg>
-                            Pokaż na mapie
-                        </button>
-                    @endif
-                    {{-- КНОПКИ ДІЙ (ЗМІНЕНО ЯК У ПРИКЛАДІ) --}}
-                    <div class="px-4 pb-4 pt-3 border-t border-gray-100">
-                        <div class="flex items-center justify-between gap-2">
-                            <a href="{{ route('noclegi.show', $n->id) }}" 
-                               class="flex-1 py-2.5 bg-blue-600 text-white text-center rounded-lg 
-                                      hover:bg-blue-700 transition-colors font-medium text-sm">
-                                Zobacz więcej
-                            </a>
-                            
-                            {{-- Кнопки управління тільки для адміна --}}
-                            @if(auth()->check() && Auth::user()->isAdmin())
-                                <div class="flex gap-2">
-                                    <a href="{{ route('noclegi.edit', $n->id) }}" 
-                                       class="w-10 h-10 flex items-center justify-center 
-                                              bg-gray-100 text-gray-700 rounded-lg 
-                                              hover:bg-gray-200 transition-colors"
-                                       title="Edytuj obiekt">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </a>
-                                    
-                                    <button wire:click="attemptDeleteNocleg({{ $n->id }})"
-                                        class="w-10 h-10 flex items-center justify-center 
-                                              bg-red-100 text-red-700 rounded-lg 
-                                              hover:bg-red-200 transition-colors cursor-pointer"
-                                        title="Usuń obiekt">
 
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            @endif
+                    {{-- БЛОК ДЛЯ КНОПКИ МАПИ ТА ОСНОВНИХ КНОПОК --}}
+                    <div class="flex flex-col flex-shrink-0">
+                        {{-- КНОПКА МАПИ (з фіксованим місцем) --}}
+                        @if($n->latitude && $n->longitude)
+                            <div class="px-4 pb-2">
+                                <button wire:click="showOnMap({{ $n->id }})"
+                                        class="w-full py-2.5 bg-green-600 text-white text-center rounded-lg 
+                                              hover:bg-green-700 transition-colors font-medium text-sm
+                                              flex items-center justify-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                    </svg>
+                                    Pokaż na mapie
+                                </button>
+                            </div>
+                        @else
+                            {{-- Порожній блок для вирівнювання, якщо немає кнопки мапи --}}
+                            <div class="px-4 pb-2 h-11"></div>
+                        @endif
+
+                        {{-- КНОПКИ ДІЙ ПРИТИСНУТІ ДО НИЗУ --}}
+                        <div class="mt-auto px-4 pb-4 pt-3 border-t border-gray-100">
+                            <div class="flex items-center justify-between gap-2">
+                                <a href="{{ route('noclegi.show', $n->id) }}" 
+                                   class="flex-1 py-2.5 bg-blue-600 text-white text-center rounded-lg 
+                                          hover:bg-blue-700 transition-colors font-medium text-sm">
+                                    Zobacz więcej
+                                </a>
+                                
+                                {{-- Кнопки управління тільки для адміна --}}
+                                @if(auth()->check() && Auth::user()->isAdmin())
+                                    <div class="flex gap-2">
+                                        <a href="{{ route('noclegi.edit', $n->id) }}" 
+                                           class="w-10 h-10 flex items-center justify-center 
+                                                  bg-gray-100 text-gray-700 rounded-lg 
+                                                  hover:bg-gray-200 transition-colors"
+                                           title="Edytuj obiekt">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </a>
+                                        
+                                        <button wire:click="attemptDeleteNocleg({{ $n->id }})"
+                                            class="w-10 h-10 flex items-center justify-center 
+                                                  bg-red-100 text-red-700 rounded-lg 
+                                                  hover:bg-red-200 transition-colors cursor-pointer"
+                                            title="Usuń obiekt">
+
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>

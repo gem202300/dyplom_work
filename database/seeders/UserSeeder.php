@@ -11,8 +11,22 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::factory(100)->create();
-
+        User::factory(90)->create();
+        
+        User::where('email', 'not like', '%@localhost')
+            ->inRandomOrder()
+            ->limit(12)
+            ->get()
+            ->each(function ($user) {
+                $user->assignRole(RoleType::OWNER->value);
+            });
+        User::factory()
+            ->count(10)
+            ->wantsToBeOwner()           // ← саме тут створюються заявки
+            ->create()
+            ->each(function ($user) {
+                $user->assignRole(RoleType::TOURIST->value);
+            });
         User::factory()->create([
             'name' => 'Użytkownik Testowy',
             'email' => 'user.test@localhost',
@@ -37,13 +51,6 @@ class UserSeeder extends Seeder
             'address' => 'Admin Address, 789',
         ])->assignRole(RoleType::ADMIN->value);
 
-        // Призначаємо роль OWNER випадковим 12 користувачам (окрім тестових)
-        User::where('email', 'not like', '%@localhost')
-            ->inRandomOrder()
-            ->limit(12)
-            ->get()
-            ->each(function ($user) {
-                $user->assignRole(RoleType::OWNER->value);
-            });
+       
     }
 }

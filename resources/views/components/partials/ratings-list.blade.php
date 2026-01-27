@@ -41,7 +41,7 @@
             </div>
 
             <div class="hidden absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-10" id="report-menu-{{ $rating->id }}">
-                @foreach(['Rugactwa', 'Nieobiektywna ocena', 'Obraza'] as $reason)
+                @foreach(['Wulgaryzmy', 'Nieobiektywna ocena', 'Treści obraźliwe ','Reklama / spam'] as $reason)
                 <form method="POST" action="{{ route('ratings.report', $rating) }}">
                     @csrf
                     <input type="hidden" name="reason" value="{{ $reason }}">

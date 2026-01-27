@@ -84,71 +84,56 @@
                 </button>
             </div>
 
-            <div id="bannedWordModal"
-                class="mt-8 bg-gray-50 dark:bg-gray-900
-                        border border-gray-200 dark:border-gray-700
-                        rounded-xl shadow hidden">
-
-                <div class="p-6 lg:p-8"> <!-- Трохи зменшено padding -->
-
+            <div id="bannedWordModal" class="mt-8 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow hidden">
+                <div class="p-6 lg:p-8">
                     <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
                         Dodaj słowo zakazane
                     </h2>
 
-                    <!-- Форма з центрированием і комфортною шириною -->
-                    <div class="max-w-lg mx-auto">
+                    <form method="POST" action="{{ route('banned-words.store') }}" class="space-y-6">
+                        @csrf
+                        <div class="w-full">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Słowo
+                            </label>
+                            <input type="text" name="word" required
+                                  placeholder="Wpisz słowo..."
+                                  class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3
+                                          focus:outline-none focus:ring-2 focus:ring-indigo-500
+                                          dark:bg-gray-800 dark:text-gray-100">
+                            @error('word')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                        <form method="POST"
-                              action="{{ route('banned-words.store') }}"
-                              class="space-y-6"> <!-- Зменшено з 7 на 6 -->
-                            @csrf
+                        <div class="w-full">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                Typ blokady
+                            </label>
+                            <select name="partial"
+                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3
+                                          focus:outline-none focus:ring-2 focus:ring-indigo-500
+                                          dark:bg-gray-800 dark:text-gray-100">
+                                <option value="1">Częściowe ukrywanie (zamiana na *)</option>
+                                <option value="0">Całkowity zakaz (komentarz odrzucany)</option>
+                            </select>
+                            @error('partial')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-                            <!-- Поле "Słowo" -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Słowo
-                                </label>
-                                <input type="text" name="word" required
-                                      placeholder="Wpisz słowo..."
-                                      class="w-full border border-gray-300 dark:border-gray-600
-                                              rounded-lg px-4 py-3
-                                              focus:outline-none focus:ring-2 focus:ring-indigo-500
-                                              dark:bg-gray-800 dark:text-gray-100">
-                            </div>
-
-                            <!-- Поле "Typ blokady" -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Typ blokady
-                                </label>
-                                <select name="partial"
-                                        class="w-full border border-gray-300 dark:border-gray-600
-                                              rounded-lg px-4 py-3
-                                              focus:outline-none focus:ring-2 focus:ring-indigo-500
-                                              dark:bg-gray-800 dark:text-gray-100">
-                                    <option value="1">Częściowe ukrywanie (zamiana na *)</option>
-                                    <option value="0">Całkowity zakaz (komentarz odrzucany)</option>
-                                </select>
-                            </div>
-
-                            <!-- Кнопки — зменшено верхній відступ -->
-                            <div class="flex justify-end gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-                                <button type="button" id="cancelBtn"
-                                        class="px-6 py-3 rounded-lg text-sm font-medium
-                                              bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200
-                                              hover:bg-gray-300 dark:hover:bg-gray-600 transition">
-                                    Anuluj
-                                </button>
-
-                                <button type="submit"
-                                        class="px-6 py-3 rounded-lg text-sm font-medium
-                                              bg-indigo-600 text-white
-                                              hover:bg-indigo-700 transition">
-                                    Zapisz
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                        <div class="flex justify-end gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <button type="button" id="cancelBtn" class="px-6 py-3 rounded-lg text-sm font-medium
+                                    bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200
+                                    hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                Anuluj
+                            </button>
+                            <button type="submit" class="px-6 py-3 rounded-lg text-sm font-medium
+                                    bg-indigo-600 text-white hover:bg-indigo-700 transition">
+                                Zapisz
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 

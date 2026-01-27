@@ -7,9 +7,18 @@
         <div class="bg-white p-6 rounded-lg shadow space-y-6 text-black">
 
             <!-- Informacje o noclegu -->
-            <p class="text-sm text-gray-600 flex items-center gap-2">
-                📍 <strong>{{ $nocleg->city }}, {{ $nocleg->street }}</strong>
-            </p>
+            <div class="flex items-center gap-1 text-sm text-gray-600">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span class="line-clamp-1">
+                    {{ $nocleg->city }}{{ $nocleg->street ? ', '.$nocleg->street : '' }}
+                </span>
+            </div>
+
 
             @if($nocleg->user)
                 <div class="pt-6 bg-gray-50 p-4 rounded-lg shadow">

@@ -81,4 +81,17 @@ class UserFactory extends Factory
         return $this->afterCreating(function (User $user) {
         });
     }
+        public function wantsToBeOwner(): static
+    {
+        return $this->afterCreating(function ($user) {
+            if (str_ends_with($user->email, '@localhost') || $user->hasRole('admin')) {
+                return;
+            }
+
+            \App\Models\OwnerRequest::factory()->create([
+                'user_id' => $user->id,
+                'phone'   => $user->phone ?? fake()->phoneNumber(),
+            ]);
+        });
+    }
 }

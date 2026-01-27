@@ -34,14 +34,17 @@ class MapIconSeeder extends Seeder
                 'icon_url' => '/images/map-icons/icons8-museum-50.png',
                 'category_id' => 3  // Miejsca historyczne
             ],
+            ['name' => 'Domyślny marker',
+            'icon_url' => 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+            'category_id' => 5
+            ],
         ];
 
-        // Ночлеги (нові іконки)
         $noclegIcons = [
             [
                 'name' => 'Hotel',
                 'icon_url' => '/images/map-icons/icons8-hotel-50.png',
-                'category_id' => null  // Ночлеги будуть в null
+                'category_id' => null  
             ],
             [
                 'name' => 'Apartament',
@@ -58,18 +61,14 @@ class MapIconSeeder extends Seeder
                 'icon_url' => '/images/map-icons/icons8-hostel-50.png',
                 'category_id' => null
             ],
+            ['name' => 'Domyślny marker',
+            'icon_url' => 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+            'category_id' => null
+            ],
         ];
 
         foreach (array_merge($icons, $noclegIcons) as $iconData) {
             MapIcon::create($iconData);
         }
-
-        // Опціонально: fallback іконка (якщо жодна категорія не підійде)
-        // Якщо не хочеш — просто видали цей блок
-        MapIcon::create([
-            'name' => 'Domyślny marker',
-            'icon_url' => 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-            'category_id' => null
-        ]);
     }
 }

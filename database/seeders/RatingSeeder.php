@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Nocleg;
 use App\Models\Rating;
 use App\Models\Attraction;
 use Illuminate\Database\Seeder;
@@ -12,89 +13,61 @@ class RatingSeeder extends Seeder
     public function run(): void
     {
         $users = User::all();
-        $attractions = Attraction::all();
+        if ($users->isEmpty()) {
+            $this->command->warn('Немає користувачів. Спочатку запусти UserSeeder.');
+            return;
+        }
 
-        // Різні коментарі залежно від оцінки
-        $comments = [
-            1 => [
-                'Niestety, bardzo się zawiodłem.',
-                'Nie polecam – wszystko zaniedbane.',
-                'Strata czasu i pieniędzy.',
-                'Fatalna organizacja, nie wrócę.',
-                'Dużo lepiej można spędzić czas gdzie indziej.',
-            ],
-            2 => [
-                'Może być, ale bez szału.',
-                'Średnio, spodziewałem się więcej.',
-                'Niektóre rzeczy OK, ale ogólnie słabo.',
-                'Trochę rozczarowania.',
-                'Da się przeżyć, ale nie polecam specjalnie.',
-            ],
-            3 => [
-                'Całkiem OK, ale nic specjalnego.',
-                'Przyzwoicie, choć mogłoby być lepiej.',
-                'Ani źle, ani super – średnio.',
-                'Warto zobaczyć raz, ale niekoniecznie wracać.',
-                'Normalne miejsce, bez większych emocji.',
-            ],
-            4 => [
-                'Bardzo fajne miejsce, polecam!',
-                'Super się bawiłem, miło spędzony czas.',
-                'Pięknie, warto przyjechać.',
-                'Dobrze zorganizowane, przyjemna atmosfera.',
-                'Jedno z lepszych miejsc w okolicy!',
-            ],
-            5 => [
-                'Absolutnie rewelacja! Przyjadę ponownie!',
-                'Przepiękne miejsce, zachwycone!',
-                'Najlepsza atrakcja w regionie!',
-                'Wow, nie spodziewałem się tak dobrze!',
-                '5 gwiazdek bez wahania – perfekt!',
-                'Cudowne wspomnienia, dziękuję!',
-                'Must-see! Nie można przegapić.',
-            ],
-        ];
+        $objects = collect()
+            ->merge(Attraction::all()->map(fn($item) => ['type' => Attraction::class, 'model' => $item]))
+            ->merge(Nocleg::all()->map(fn($item) => ['type' => Nocleg::class, 'model' => $item]));
 
-        foreach ($attractions as $attraction) {
-            // Перемішуємо користувачів, щоб оцінки були випадкові
-            $shuffledUsers = $users->shuffle();
+        if ($objects->isEmpty()) {
+            $this->command->warn('Немає атракцій або ноцлегів для оцінки.');
+            return;
+        }
 
-            // Кожен атракціон оцінює приблизно 30-50% користувачів
-            $usersToRate = $shuffledUsers->take(rand(
-                intval($users->count() * 0.3),
-                intval($users->count() * 0.5)
-            ));
+        $totalRatings = 0;
+        $maxRatingsPerObject = 20;   // максимум оцінок на об'єкт
+        $chanceToRate = 45;          // шанс, що користувач залишить оцінку
 
-            foreach ($usersToRate as $user) {
-                // Перевіряємо, чи вже немає оцінки від цього юзера
-                $exists = Rating::where('user_id', $user->id)
-                    ->where('rateable_id', $attraction->id)
-                    ->where('rateable_type', Attraction::class)
-                    ->exists();
+        foreach ($objects as $item) {
+            $rateable = $item['model'];
+            $type     = $item['type'];
 
-                if (!$exists) {
-                    // Випадкова оцінка від 1 до 5
-                    $ratingValue = rand(1, 5);
+            $alreadyRated = Rating::where('rateable_id', $rateable->id)
+                ->where('rateable_type', $type)
+                ->pluck('user_id')
+                ->toArray();
 
-                    // 70% шанс залишити коментар
-                    $comment = 10
-                        ? $comments[$ratingValue][array_rand($comments[$ratingValue])]
-                        : null;
+            $availableUsers = $users->whereNotIn('id', $alreadyRated);
 
-                    Rating::create([
-                        'rateable_id'   => $attraction->id,
-                        'rateable_type' => Attraction::class,
-                        'user_id'       => $user->id,
-                        'rating'        => $ratingValue,
-                        'comment'       => $comment,
-                    ]);
-                }
+            if ($availableUsers->count() < 3) {
+                continue;
+            }
+
+            $potentialCount = min($maxRatingsPerObject, $availableUsers->count());
+
+            $usersWhoRate = $availableUsers
+                ->shuffle()
+                ->take($potentialCount)
+                ->filter(fn() => rand(1, 100) <= $chanceToRate);
+
+            foreach ($usersWhoRate as $user) {
+                Rating::factory()->create([
+                    'user_id'       => $user->id,
+                    'rateable_id'   => $rateable->id,
+                    'rateable_type' => $type,
+                ]);
+
+                $totalRatings++;
             }
         }
 
-        // Опціонально: вивести статистику в консоль
-        $totalRatings = Rating::count();
-        $this->command->info("Створено оцінок: {$totalRatings}");
-        $this->command->info("Середня кількість оцінок на атракцію: " . round($totalRatings / $attractions->count(), 1));
+        $totalObjects = $objects->count();
+        $avg = $totalObjects > 0 ? round($totalRatings / $totalObjects, 1) : 0;
+
+        $this->command->info("Створено оцінок: $totalRatings");
+        $this->command->info("Середня кількість оцінок на об'єкт: $avg");
     }
 }

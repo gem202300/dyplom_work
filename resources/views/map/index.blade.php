@@ -38,45 +38,7 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        /* Кнопка перемикача теми - ЗМІНИВ: знизу, без написів */
-        .theme-switcher {
-            position: fixed;
-            bottom: 40px;
-            right: 10px;
-            z-index: 100;
-            background: white;
-            color: #333;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            padding: 10px;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            user-select: none;
-        }
-        .theme-switcher:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-            border-color: #007cbf;
-        }
-        .theme-switcher.dark {
-            background: #2d3748;
-            color: white;
-            border-color: #4a5568;
-        }
-        .theme-switcher.dark:hover {
-            background: #4a5568;
-        }
-        .theme-icon {
-            font-size: 1.5em;
-        }
-        
-        /* Кнопка відкриття фільтрів (коли панель прихована) */
+        /* Кнопка відкриття фільтрів (показується коли панель прихована) */
         .open-filters-btn {
             position: fixed;
             top: 80px;
@@ -103,11 +65,6 @@
             box-shadow: 0 6px 16px rgba(0,0,0,0.15);
             border-color: #007cbf;
         }
-        .open-filters-btn.dark {
-            background: #2d3748;
-            color: white;
-            border-color: #4a5568;
-        }
         
         /* Панель фільтрів */
         .filter-panel {
@@ -125,10 +82,6 @@
             overflow-y: auto;
             transition: all 0.3s ease;
         }
-        .filter-panel.dark {
-            background: #2d3748;
-            color: white;
-        }
         .filter-title {
             font-size: 16px;
             font-weight: 600;
@@ -137,9 +90,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        .filter-panel.dark .filter-title {
-            color: white;
         }
         
         /* Стилі для прокручуваної панелі */
@@ -150,15 +100,9 @@
             background: #f1f1f1;
             border-radius: 3px;
         }
-        .filter-panel.dark::-webkit-scrollbar-track {
-            background: #374151;
-        }
         .filter-panel::-webkit-scrollbar-thumb {
             background: #c1c1c1;
             border-radius: 3px;
-        }
-        .filter-panel.dark::-webkit-scrollbar-thumb {
-            background: #6b7280;
         }
         
         /* Стилі для випадаючих блоків - ЗМІНИВ: за замовчуванням не відкриті */
@@ -179,16 +123,8 @@
             border: 1px solid #e2e8f0;
             transition: all 0.2s;
         }
-        .filter-panel.dark .filter-collapsible-header {
-            background: #374151;
-            border-color: #4b5563;
-            color: white;
-        }
         .filter-collapsible-header:hover {
             background: #f1f5f9;
-        }
-        .filter-panel.dark .filter-collapsible-header:hover {
-            background: #4b5563;
         }
         .filter-collapsible-header.active {
             background: #3b82f6;
@@ -233,15 +169,8 @@
             font-weight: 500;
             transition: all 0.2s;
         }
-        .filter-panel.dark .filter-tab {
-            background: #374151;
-            color: #d1d5db;
-        }
         .filter-tab:hover {
             background: #e2e8f0;
-        }
-        .filter-panel.dark .filter-tab:hover {
-            background: #4b5563;
         }
         .filter-tab.active {
             background: #3b82f6;
@@ -260,12 +189,6 @@
             box-sizing: border-box;
             transition: all 0.2s;
             margin-bottom: 10px;
-        }
-        .filter-panel.dark .filter-input,
-        .filter-panel.dark .filter-select {
-            background: #374151;
-            color: white;
-            border-color: #4b5563;
         }
         .filter-input:focus, .filter-select:focus {
             outline: none;
@@ -287,9 +210,6 @@
         }
         .category-checkbox:hover {
             background: #f9fafb;
-        }
-        .filter-panel.dark .category-checkbox:hover {
-            background: #4b5563;
         }
         .category-checkbox input {
             width: 16px;
@@ -336,26 +256,16 @@
             border-left: 4px solid #3b82f6;
             font-size: 13px;
         }
-        .filter-panel.dark .active-filters {
-            background: #1e293b;
-            border-color: #60a5fa;
-        }
         .active-filters-title {
             font-weight: 600;
             margin-bottom: 5px;
             color: #1e40af;
-        }
-        .filter-panel.dark .active-filters-title {
-            color: #93c5fd;
         }
         .active-filter-item {
             display: flex;
             justify-content: space-between;
             padding: 3px 0;
             color: #4b5563;
-        }
-        .filter-panel.dark .active-filter-item {
-            color: #d1d5db;
         }
         
         /* Лічильники */
@@ -367,10 +277,6 @@
             color: #6b7280;
             padding-top: 15px;
             border-top: 1px solid #e5e7eb;
-        }
-        .filter-panel.dark .filter-counters {
-            border-top-color: #4b5563;
-            color: #d1d5db;
         }
         
         /* Інші стилі (залишаються з оригіналу) */
@@ -476,40 +382,6 @@
             background-color: #9333ea;
         }
         
-        /* Темна тема */
-        .dark-theme .mapboxgl-popup-content {
-            background: #2d3748;
-            border: 1px solid #4a5568;
-        }
-        .dark-theme .popup-type.nocleg {
-            background-color: #14532d;
-            color: #86efac;
-        }
-        .dark-theme .popup-type.attraction {
-            background-color: #92400e;
-            color: #fbbf24;
-        }
-        .dark-theme .popup-title {
-            color: #f3f4f6;
-        }
-        .dark-theme .popup-content {
-            color: #d1d5db;
-        }
-        .dark-theme .popup-details {
-            color: #9ca3af;
-        }
-        .dark-theme .popup-link {
-            background-color: #4f46e5;
-        }
-        .dark-theme .popup-link:hover {
-            background-color: #4338ca;
-        }
-        .dark-theme .cluster-count-item {
-            background-color: #374151;
-        }
-        .dark-theme .cluster-title {
-            color: #f3f4f6;
-        }
         .maplibregl-popup-close-button {
             display: none !important;
         }
@@ -664,17 +536,11 @@
         </div>
     </div>
 
-    <!-- ЗМІНИВ: кнопка знизу, без написів -->
-    <div id="theme-switcher" class="theme-switcher" onclick="toggleTheme()">
-        <span class="theme-icon">🌙</span>
-    </div>
-
     <div id="map"></div>
 
     <script src="https://unpkg.com/maplibre-gl@4.7.0/dist/maplibre-gl.js"></script>
 
 <script>
-let currentTheme = 'light';
 let map;
 let isMapLoaded = false;
 let allFeatures = [];
@@ -699,55 +565,6 @@ let activeFilters = {
     objectType: '',
     selectedCategories: []
 };
-
-const themes = {
-    light: {
-        mapStyle: 'https://api.maptiler.com/maps/streets-v2/style.json?key=uJDiq16jXWiNZLGeCJ0m',
-        buttonIcon: '🌙',
-        bodyClass: ''
-    },
-    dark: {
-        mapStyle: 'https://api.maptiler.com/maps/streets-v2-dark/style.json?key=uJDiq16jXWiNZLGeCJ0m',
-        buttonIcon: '☀️',
-        bodyClass: 'dark-theme'
-    }
-};
-
-function saveTheme(theme) {
-    localStorage.setItem('mapTheme', theme);
-}
-
-function loadTheme() {
-    return localStorage.getItem('mapTheme') || 'light';
-}
-
-function applyTheme(themeName) {
-    const theme = themes[themeName];
-    const themeSwitcher = document.getElementById('theme-switcher');
-    const openFiltersBtn = document.getElementById('open-filters-btn');
-    const filterPanel = document.getElementById('filter-panel');
-    const icon = themeSwitcher.querySelector('.theme-icon');
-    
-    currentTheme = themeName;
-    
-    if (map && isMapLoaded) {
-        map.setStyle(theme.mapStyle);
-    }
-
-    icon.textContent = theme.buttonIcon;
-    document.body.className = 'h-full ' + theme.bodyClass;
-    
-    themeSwitcher.classList.toggle('dark', themeName === 'dark');
-    openFiltersBtn.classList.toggle('dark', themeName === 'dark');
-    filterPanel.classList.toggle('dark', themeName === 'dark');
-
-    saveTheme(themeName);
-}
-
-function toggleTheme() {
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    applyTheme(newTheme);
-}
 
 // Функції для управління панеллю фільтрів
 function toggleFilterPanel() {
@@ -1164,7 +981,7 @@ async function loadIconImage(iconUrl, iconName) {
     }
     
     return new Promise((resolve, reject) => {
-        const img = new Image(25, 25);
+        const img = new Image(30, 30);
         img.crossOrigin = 'anonymous';
         img.src = iconUrl;
         
@@ -1386,11 +1203,6 @@ function createPopupContent(feature) {
         }
     }
     
-    // Для атракцій - інша додаткова інформація
-    // if (type === 'attraction') {
-        // Тут можна додати специфічні для атракцій деталі, якщо потрібно
-    // }
-    
     return `
         <div class="popup-header">
             <div class="popup-type ${typeClass}">${typeText}</div>
@@ -1577,10 +1389,8 @@ function restoreMapLayers() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    const savedTheme = loadTheme();
-
-    let initialCenter = [21.0122, 52.2297];
-    let initialZoom = 12;
+    let initialCenter = [19.1451, 51.9194]; 
+    let initialZoom = 4.5;
     
     if (focusData) {
         initialCenter = [parseFloat(focusData.lng), parseFloat(focusData.lat)];
@@ -1589,7 +1399,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     map = new maplibregl.Map({
         container: 'map',
-        style: themes[savedTheme].mapStyle,
+        style: 'https://api.maptiler.com/maps/streets-v2/style.json?key=uJDiq16jXWiNZLGeCJ0m',
         center: initialCenter,
         zoom: initialZoom,
         pitch: 0,
@@ -1600,7 +1410,6 @@ document.addEventListener('DOMContentLoaded', function () {
     map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
     map.addControl(new maplibregl.ScaleControl(), 'bottom-left');
 
-    applyTheme(savedTheme);
     setupFilters();
 
     map.on('load', async () => {

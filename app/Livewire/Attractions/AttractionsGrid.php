@@ -16,25 +16,23 @@ class AttractionsGrid extends Component
     public $focusAttractionId = null;
     public $search = '';
     public $selectedCategories = [];
-    public $minRating = 0; // ЗМІНА: за замовчуванням 0
-    public $maxRating = 5; // ЗМІНА: за замовчуванням null (не 5)
+    public $minRating = 0; 
+    public $maxRating = 5; 
     public $showFilters = false;
     public $hasRatingError = false;
     
     protected $queryString = [
         'search' => ['except' => ''],
         'selectedCategories' => ['except' => []],
-        'minRating' => ['except' => 0], // ЗМІНА: 0 за замовчуванням
-        'maxRating' => ['except' => null], // ЗМІНА: null за замовчуванням
+        'minRating' => ['except' => 0], 
+        'maxRating' => ['except' => null], 
     ];
     
-    // Правила валідації
     protected $rules = [
         'minRating' => ['nullable', 'numeric', 'min:0', 'max:5'],
         'maxRating' => ['nullable', 'numeric', 'min:0', 'max:5'],
     ];
     
-    // Валідація рейтингу
     protected function validateRating()
     {
         $this->hasRatingError = false;
@@ -49,7 +47,6 @@ class AttractionsGrid extends Component
         return true;
     }
     
-    // Слухачі для валідації в реальному часі
     public function updatedMinRating($value)
     {
         $this->validateOnly('minRating');
@@ -66,7 +63,6 @@ class AttractionsGrid extends Component
     {
         $query = Attraction::with(['photos', 'categories']);
         
-        // Для неавторизованих користувачів показуємо тільки активні
         if (!auth()->check()) {
             $query->where('is_active', true);
         }
@@ -87,7 +83,6 @@ class AttractionsGrid extends Component
             });
         }
         
-        // Фільтр по рейтингу
         if ($this->minRating !== null && $this->minRating > 0) {
             $query->where('rating', '>=', $this->minRating);
         }
@@ -116,7 +111,6 @@ class AttractionsGrid extends Component
     }
     public function mount()
     {
-        // Якщо є ID для фокусу, перевіряємо чи існує атракція
         if ($this->focusAttractionId) {
             $attraction = Attraction::find($this->focusAttractionId);
             if (!$attraction) {
@@ -136,7 +130,6 @@ class AttractionsGrid extends Component
             return;
         }
         
-        // Переходимо на сторінку карти з параметром фокусу
         return redirect()->route('map.index', [
             'focus' => $attractionId,
             'type' => 'attraction'
@@ -152,8 +145,8 @@ class AttractionsGrid extends Component
     {
         $this->search = '';
         $this->selectedCategories = [];
-        $this->minRating = 0; // ЗМІНА: скидаємо на 0
-        $this->maxRating = null; // ЗМІНА: скидаємо на null
+        $this->minRating = 0; 
+        $this->maxRating = null; 
         $this->hasRatingError = false;
         $this->resetPage();
     }
@@ -171,7 +164,6 @@ class AttractionsGrid extends Component
     
     public function toggleActive($attractionId)
     {
-        // Перевірка авторизації
         if (!auth()->check()) {
             return;
         }

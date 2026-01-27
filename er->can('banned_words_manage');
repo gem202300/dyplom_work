@@ -1,0 +1,14 @@
+[90m= [39m[34;4mApp\Models\User[39;24m {#6138
+    [34mid[39m: [35m1[39m,
+    [34mname[39m: "[32mAdrianna Wróblewska[39m",
+    [34memail[39m: "[32mdudek.lucja@example.com[39m",
+    [34memail_verified_at[39m: "[32m2026-01-13 12:50:25[39m",
+    #[33mpassword[39m: "[32m$2y$12$KMarMoINENJ4/H5l04smrusSRE4K/MS7kQtleHIyY.lnSsKRtULly[39m",
+    #[33mremember_token[39m: "[32m4H0l6zDfcl[39m",
+    [34mcreated_at[39m: "[32m2026-01-13 12:50:26[39m",
+    [34mupdated_at[39m: "[32m2026-01-13 12:50:26[39m",
+    [34mphone[39m: "[32m+48 93 966 95 59[39m",
+    [34maddress[39m: "[32mLotników 30/69, 31-647 Czechowice-Dziedzice[39m",
+    +[1mprofile_photo_url[22m: "[32mhttps://ui-avatars.com/api/?name=A+W&color=7F9CF5&background=EBF4FF[39m",
+  }
+
