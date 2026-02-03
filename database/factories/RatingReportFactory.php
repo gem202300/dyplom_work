@@ -13,8 +13,8 @@ class RatingReportFactory extends Factory
     public function definition(): array
     {
         return [
-            'rating_id' => null,   // буде встановлено вручну
-            'user_id'   => null,   // буде встановлено вручну
+            'rating_id' => null,   
+            'user_id'   => null,   
             'reason'    => $this->faker->randomElement([
                 'Wulgaryzmy',
                 'Nieobiektywna ocena',

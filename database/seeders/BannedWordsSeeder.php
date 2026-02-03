@@ -10,14 +10,13 @@ class BannedWordsSeeder extends Seeder
     public function run(): void
     {
         $words = [
-            // Основні вульгаризми (точні)
             ['word' => 'kurwa', 'partial' => false],
             ['word' => 'chuj', 'partial' => false],
             ['word' => 'pizda', 'partial' => false],
             ['word' => 'jebać', 'partial' => false],
             ['word' => 'pierdolić', 'partial' => false],
 
-            ['word' => 'kurw', 'partial' => true],      // ловить kurwa, skurwysyn, kurwić тощо
+            ['word' => 'kurw', 'partial' => true],      
             ['word' => 'chuj', 'partial' => true],
             ['word' => 'huj', 'partial' => true],
             ['word' => 'pizd', 'partial' => true],
@@ -45,7 +44,7 @@ class BannedWordsSeeder extends Seeder
             ['word' => 'frajer', 'partial' => true],
             ['word' => 'szmata', 'partial' => true],
             ['word' => 'dziwka', 'partial' => true],
-            ['word' => 'choler', 'partial' => true],   // cholera, cholernie
+            ['word' => 'choler', 'partial' => true],   
             ['word' => 'jasna cholera', 'partial' => false],
         ];
 

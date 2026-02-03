@@ -9,30 +9,28 @@ class MapIconSeeder extends Seeder
 {
     public function run()
     {
-        // Очищаємо старі записи (можна закоментувати після першого запуску)
         MapIcon::truncate();
 
-        // Додаємо твої 4 локальні іконки з правильними шляхами
        $icons = [
             [
                 'name' => 'Zamek',
                 'icon_url' => '/images/map-icons/icons8-castle-50.png',
-                'category_id' => 1  // Замки
+                'category_id' => 1  
             ],
             [
                 'name' => 'Jezioro',
                 'icon_url' => '/images/map-icons/icons8-lake-50.png',
-                'category_id' => 2  // Jeziorka / Wody
+                'category_id' => 2  
             ],
             [
                 'name' => 'Góry',
                 'icon_url' => '/images/map-icons/icons8-mountain-50.png',
-                'category_id' => 4  // Przyroda / Góry
+                'category_id' => 4  
             ],
             [
                 'name' => 'Muzeum',
                 'icon_url' => '/images/map-icons/icons8-museum-50.png',
-                'category_id' => 3  // Miejsca historyczne
+                'category_id' => 3  
             ],
             ['name' => 'Domyślny marker',
             'icon_url' => 'https://cdn-icons-png.flaticon.com/512/684/684908.png',

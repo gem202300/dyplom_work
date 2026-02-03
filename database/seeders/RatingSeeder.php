@@ -14,7 +14,7 @@ class RatingSeeder extends Seeder
     {
         $users = User::all();
         if ($users->isEmpty()) {
-            $this->command->warn('Немає користувачів. Спочатку запусти UserSeeder.');
+            $this->command->warn('błąd');
             return;
         }
 
@@ -28,8 +28,8 @@ class RatingSeeder extends Seeder
         }
 
         $totalRatings = 0;
-        $maxRatingsPerObject = 20;   // максимум оцінок на об'єкт
-        $chanceToRate = 45;          // шанс, що користувач залишить оцінку
+        $maxRatingsPerObject = 20;   
+        $chanceToRate = 45;          
 
         foreach ($objects as $item) {
             $rateable = $item['model'];
@@ -66,8 +66,5 @@ class RatingSeeder extends Seeder
 
         $totalObjects = $objects->count();
         $avg = $totalObjects > 0 ? round($totalRatings / $totalObjects, 1) : 0;
-
-        $this->command->info("Створено оцінок: $totalRatings");
-        $this->command->info("Середня кількість оцінок на об'єкт: $avg");
     }
 }

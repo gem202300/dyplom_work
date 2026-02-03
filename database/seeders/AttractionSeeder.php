@@ -13,9 +13,6 @@ class AttractionSeeder extends Seeder
 {
     public function run(): void
     {
-        
-        // 2. Створюємо реальні атракції
-
         // A) Ratusz w Kaliszu
         $ratusz = Attraction::create([
             'name'         => 'Ratusz w Kaliszu',
@@ -133,8 +130,8 @@ class AttractionSeeder extends Seeder
                 'closing_time' => '18:00:00',
                 'is_active'    => true,
                 'rating'       => 4.6,
-                'latitude'     => 51.761389,
-                'longitude'    => 18.086944,
+                'latitude'     => 51.75853247,
+                'longitude'    => 18.09362698,
             ]);
 
             $categoryTeatr = Category::whereIn('name', [

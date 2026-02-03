@@ -24,7 +24,7 @@ class PermissionSeeder extends Seeder
 
         Permission::create(['name' => PermissionType::NOCLEG_VIEW->value]);
         Permission::create(['name' => PermissionType::NOCLEG_MANAGE->value]);
-        Permission::create(['name' => PermissionType::NOCLEG_OWNER_MANAGE->value]); // новий
+        Permission::create(['name' => PermissionType::NOCLEG_OWNER_MANAGE->value]); 
 
         Permission::create(['name' => PermissionType::RATING_VIEW->value]);
         Permission::create(['name' => PermissionType::RATING_CREATE->value]);

@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
             });
         User::factory()
             ->count(10)
-            ->wantsToBeOwner()           // ← саме тут створюються заявки
+            ->wantsToBeOwner()         
             ->create()
             ->each(function ($user) {
                 $user->assignRole(RoleType::TOURIST->value);

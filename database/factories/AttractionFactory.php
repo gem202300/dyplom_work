@@ -81,11 +81,9 @@ class AttractionFactory extends Factory
             }
             $attraction->photos()->createMany($photos);
 
-            // Категорії
             $categories = Category::inRandomOrder()->limit(rand(1, 3))->pluck('id');
             $attraction->categories()->attach($categories);
 
-            // Іконка на основі першої категорії
             $firstCategoryId = $categories->first();
             $mapIcon = MapIcon::where('category_id', $firstCategoryId)->first()
                 ?? MapIcon::where('name', 'Domyślny marker')->first();

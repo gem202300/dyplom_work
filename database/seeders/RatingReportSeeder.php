@@ -17,7 +17,7 @@ class RatingReportSeeder extends Seeder
             ->get();
 
         if ($badRatings->isEmpty()) {
-            $this->command->info('Немає рейтингів з низькою оцінкою для створення скарг.');
+            $this->command->info('błąd');
             return;
         }
 
@@ -30,7 +30,6 @@ class RatingReportSeeder extends Seeder
                 break;
             }
 
-            // Перевіряємо, чи вже є скарги від когось на цей рейтинг
             $existingReporters = RatingReport::where('rating_id', $rating->id)
                 ->pluck('user_id')
                 ->toArray();
@@ -82,9 +81,5 @@ class RatingReportSeeder extends Seeder
 
         $badCount = $badRatings->count();
         $avg = $badCount > 0 ? round($reportsCreated / $badCount, 1) : 0;
-
-        $this->command->info("Створено скарг: $reportsCreated");
-        $this->command->info("Поганих рейтингів: $badCount");
-        $this->command->info("Середня кількість скарг на поганий рейтинг: $avg");
     }
 }

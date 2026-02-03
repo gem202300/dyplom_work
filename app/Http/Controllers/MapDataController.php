@@ -12,7 +12,6 @@ class MapDataController extends Controller
     public function index()
     {
         try {
-            // Затверджені ночлеги з рейтингом та типом
             $noclegs = Nocleg::where('status', 'approved')
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude')
